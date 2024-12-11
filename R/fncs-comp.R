@@ -12,7 +12,7 @@
 NULL
 
 ##' @rdname comp-real
-##' @details real.std: (weighted) mean value
+##' @details real.std: (weighted) standardized difference
 ##' @export
 real.std <- function(x, g, weight = NULL, ...){
     if(!is.factor(g)) g <- factor(g)
@@ -142,13 +142,21 @@ attr(date.std, "label") <- .stddiff()
 NULL
 
 ##' @rdname comp-surv
-##' @details surv.std: placeholder for (weighted) standardized difference for
+##' @details surv.std: (weighted) standardized difference for
 ##' 'surv'
 ##' @export
 surv.std <- function(time, event, g, weight = NULL, ...){
-    NA_real_ ## maybe this could be defined?
+    if(!is.factor(g)) g <- factor(g)
+    x_i <- g == levels(g)[1]
+    y_i <- g == levels(g)[2]
+    n1 <- d.sum(x = event[x_i], weight = weight[x_i])
+    n2 <- d.sum(x = event[y_i], weight = weight[y_i])
+    t1 <- d.sum(x = time[x_i], weight = weight[x_i])
+    t2 <- d.sum(x = time[y_i], weight = weight[y_i])
+    (n1 / t1 - n2 / t2) / sqrt((n1 / t1 + n2 / t2) / 2)
 }
 attr(surv.std, "label") <- .stddiff()
+
 
 ##' @rdname comp-surv
 ##' @details rate_ratio: ratio of the (weighted) rates

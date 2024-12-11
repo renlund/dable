@@ -10,7 +10,7 @@ dable <- function(data,
                   fnc = list(desc = NULL, comp = NULL, test = NULL),
                   weight = NULL,
                   ...) {
-    Dots <- list(...)
+    Dots <- list(...) ## Dots <- as.list(NULL)
     properties(data, class = "data.frame")
     if(is.null(guide)){
         guide <- dguide(data)
@@ -18,14 +18,11 @@ dable <- function(data,
         properties(guide, class = "data.frame")
         inclusion(names(guide), nm = "names of guide",
                   include = c("term", "type", "class", "label", "group"))
-        guide <- guide[guide$term %in% names(data), ]
+        ## guide <- guide[guide$term %in% names(data), ]
+        guide <- subset.guide(guide, names(data))
         if(nrow(guide) == 0) stop("no guide terms in data")
     }
-    ## XK must remove types that does not exist in guide
-    stop("XK")
-
-    ## ---------------------------------------------------
-    Types <- check_type(type = type, bl.rm = bl.rm)
+    Types <- check_type(type = type, bl.rm = bl.rm, guide = guide)
     BL <- type %in% .baseline
     Dots$.table.type <- if(BL) "baseline" else type
     if(BL && !is.null(unlist(fnc))){
@@ -66,7 +63,7 @@ dable <- function(data,
         Weight <- data[[weight]]
         if(any(is.na(Weight))) warning("there are missing weights") ## XK?
         if(any(!is.na(Weight) & Weight < 0)) stop("negative weights not allowed")
-        Dots$.weight <- weight
+        Dots$.weight <- weight ## Weight ??????
     } else {
         Weight <- NULL
         Dots$.weight <- NULL
@@ -75,7 +72,7 @@ dable <- function(data,
     Data <- guidify(data, guide)
     Spec <- part_spec(part, gtab)
     R <- NULL
-    for(t in Types){
+    for(t in Types){ ## t = Types[5]
         if(t == "surv"){
             Stab <- guide2stab(guide)
             Term <- Stab$label
@@ -106,8 +103,6 @@ dable <- function(data,
         ## ---
         R <- rbind(R, r)
     }
-    s_patt <- paste0(paste0("(", Types, ")"), collapse= "|")
-    guide_for_types <- guide[grepl(s_patt, guide$type), ]
     if(is.null(R)){
         message("no table produced")
         return(invisible(data.frame()))
@@ -119,20 +114,7 @@ dable <- function(data,
     add_attr <- function(i) attr(R, which = names(ATTR)[i]) <<- ATTR[[i]]
     lapply(seq_along(ATTR), add_attr)
     attr(R, "type") <- if(BL) "baseline" else type
-    if("surv" %in% Types){
-        ## oh, another complication, want to store the grouping, perhaps as the
-        ## guide but if so then it needs to be updated. Perhaps better to only
-        ## store the grouping variable ??
-        Stab <- guide2stab(guide)
-        is <- which(guide_for_types$type %in% c("surv.e", "surv.t"))
-        a <- min(is)
-        sel <- setdiff(1:nrow(guide_for_types), is)
-        guide_final <- rbind(
-            guide_for_types[sel, ],
-            stab2guide(Stab, guide_for_types)
-        )
-    } else guide_final <- guide_for_types
-    attr(R, "guide") <- guide_final
+    attr(R, "guide") <- guide
     al <- align(R$term, template = guide$term)
     R[al$order,]
 }
@@ -140,7 +122,7 @@ dable <- function(data,
 .types <- c("real", "bnry", "catg", "lcat", "surv", "date")
 .baseline <- c("baseline", "bl")
 
-check_type <- function(type, bl.rm){
+check_type <- function(type, bl.rm, guide){
     properties(type, class = "character", length = 1, na.ok = FALSE)
     one_of(type, nm = "type", set = c(.types, .baseline))
     if(any(type %in% .baseline)){
@@ -156,9 +138,10 @@ check_type <- function(type, bl.rm){
                    set = .types)
         }
         type <- setdiff(type, bl.rm)
+        type <- type[type %in% unique(guide$type)]
     }
     if(length(type) == 0){
-        stop("bl.rm specification leaves leaves no type")
+        stop("specification leaves leaves no type")
     } else type
 }
 
@@ -207,26 +190,49 @@ if(FALSE){
     fnc = list(desc = NULL, comp = NULL, test = NULL)
     weight = "importance"
 
+    ## ---------
+
+    data <- test_data()
+    vtab <- test_vtab()
+    stab <- test_stab()
+    unit.id <- "id"
+    ## elim.set <- NULL
+
+    type = "baseline"
+    bl.rm = NULL
+    guide = dguide(data, unit.id = "id", vtab = vtab, stab = stab)
+    guide$type[guide$term %in% c("pid")] <- "lcat"
+    gtab = "gender"
+    part = list(desc = TRUE, comp = NA, test = NA)
+    fnc = list(desc = NULL, comp = NULL, test = NULL)
+    weight = "importance"
+    Dots = as.list(NULL)
+
 
 }
+
 
 guide2stab <- function(guide){
-    g <- guide[substr(guide$type, 1, 4) == "surv",]
-    if(nrow(g) == 0) return(NULL)
-    g$lab <- sub(pattern = " \\(time\\)$", replacement = "", g$label)
-    if(length(unique(g$lab)) != nrow(g)/2){
-        s <- paste0("Trying to identify the surv components from the ",
-                    "guide labels fails. Either use the same label for ",
-                    "both components associated with the same time-to-event ",
-                    "variable or use 'LAB' for the event- and 'LAB (time)' ",
-                    "for the time component.")
-        stop(s)
-    }
-    g$component <- sub(pattern = "(^.*)(\\.)(.*$)", replacement = "\\3", g$type)
-    g2 <- g[, c("lab","term", "component")]
-    g3 <- stats::reshape(g2, direction = "wide", idvar = "lab", timevar = "component")
-    names(g3)[names(g3) == "lab"] <- "label"
-    names(g3)[names(g3) == "term.t"] <- "time"
-    names(g3)[names(g3) == "term.e"] <- "event"
-    g3[, c("label", "time", "event")]
+    attr(guide, "stab")
 }
+
+## guide2stab <- function(guide){
+##     g <- guide[substr(guide$type, 1, 4) == "surv",]
+##     if(nrow(g) == 0) return(NULL)
+##     g$lab <- sub(pattern = " \\(time\\)$", replacement = "", g$label)
+##     if(length(unique(g$lab)) != nrow(g)/2){
+##         s <- paste0("Trying to identify the surv components from the ",
+##                     "guide labels fails. Either use the same label for ",
+##                     "both components associated with the same time-to-event ",
+##                     "variable or use 'LAB' for the event- and 'LAB (time)' ",
+##                     "for the time component.")
+##         stop(s)
+##     }
+##     g$component <- sub(pattern = "(^.*)(\\.)(.*$)", replacement = "\\3", g$type)
+##     g2 <- g[, c("lab","term", "component")]
+##     g3 <- stats::reshape(g2, direction = "wide", idvar = "lab", timevar = "component")
+##     names(g3)[names(g3) == "lab"] <- "label"
+##     names(g3)[names(g3) == "term.t"] <- "time"
+##     names(g3)[names(g3) == "term.e"] <- "event"
+##     g3[, c("label", "time", "event")]
+## }

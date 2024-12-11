@@ -36,19 +36,13 @@ dguide <- function(data, unit.id = NULL, elim.set = NULL,
         stab <- check_stab(stab)
     }
     if(!is.null(stab)) vtab <- combine_vs_tab(vtab, stab)
-
-    ## tt0 <- term_type(term = terms, data = data, stab = stab, ...)
-    tt0 <- term_type(term = terms, data = data, stab = stab)
+    tt0 <- term_type(term = terms, data = data, stab = stab, ...)
+    ## tt0 <- term_type(term = terms, data = data, stab = stab)
     lev <- attr(tt0, "levels")
-
     terms <- setdiff(terms, c(stab$event, stab$time))
-
-
     no_vt <- setdiff(terms, vtab$term)
     if(length(no_vt) > 0){
         vt_xtra <- check_vtab(extract_labels(data[, no_vt, drop = FALSE]))
-        ## vtab <- rbind(vtab[, c("term", "label", "group")],
-        ##               vt_xtra[, c("term", "label", "group")])
         vtab <- rbind.vtab(vtab, vt_xtra)
     }
     tt <- merge(x = tt0,
@@ -80,13 +74,21 @@ extract_labels <- function(x){
                label = ifelse(!is.na(ls), ls, terms))
 }
 
+subset.guide <- function(guide, term){
+    stab <- guide2stab(guide)
+    s <- stab$label[stab$time %in% term & stab$event %in% term]
+    guide[guide$term %in% term | guide$label %in% s, ]
+}
+
 guidify <- function(data, guide){
     kill <- guide$term[guide$type == .unknown.type]
     catgify <- guide$term[guide$type %in% c("catg", "bnry", "lcat")]
+    stab <- attr(guide, "stab")
+    surv_term <- c(stab$event, stab$time)
     LEV <- attr(guide, "levels")
     for(nm in names(data)){
         if(nm %in% kill) data[[nm]] <- NULL
-        if( !(nm %in% guide$term) ) data[[nm]] <- NULL
+        if( !(nm %in% c(guide$term, surv_term)) ) data[[nm]] <- NULL
         if(nm %in% catgify){
             if(is.factor(data[[nm]])) next
             if(nm %in% names(LEV)){
@@ -226,5 +228,7 @@ if(FALSE){
     stab <- test_stab()
     unit.id <- "id"
     elim.set <- NULL
+
+    dguide(data, unit.id = "id", vtab=vtab, stab=stab)
 
 }

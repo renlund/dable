@@ -156,7 +156,7 @@ META_chisq <- function(x, g, bl = TRUE, catg.full.length = TRUE){
     p <- NA_real_
     p.info <- "no test"
     if(n_lev > 1){
-        browser()
+        ## browser()
         p <- tryElseNA(stats::chisq.test(x,g)$p.value)
         p.info <- "Chi-square"
     }

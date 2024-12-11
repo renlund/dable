@@ -116,21 +116,6 @@ Checks:
 dable_attr(dt)
 attr2text(dt)
 
-dparam("digits")
-
-test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(F,F,F))
-test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(T,F,F))
-test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(T,T,F))
-test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(T,T,T))
-test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(F,F,T))
-test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(F,T,T))
-
-
-test <- d[, c("id", "gender", "male")]
-gt <- dguide(test, unit.id = "id")
-guide2stab(gt)
-
-dable(test, type = "bl", guide = gt, gtab = "gender", part = c(T,T,T))
 
 @
 
