@@ -19,7 +19,7 @@ dguide <- function(data, unit.id = NULL, elim.set = NULL,
     properties(vtab, class = c("NULL", "data.frame"))
     properties(stab, class = c("NULL", "data.frame"))
     terms <- setdiff(names(data), c(elim.set))
-    if(is.null(unit.id)) unit.id <- dparam("unit.id")
+    ## if(is.null(unit.id)) unit.id <- dparam("unit.id")
     if(!is.null(unit.id)){
         inclusion(names(data), "names of data", include = unit.id)
         if(any(is.na(data[[unit.id]]))){
@@ -32,23 +32,34 @@ dguide <- function(data, unit.id = NULL, elim.set = NULL,
     vtab <- check_vtab(vtab)
     if(is.null(stab)){
         stab <- extract_stab_from_names(names(data))
-    } else stab <- check_stab(stab)
-    if(!is.null(stab)) vtab <- combine_vs_tab(vtab, stab, stab.first = !vtab_given)
-    tt0 <- term_type(term = terms, data = data, stab = stab, ...)
+    } else {
+        stab <- check_stab(stab)
+    }
+    if(!is.null(stab)) vtab <- combine_vs_tab(vtab, stab)
+
+    ## tt0 <- term_type(term = terms, data = data, stab = stab, ...)
+    tt0 <- term_type(term = terms, data = data, stab = stab)
     lev <- attr(tt0, "levels")
+
+    terms <- setdiff(terms, c(stab$event, stab$time))
+
+
     no_vt <- setdiff(terms, vtab$term)
     if(length(no_vt) > 0){
         vt_xtra <- check_vtab(extract_labels(data[, no_vt, drop = FALSE]))
-        vtab <- rbind(vtab[, c("term", "label", "group")],
-                      vt_xtra[, c("term", "label", "group")])
+        ## vtab <- rbind(vtab[, c("term", "label", "group")],
+        ##               vt_xtra[, c("term", "label", "group")])
+        vtab <- rbind.vtab(vtab, vt_xtra)
     }
-    tt <- merge(x = tt0, y = vtab[, c("term", "label", "group")],
-                by = "term", all.x = TRUE)
+    tt <- merge(x = tt0,
+                y = vtab[, c("term", "label", "group")],
+                by = "term", all.x = TRUE, sort = FALSE)
     if(!is.null(unit.id)){
         tt$type[tt$term == unit.id] <- "unit.id"
     }
     al <- align(x = tt$term, template = vtab$term, group = vtab$group, all = TRUE)
     TT <- tt[al$order, ]
+    attr(TT, "stab") <- attr(vtab, "stab")
     attr(TT, "levels") <- lev
     attr(TT, "missing") <- unlist(lapply(X = data[, terms, drop = FALSE],
                                          FUN = function(x) any(is.na(x))))
@@ -135,6 +146,18 @@ term_type <- function(term, data, stab = NULL, bnry.list = NULL,
                     type = type,
                     class = unlist(lapply(X = data[, term, drop =FALSE],
                                           FUN = function(z) class(z)[1])))
+    if(!is.null(stab)){
+        for(i in 1:nrow(stab)){
+            ev <- stab$event[i]
+            t <- stab$time[i]
+            ev_i <- which(r$term == ev)
+            t_i <- which(r$term == t)
+            r$type[ev_i] <- "surv"
+            r$term[ev_i] <- event_time_comb_name(ev, t)
+            r$class[ev_i] <- paste(r$class[ev_i], "/", r$class[t_i])
+            r <- r[r$term != t,]
+        }
+    }
     attr(r, "levels") <- rm_na_from_list(L)
     rownames(r) <- NULL
     r
@@ -195,3 +218,13 @@ is.bnry <- function(x, bnry.list){
 ##     r[seq(2, N, 2)] <- y
 ##     r
 ## }
+
+if(FALSE){
+
+    data <- test_data()
+    vtab <- test_vtab()
+    stab <- test_stab()
+    unit.id <- "id"
+    elim.set <- NULL
+
+}

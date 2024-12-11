@@ -1,3 +1,6 @@
+## Note: these functions are 'imported' (copied) from another package, but will
+## probably undergo many changes.
+
 default.surv.affix <- function() dparam("surv.affix")
 default.surv.prefix <- function() dparam("surv.prefix")
 default.stab.group.name <- function() dparam("stab.group.name")
@@ -16,7 +19,6 @@ default.stab.group.name <- function() dparam("stab.group.name")
 ##' @param term character; variable name(s)
 ##' @param nm character vector; typically the names of variables in a data set
 ##' @param vtab data.frame; a "variable table" (vtab)
-##' @param group.name character; name of grouping for surv variables
 ##' @name stab-fncs
 NULL
 
@@ -99,6 +101,11 @@ check_stab <- function(stab){
         properties(stab$label, class = "character", length = n, na.ok = FALSE)
         properties(stab$time, class = "character", length = n, na.ok = FALSE)
         properties(stab$event, class = "character", length = n, na.ok = FALSE)
+        if("group" %in% names(stab)){
+            properties(stab$group, class = "character", length = n, na.ok = FALSE)
+        } else {
+            stab$group <- default.stab.group.name()
+        }
         stab
     } else {
         warning("stab has zero rows")
@@ -178,7 +185,8 @@ create_stab <- function(s){
     if(!is.null(nm)) properties(nm, class = "character", na.ok = FALSE)
     data.frame(label = if(!is.null(nm)) nm else s,
                time = surv_t(s),
-               event = surv_e(s))
+               event = surv_e(s),
+               group = default.stab.group.name())
 }
 
 #' @rdname stab-fncs
@@ -195,52 +203,83 @@ extract_stab_from_names <- function(nm){
     if(nrow(r) > 0) r else NULL
 }
 
+event_time_comb_name <- function(event, time){
+    paste(event, "/", time)
+}
+
 #' @rdname stab-fncs
 #' @details stab2vtab: convert survival table to variable table
 #' @export
-stab2vtab <- function(stab, group.name = NULL){
-    check_stab(stab)
-    if(is.null(group.name)){
-        group.name = default.stab.group.name()
-    }
-    properties(group.name, class = "character",
-               length = 1, na.ok = FALSE)
-    if(is.null(stab$group)){
-        stab$group <- group.name
-    }
-    stab$label.time <- paste0(stab$label, " (time)")
-    nm <- c("term", "label", "group")
-    a <- stab[, c("event", "label", "group")]
-    names(a) <- nm
-    b <- stab[, c("time", "label.time", "group")]
-    names(b) <- nm
-    r <- rbind(a,b)
-    n <- nrow(r)
-    i <- shuffle(1:(n/2), (n/2+1):n)
-    r[i, ]
+stab2vtab <- function(stab){
+    stab <- check_stab(stab)
+    ## stab$label.time <- paste0(stab$label, " (time)")
+    r <- data.frame(term = event_time_comb_name(stab$event, stab$time),
+                    label = stab$label,
+                    group = stab$group)
+    attr(r, "stab") <- stab
+    r
 }
+
+## stab2vtab <- function(stab, group.name = NULL){
+##     check_stab(stab)
+##     if(is.null(group.name)){
+##         group.name = default.stab.group.name()
+##     }
+##     properties(group.name, class = "character",
+##                length = 1, na.ok = FALSE)
+##     if(is.null(stab$group)){
+##         stab$group <- group.name
+##     }
+##     stab$label.time <- paste0(stab$label, " (time)")
+##     nm <- c("term", "label", "group")
+##     a <- stab[, c("event", "label", "group")]
+##     names(a) <- nm
+##     b <- stab[, c("time", "label.time", "group")]
+##     names(b) <- nm
+##     r <- rbind(a,b)
+##     n <- nrow(r)
+##     i <- shuffle(1:(n/2), (n/2+1):n)
+##     r[i, ]
+## }
 
 #' @rdname stab-fncs
 #' @details combine_vs_tab: create a variable table by combining a variable
 #'     table and a surv table
 #' @export
-combine_vs_tab <- function(vtab, stab, group.name = NULL, stab.first = FALSE){
-    Stab <- stab2vtab(stab = stab, group.name = group.name)
-    nm <- c("term", "label", "group")
-    if(any(Stab$term %in% vtab$term)){
-        if( all(Stab$term %in% vtab$term) ){
-            if(stab.first){
-                Vtab <- subset(vtab, !(term %in% Stab$term))
-                rbind(Vtab[, nm], Stab[, nm])
-            } else {
-                vtab
-            }
-        } else {
-            s <- paste0("partially overlapping stab and vtab information\n",
-                        " (no overlap or complete overlap is ok)")
-            stop(s)
-        }
-    } else {
-        rbind(vtab[, nm], Stab[, nm])
+combine_vs_tab <- function(vtab, stab){
+    Stab <- stab2vtab(stab = stab)
+    Vtab <- vtab[ !(vtab$term %in% c(stab$time, stab$event)), ]
+    if(any(i <- which(Vtab$label %in% Stab$label))){
+        s <- paste0("vtab labels (",
+                   paste0(Vtab$labels[i], collapse = ", "),
+                   ") already exists. Check the results.")
+        stop(s)
     }
+    r <- rbind(Vtab, Stab)
+    a <- align(r$group, unique(vtab$group), all = TRUE)
+    R <- r[a$order,]
+    attr(R, "stab") <- attr(Stab, "stab")
+    rownames(R) <- NULL
+    R
 }
+
+## combine_vs_tab <- function(vtab, stab, group.name = NULL, stab.first = FALSE){
+##     Stab <- stab2vtab(stab = stab, group.name = group.name)
+##     nm <- c("term", "label", "group")
+##     if(any(Stab$term %in% vtab$term)){
+##         if( all(Stab$term %in% vtab$term) ){
+##             if(stab.first){
+##                 Vtab <- subset(vtab, !(term %in% Stab$term))
+##                 rbind(Vtab[, nm], Stab[, nm])
+##             } else {
+##                 vtab
+##             }
+##         } else {
+##             s <- paste0("partially overlapping stab and vtab information\n",
+##                         " (no overlap or complete overlap is ok)")
+##             stop(s)
+##         }
+##     } else {
+##         rbind(vtab[, nm], Stab[, nm])
+##     }
+## }

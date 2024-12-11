@@ -1,9 +1,11 @@
+## Note: these functions are 'imported' (copied) from another package, but will
+## probably undergo many changes.
+
 default.vtab.group.name <- function() dparam("vtab.group.name")
 
 ##' variable table (vtab) functions
 ##'
 ##' @param vtab data.frame; a "variable table" (vtab)
-##' @param group.name character; group name of variables (if missing)
 ##' @param vl list; a "variable list" (vlist) - older specification of variables
 ##'     not really used any more
 ##' @name vtab-fncs
@@ -13,18 +15,40 @@ NULL
 ##' @details check_vtab: check a variable table, i.e. that it contains 'term',
 ##'     'label' and possibly 'group'. It will addd variable group if missing.
 ##' @export
-check_vtab <- function(vtab, group.name = NULL){
+check_vtab <- function(vtab){
     properties(vtab, class = "data.frame")
     if( !("group" %in% names(vtab)) ){
-        if(is.null(group.name)) group.name <- default.vtab.group.name()
-        vtab$group <- group.name
+        vtab$group <- default.vtab.group.name()
     }
     inclusion(names(vtab), nm = "names of variable table",
               include = c("term", "label", "group"))
-    properties(vtab$term, class = "character", na.ok = FALSE)
     properties(vtab$label, class = "character", na.ok = FALSE)
     properties(vtab$group, class = "character", na.ok = FALSE)
+    properties(vtab$term, class = "character", na.ok = TRUE)
+    if(any(is.na(vtab$term))){
+        lab_v <- vtab$label[is.na(vtab$term)]
+        stab <- attr(vtab, "stab")
+        if(is.null(stab)){
+            s <- paste0("Missing values in 'term' is only allowed in ",
+                        "additional information exists in 'stab' attribute.")
+            stop(s)
+        } else {
+            stab <- check_stab(stab)
+            lab_s <- stab$label
+            if(!all(lab_v %in% lab_s)){
+                s <- paste0("Some labels in vtab are missing from stab.")
+                stop(s)
+            }
+        }
+    }
     vtab
+}
+
+rbind.vtab <- function(x, y){
+    r <- rbind(x, y)
+    attr(r, "stab") <- rbind(attr(x, "stab"), attr(y, "stab"))
+    rownames(r) <- NULL
+    r
 }
 
 delist <- function(x){
