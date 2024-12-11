@@ -12,6 +12,19 @@ dable <- function(data,
                   ...) {
     Dots <- list(...)
     properties(data, class = "data.frame")
+    if(is.null(guide)){
+        guide <- dguide(data)
+    } else {
+        properties(guide, class = "data.frame")
+        inclusion(names(guide), nm = "names of guide",
+                  include = c("term", "type", "class", "label", "group"))
+        guide <- guide[guide$term %in% names(data), ]
+        if(nrow(guide) == 0) stop("no guide terms in data")
+    }
+    ## XK must remove types that does not exist in guide
+    stop("XK")
+
+    ## ---------------------------------------------------
     Types <- check_type(type = type, bl.rm = bl.rm)
     BL <- type %in% .baseline
     Dots$.table.type <- if(BL) "baseline" else type
@@ -26,12 +39,9 @@ dable <- function(data,
         fnc <- list(desc = NULL, comp = NULL, test = NULL)
     }
     N <- nrow(data)
-    if(is.null(guide)) guide <- dguide(data)
-    properties(guide, class = "data.frame")
-    inclusion(names(guide), nm = "names of guide",
-              include = c("term", "type")) ## maybe more?
-    if(any(guide$type == "hide")) guide[guide$type != "hide", ]
-    Data <- guidify(data, guide)
+    ## if(any(guide$type == .unknown.type)){
+    ##     guide <- guide[guide$type != .unknown.type, ]
+    ## } ## ??
     properties(gtab, class = c("NULL", "character", "data.frame"))
     gtab_given <- !is.null(gtab)
     if(!gtab_given){
@@ -39,8 +49,10 @@ dable <- function(data,
         names(gtab) <- dparam("gtab.group.name")
     } else if( is.character(gtab) ){
         properties(gtab, class = "character", length = 1, na.ok = FALSE)
-        if(dparam("gtab.defvar.rm")) guide <- guide[guide$term != gtab,]
-        gtab <- create_gtab(term = gtab, data = Data)
+        if(dparam("gtab.defvar.rm")){
+            guide$type[guide$term == gtab] <- .hide.type
+        }
+        gtab <- create_gtab(term = gtab, data = data)
     } else {
         check_gtab(gtab, n = N)
     }
@@ -48,12 +60,19 @@ dable <- function(data,
     if(!is.null(weight)){
         properties(weight, class = "character", length = 1, na.ok = FALSE)
         inclusion(names(data), nm = "names of data", include = weight)
-        Weight <- Data[[weight]]
+        if(dparam("weight.defvar.rm")){
+            guide$type[guide$term == weight] <- .hide.type
+        }
+        Weight <- data[[weight]]
         if(any(is.na(Weight))) warning("there are missing weights") ## XK?
         if(any(!is.na(Weight) & Weight < 0)) stop("negative weights not allowed")
-        Dots$weight <- Weight
-    } else Weight <- NULL
+        Dots$.weight <- weight
+    } else {
+        Weight <- NULL
+        Dots$.weight <- NULL
+    }
     properties(fnc, class = "list", length = 0:3)
+    Data <- guidify(data, guide)
     Spec <- part_spec(part, gtab)
     R <- NULL
     for(t in Types){
@@ -65,17 +84,30 @@ dable <- function(data,
             Stab <- NULL
         }
         if(length(Term) == 0) next
-        ## r <- create_table(data = Data, term = Term, type = t, bl = BL,
-        ##                   gtab = gtab, stab = Stab, dots = Dots,
-        ##                   spec = Spec,
-        ##                   fnc = expand_list(fnc, n = 3, fill = NULL))
         r <- table_creator(data = Data, term = Term, type = t, bl = BL,
-                          gtab = gtab, stab = Stab, dots = Dots,
-                          spec = Spec,
-                          fnc = expand_list(fnc, n = 3, fill = NULL),
-                          guide = guide)
+                           gtab = gtab, stab = Stab, dots = Dots,
+                           spec = Spec,
+                           fnc = expand_list(fnc, n = 3, fill = NULL),
+                           guide = guide)
+        ## ---
+        nm_is <- names(R)
+        nm_new <- names(r)
+        if( !is.null(R) ){
+            if(length(nm_is) != length(nm_new) ||
+               any(nm_is != nm_new)){
+                etxt <- paste0("Trying to rbind table with name set {",
+                               paste0(nm_new, collapse = ", "),
+                               "} onto created table with name set {",
+                               paste0(nm_is, collapse = ", "),
+                               "} will create problems.\n")
+                warning(etxt)
+            }
+        }
+        ## ---
         R <- rbind(R, r)
     }
+    s_patt <- paste0(paste0("(", Types, ")"), collapse= "|")
+    guide_for_types <- guide[grepl(s_patt, guide$type), ]
     if(is.null(R)){
         message("no table produced")
         return(invisible(data.frame()))
@@ -87,6 +119,20 @@ dable <- function(data,
     add_attr <- function(i) attr(R, which = names(ATTR)[i]) <<- ATTR[[i]]
     lapply(seq_along(ATTR), add_attr)
     attr(R, "type") <- if(BL) "baseline" else type
+    if("surv" %in% Types){
+        ## oh, another complication, want to store the grouping, perhaps as the
+        ## guide but if so then it needs to be updated. Perhaps better to only
+        ## store the grouping variable ??
+        Stab <- guide2stab(guide)
+        is <- which(guide_for_types$type %in% c("surv.e", "surv.t"))
+        a <- min(is)
+        sel <- setdiff(1:nrow(guide_for_types), is)
+        guide_final <- rbind(
+            guide_for_types[sel, ],
+            stab2guide(Stab, guide_for_types)
+        )
+    } else guide_final <- guide_for_types
+    attr(R, "guide") <- guide_final
     al <- align(R$term, template = guide$term)
     R[al$order,]
 }
@@ -138,47 +184,35 @@ attributer <- function(gtab, units = NULL, weight = NULL){
 
 if(FALSE){
 
-    gt <- data.frame(A=c(T,T,T,F,F,F),B=c(F,F,F,T,T,F),C=c(F,F,F,F,F,T))
-    check_gtab(gt, 6)
-    attributer(gt, units = 1:6)
-    attributer(gt, units = c(1,1:5))
-    attributer(gt, weight = 1:6)
-    attributer(gt, units = 11:16, weight = 6:1)
-
-    gt <- data.frame(Foo = c(T,T,T,T,T,T))
-    check_gtab(gt, 6)
-    attributer(gt, units = 1:6)
-    attributer(gt, units = c(1,1:5))
-    attributer(gt, weight = 1:6)
-    attributer(gt, units = 11:16, weight = 6:1)
-
-    gt <- data.frame(Foo = c(T,T,F,F,T,T))
-    check_gtab(gt, 6)
-    attributer(gt, units = 1:6)
-    attributer(gt, units = c(1,1:5))
-    attributer(gt, weight = 1:6)
-    attributer(gt, units = 11:16, weight = 6:1)
-
-    gt <- data.frame(Foo = c(T,T,F,F,T,T))[, integer(), drop = FALSE]
-    attributer(gt, units = 1:6)
-    attributer(gt, units = c(1,1:5))
-    attributer(gt, weight = 1:6)
-    attributer(gt, units = 11:16, weight = 6:1)
-
-
-
-    dable(test_data()) ## bad labels for surv ! XK
+    dguide(test_data())
 
     g <- dguide(test_data(), vtab = test_vtab(), stab = test_stab(),
                 unit.id = "id", elim.set = "pid")
-    d <- dable(test_data(), guide = g, gtab = "gender", weight = "measA")
+    dable(test_data(), guide = g)
+    dable(test_data(), guide = g, gtab = "gender")
+    dable(test_data(), guide = g, gtab = "gender", weight = "importance")
+
+
+
+    d <- dable(test_data(), guide = g, gtab = "gender", weight = "importance")
     ## XK check warning ! XK
     str(d)
+
+    data = test_data()
+    type = "baseline"
+    bl.rm = NULL
+    guide = dguide(test_data(), unit.id = "id")
+    gtab = "gender"
+    part = list(desc = TRUE, comp = NA, test = NA)
+    fnc = list(desc = NULL, comp = NULL, test = NULL)
+    weight = "importance"
+
 
 }
 
 guide2stab <- function(guide){
     g <- guide[substr(guide$type, 1, 4) == "surv",]
+    if(nrow(g) == 0) return(NULL)
     g$lab <- sub(pattern = " \\(time\\)$", replacement = "", g$label)
     if(length(unique(g$lab)) != nrow(g)/2){
         s <- paste0("Trying to identify the surv components from the ",

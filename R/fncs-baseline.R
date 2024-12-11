@@ -1,0 +1,75 @@
+
+##' @rdname desc-real
+##' @details mean_sd.bl: (weighted) mean and standard deviation as single string
+##' @export
+mean_sd.bl <- function(x, weight = NULL, ...){
+    r <- mean_sd(x = x, weight = weight, ...)
+    data.frame(Variable = di.Variable(x, ...),
+               Summary = sprintf("%s (%s)", dform.num(r$Mean), dform.num(r$SD)),
+               Summary.info = "Numeric variable: Mean(SD)")
+}
+attr(mean_sd.bl, "meta") <- c("Summary.info", "Variable")
+
+##' @rdname desc-bnry
+##' @details bnry.count_prop.bl: (weighted) count and proportion of
+##'     non-reference value as single string
+##' @export
+bnry.count_prop.bl <- function(x, weight = NULL, ...){
+    r <- bnry.count_prop(x = x, weight = weight, ...)
+    data.frame(Variable = di.Variable(x, ...),
+               Summary = sprintf("%s (%s%%)",
+                                 dform.num(r$Count),
+                                 dform.num(100 * r$Proportion)),
+               Summary.info = "Categorical variable: Count (Percent)")
+}
+attr(bnry.count_prop.bl, "meta") <- c("Variable", "Summary.info")
+
+##' @rdname desc-catg
+##' @details catg.count_prop.bl: (weighted) count and proportion of
+##'     categorical levels as single string
+##' @export
+catg.count_prop.bl <- function(x, weight = NULL, ...){
+    r <- catg.count_prop(x = x, weight = weight, ...)
+    data.frame(Variable = di.Variable(x, ...),
+               Summary = sprintf("%s (%s%%)",
+                                 dform.num.vec(r$Count),
+                                 dform.num.vec(100 * r$Proportion)),
+               Summary.info = "Categorical variable: Count (Percent)")
+}
+attr(catg.count_prop.bl, "meta") <- c("Variable", "Summary.info")
+
+##' @rdname desc-lcat
+##' @details lcat.bl: number of unique non-missing values in x
+##' @export
+lcat.bl <- function(x, ...){
+    r <- n.unique(x)
+    data.frame(Variable = di.Variable(x, ...),
+               Summary = sprintf("{%s}", r),
+               Summary.info = "Categorical variable: {unique values}")
+}
+attr(lcat.bl, "meta") <- c("Variable", "Summary.info")
+
+##' @rdname desc-date
+##' @details date.bl: min/max
+##' @export
+date.bl <- function(x, ...){
+    r <- min_max(x)
+    data.frame(Variable = di.Variable(x, ...),
+               Summary = sprintf("%s/%s", r$Min, r$Max),
+               Summary.info = "Date variables: min/max")
+}
+attr(date.bl, "meta") <- c("Variable", "Summary.info")
+
+##' @rdname desc-surv
+##' @details eventrate.bl: events; rate
+##' @export
+eventrate.bl <- function(time, event, weight = NULL, time.unit = NULL, ...){
+    r <- eventrate(time = time, event = event, weight = weight,
+                   time.unit = time.unit, ...)
+    data.frame(Variable = di.Variable(event, ...),
+               Summary = sprintf("%s; %s",
+                                 dform.num(r$Events),
+                                 dform.num(r$Rate)),
+               Summary.info = "Time-to-event variable: events; rate")
+}
+attr(eventrate.bl, "meta") <- c("Variable", "Summary.info")

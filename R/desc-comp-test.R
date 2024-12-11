@@ -3,6 +3,7 @@ table_creator <- function(data, term, type, bl, gtab, stab = NULL,
     desc <- length(spec[[1]]) > 0
     comp <- length(spec[[2]]) > 0
     test <- length(spec[[3]]) > 0
+    ## browser()
     R <- NULL
     if(desc){
         What <- if(bl) ".desc.bl" else ".desc"
@@ -44,6 +45,8 @@ descomtes <- function(fnc, data, term, gtab, spec, surv, stab, guide, args, part
     }
     Lab <- attr(get(fnc), "label")
     Meta <- attr(get(fnc), "meta")
+    weight <- args$.weight
+    Weight <- if(is.null(weight)) NULL else data[[weight]]
     RR <- NULL
     if(part == "test") spec <- list(spec) ## special case ...
     for(i in seq_along(spec)){
@@ -60,13 +63,20 @@ descomtes <- function(fnc, data, term, gtab, spec, surv, stab, guide, args, part
                 if(surv){
                     time.var <- stab$time[stab$label == term_j]
                     event.var <- stab$event[stab$label == term_j]
+                    args$.type <- "surv"
+                    args$.label <- args$.term
+                    args$.term <- event.var ## XK ?
+                    args$.group <-  guide$group[guide$term == event.var]
+                    args$.missing <- attr(guide, "missing")[event.var]
+                    ## browser()
                     if(part == "desc"){
                         do.call(
                             what = xFnc.surv,
                             args = list(
+                                fnc = fnc,
                                 time = data[gtab[, spec_i], time.var, drop = TRUE],
                                 event = data[gtab[, spec_i], event.var, drop = TRUE],
-                                fnc = fnc,
+                                weight = Weight[gtab[, spec_i]],
                                 args = args
                             )
                         )
@@ -74,10 +84,11 @@ descomtes <- function(fnc, data, term, gtab, spec, surv, stab, guide, args, part
                         do.call(
                             what = xgFnc.surv,
                             args = list(
+                                fnc = fnc,
                                 time = data[[time.var]],
                                 event = data[[event.var]],
                                 g = gtab2factor(gtab = gtab[,spec_i]),
-                                fnc = fnc,
+                                weight = Weight,
                                 args = args
                             )
                         )
@@ -87,19 +98,20 @@ descomtes <- function(fnc, data, term, gtab, spec, surv, stab, guide, args, part
                         do.call(
                             what = xFnc,
                             args = list(
-                                x = data[gtab[, spec_i], term_j, drop = TRUE],
                                 fnc = fnc,
+                                x = data[gtab[, spec_i], term_j, drop = TRUE],
+                                weight = Weight[gtab[, spec_i]],
                                 args = args
                             )
                         )
                     } else {
-                        ## browser()
                         do.call(
                             what = xgFnc,
                             args = list(
+                                fnc = fnc,
                                 x = data[, term_j, drop = TRUE],
                                 g = gtab2factor(gtab = gtab[,spec_i,drop=FALSE]),
-                                fnc = fnc,
+                                weight = Weight,
                                 args = args
                             )
                         )
@@ -120,57 +132,74 @@ descomtes <- function(fnc, data, term, gtab, spec, surv, stab, guide, args, part
     RR
 }
 
-xFnc <- function(x, fnc, args){
-    r <- tryCatch(expr = do.call(what = fnc, args = c(list(x = x), args)),
-                  error = function(e){
-                      warning(e)
-                      tryCatch(expr = do.call(
-                                   what = fnc,
-                                   args = c(list(x = NA), args)
-                               ), error = function(e) NA)
-                  })
-    as.data.frame(r)
-}
+## XK these helpers must explicitly take a 'weight' argument
 
-xFnc.surv <- function(time, event, fnc, args = list()){
+xFnc <- function(fnc, x, weight, args){
     r <- tryCatch(expr = do.call(what = fnc,
-                                 args = c(list(time = time,
-                                               event = event), args)),
+                                 args = c(list(x = x,
+                                               weight = weight),
+                                          args)),
                   error = function(e){
-                      warning(e)
-                      tryCatch(expr = do.call(
-                                   what = fnc,
-                                   args = c(list(time = NA, event = NA), args)
-                               ), error = function(e) NA)
+                      warning(e, "\n")
+                      do.call(
+                          what = fnc,
+                          args = c(list(x = rep(NA, length(x))),
+                                   args)
+                      )
                   })
     as.data.frame(r)
 }
 
-xgFnc <- function(x, g, fnc, args){
-    r <- tryCatch(expr = do.call(what = fnc, args = c(list(x = x, g = g), args)),
-                  error = function(e){
-                      warning(e)
-                      tryCatch(expr = do.call(
-                                   what = fnc,
-                                   args = c(list(x = NA, g = NA), args)
-                               ), error = function(e) NA)
-                  })
-    as.data.frame(r)
-}
-
-xgFnc.surv <- function(time, event, g, fnc, args = list()){
+xFnc.surv <- function(fnc, time, event, weight, args = list()){
     r <- tryCatch(expr = do.call(what = fnc,
                                  args = c(list(time = time,
                                                event = event,
-                                               g = g), args)),
+                                               weight = weight),
+                                          args)),
                   error = function(e){
-                      warning(e)
-                      tryCatch(expr = do.call(
-                                   what = fnc,
-                                   args = c(list(time = NA,
-                                                 event = NA,
-                                                 g = NA), args)
-                               ), error = function(e) NA)
+                      warning(e, "\n")
+                      do.call(
+                          what = fnc,
+                          args = c(list(time = rep(NA, length(time)),
+                                        event = rep(NA), length(event)),
+                                   args)
+                      )
+                  })
+    as.data.frame(r)
+}
+
+xgFnc <- function(fnc, x, g, weight, args){
+    r <- tryCatch(expr = do.call(what = fnc,
+                                 args = c(list(x = x,
+                                               g = g,
+                                               weight = weight), args)),
+                  error = function(e){
+                      warning(e, "\n")
+                      do.call(
+                          what = fnc,
+                          args = c(list(x = rep(NA, length(x)),
+                                        g = g),
+                                   args)
+                      )
+                  })
+    as.data.frame(r)
+}
+
+xgFnc.surv <- function(fnc, time, event, g, weight, args = list()){
+    r <- tryCatch(expr = do.call(what = fnc,
+                                 args = c(list(time = time,
+                                               event = event,
+                                               g = g,
+                                               weight = weight), args)),
+                  error = function(e){
+                      warning(e, "\n")
+                      do.call(
+                          what = fnc,
+                          args = c(list(time = rep(NA, length(time)),
+                                        event = rep(NA, length(event)),
+                                        g = g),
+                                   args)
+                      )
                   })
     as.data.frame(r)
 }

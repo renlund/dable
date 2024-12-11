@@ -47,7 +47,7 @@ extract_stab_from_names(nm)
 
 stab2vtab(stab, group.name = NULL)
 
-combine_vs_tab(vtab, stab, group.name = NULL)
+combine_vs_tab(vtab, stab, group.name = NULL, stab.first = FALSE)
 }
 \arguments{
 \item{affix}{character; a prefix or suffix}

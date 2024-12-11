@@ -27,6 +27,7 @@ test_data <- function(n = 1000, seed = 1){
         measA = rexp(n, 1/40),
         measNA = NA_real_,
         forgotten = runif(n, -1,1),
+        importance = sample(seq(0.1, 6, by = .1), size = n, replace = TRUE),
         index = as.Date("2017-01-01") + runif(n, min = 0, max = 729),
         posix = as.POSIXct(runif(n, 1485000000, 1495000000)),
         ev.foo = rbinom(n, 1, prob = .2),

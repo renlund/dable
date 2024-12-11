@@ -9,6 +9,13 @@ unusedWeightWarning <- function(..., caller = NULL){
     invisible(NULL)
 }
 
+tryElseNA <- function(expr){
+    tryCatch(expr = expr, error = function(e){
+        message(e, "\n")
+        NA
+    })
+}
+
 ## ------------------------------------------------------------------------ real
 
 ##' general testers
@@ -59,11 +66,11 @@ META_param <- function(x, g, bl = TRUE){
     g <- factor(g)
     n_lev <- length(levels(g))
     p <- NA_real_
-    p.info <- "no test"
-    ## if(n_lev > 1) p <- anova(lm(x ~ g, weights = weight))[['Pr(>F)']][1]
-    if(n_lev > 1) p <- anova(lm(x ~ g))[['Pr(>F)']][1]
-    if(n_lev == 2) p.info <- "t-test"
-    if(n_lev > 2) p.info <- "F-test"
+    p.info <- if(n_lev<=1) "no test" else if(n_lev==2) "t-test" else "F-test"
+    if(n_lev > 1){
+        ## p <- anova(lm(x ~ g))[['Pr(>F)']][1]
+        p <- tryElseNA(anova(lm(x ~ g))[['Pr(>F)']][1])
+    }
     if(bl){
        data.frame(p = p, p.info = p.info)
     } else{
@@ -79,11 +86,13 @@ META_nonparam <- function(x, g, bl = TRUE){
     p <- NA_real_
     p.info <- "no test"
     if(n_lev == 2){
-        p <- stats::wilcox.test(x~g)$p.value
+        ## p <- stats::wilcox.test(x~g)$p.value
+        p <- tryElseNA(stats::wilcox.test(x~g)$p.value)
         p.info <- "Wilcoxon" ## "Wilcoxon-Mann-Whitney"
     }
     if(n_lev > 2){
-        p <- stats::kruskal.test(x~g)$p.value
+        ## p <- stats::kruskal.test(x~g)$p.value
+        p <- tryElseNA(stats::kruskal.test(x~g)$p.value)
         p.info <- "Kruskal-Wallis"
     }
     if(bl){
@@ -147,7 +156,8 @@ META_chisq <- function(x, g, bl = TRUE, catg.full.length = TRUE){
     p <- NA_real_
     p.info <- "no test"
     if(n_lev > 1){
-        p <- stats::chisq.test(x,g)$p.value
+        browser()
+        p <- tryElseNA(stats::chisq.test(x,g)$p.value)
         p.info <- "Chi-square"
     }
     if(catg.full.length){
@@ -265,8 +275,7 @@ NULL
 ##' @export
 logrank <- function(time, event, g, ...){
     unusedWeightWarning(..., caller = "logrank")
-    s <- survival::survdiff(survival::Surv(time, event) ~ g)
-    s$pvalue
+    tryElseNA(survival::survdiff(survival::Surv(time, event) ~ g)$pvalue)
 }
 attr(logrank, "label") <- "Logrank"
 
@@ -275,7 +284,7 @@ attr(logrank, "label") <- "Logrank"
 ##' @export
 logrank.bl <- function(time, event, g, ...){
     unusedWeightWarning(..., caller = "logrank.bl")
-    data.frame(Logrank = logrank(time, event, g),
+    data.frame(p = logrank(time, event, g),
                p.info = "Log rank")
 }
 ##attr(logrank.bl, "part") <- c("test", "meta")

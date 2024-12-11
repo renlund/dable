@@ -1,0 +1,139 @@
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{describe-data}
+%\VignetteEncoding{UTF-8}
+\documentclass{article}
+\addtolength{\hoffset}{-1cm}
+\addtolength{\textwidth}{2cm}
+% \usepackage[table]{xcolor}
+% \addtolength{\voffset}{-1.5cm}
+% \addtolength{\textheight}{3cm}
+
+\title{Describe data}
+\author{Henrik Renlund}
+
+<<"setup", cache = FALSE, echo = FALSE, include = FALSE>>=
+library(knitr)
+.DEV <- TRUE
+if(.DEV){
+    devtools::load_all()
+} else {
+    library(dable)
+}
+## devtools::load_all()
+opts_chunk$set(include = TRUE,
+               echo = TRUE,
+               cache = FALSE)
+## knit_hooks$set(document = function(x) {
+##     sub(pattern = '\\usepackage[]{color}',
+##         replacement = '\\usepackage[table]{xcolor}',
+##         x, fixed = TRUE)
+## })
+if(FALSE){
+    knitr::knit2pdf("describe-data.rnw", clean = TRUE)
+    shell.exec("describe-data.pdf")
+}
+@
+
+\begin{document}
+
+\maketitle
+
+%% \tableofcontents
+%% \newpage
+
+\section{A first look}
+
+The package includes a test data set along with associated \texttt{vtab} and
+\texttt{stab} objects.
+
+<<"test">>=
+d <- test_data()
+vt <- test_vtab()
+st <- test_stab()
+@
+
+The test data contains variables of different classes:
+
+<<"test-data">>=
+str(d)
+@
+
+The "variable table" (\texttt{vtab}) is a data set that assigns a label and (possibly)
+a grouping to all the terms of interest
+
+<<"test-vtab">>=
+vt
+@
+
+The "survival table" (\texttt{stab}) is a data set that specifices the time and
+status component of the time-to-event variables in the data set
+
+<<"test-stab">>=
+st
+@
+
+A "data guide" can be created which assigns a \emph{type} to each variable. The
+main types are \emph{real}, \emph{catg}, \emph{date}, and \emph{surv}.
+But there is also \emph{bnry}, \emph{lcat}, \emph{unit.id}, and \emph{unknown}.
+
+<<"test-guide">>=
+(g <- dguide(d, unit.id = "id", vtab = vt, stab = st))
+@
+
+
+Types are assigned according to rules given by default values. But types can
+also be changed manually
+
+<<"test-type-change">>=
+g$type[g$term == "pid"] <- "lcat"
+@
+
+Now, a baseline table can be created using
+
+<<"test-dable">>=
+dt <- dable(d, type = "bl", guide = g, gtab = "gender",
+            weight = "importance", part = c(T,T,T))
+@
+
+Note that \texttt{gtab} is the terminology for a "grouping table" - although
+this can be created here by just refering to the grouping term.
+
+\texttt{dt} contains many things but we can look at the more interesting stuff
+
+<<"test-select">>=
+dt[, c(2,4,5)]
+@
+
+The attributes contains meta(ish) information that can help create informative tables.
+
+<<"test-attr">>=
+attributes(dt)
+@
+
+Checks:
+
+<<"">>=
+dable_attr(dt)
+attr2text(dt)
+
+dparam("digits")
+
+test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(F,F,F))
+test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(T,F,F))
+test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(T,T,F))
+test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(T,T,T))
+test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(F,F,T))
+test <- dable(d, type = "bl", guide = g, gtab = "gender",part = c(F,T,T))
+
+
+test <- d[, c("id", "gender", "male")]
+gt <- dguide(test, unit.id = "id")
+guide2stab(gt)
+
+dable(test, type = "bl", guide = gt, gtab = "gender", part = c(T,T,T))
+
+@
+
+
+
+\end{document}

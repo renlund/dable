@@ -1,7 +1,33 @@
 empty <- function(...) NA
 placeholder <- function(...) "placeholder"
 attr(placeholder, "label") <- "Summary"
-placeholder2 <- function(...) data.frame(p=NA,p.info="no test")
+placeholder2 <- function(...) data.frame(p=NA, p.info="no test")
+
+## tester <- function(x, weight = NULL, ...){
+##     dots <- list(...)
+##     foo <- function(z) if(is.null(z)) "" else z
+##     data.frame(
+##         term = foo(dots$.term),
+##         label = foo(dots$.label),
+##         type = foo(dots$.type),
+##         table.type = foo(dots$.table.type),
+##         group = foo(dots$.group),
+##         missing = foo(dots$.missing),
+##         all = paste(names(dots), collapse = ",")
+##     )
+## }
+## tester2 <- function(x, weight = NULL, ...){
+##     data.frame(
+##         term = di.dots("term", ...),
+##         label = di.dots("label", ...),
+##         type = di.dots("type", ...),
+##         table.type = di.dots("table.type", ...),
+##         group = di.dots("group", ...),
+##         missing = di.dots("missing", ...)
+##     )
+## }
+
+
 
 ## --------------------------------------------------------------------- general
 ##' general describers
@@ -59,6 +85,7 @@ d.mode <- function(x, weight = NULL, ...){
 }
 attr(d.mode, "label") <- "Mode"
 
+
 ## ------------------------------------------------------------------------ real
 
 ##' 'real' describers
@@ -97,6 +124,7 @@ min_max <- function(x, ...){
 ##' @details d.mean: (weighted) mean value
 ##' @export
 d.mean <- function(x, weight = NULL, ...){
+    ## browser()
     if(is.null(weight)){
         mean(x, na.rm = TRUE)
     } else {
@@ -118,7 +146,7 @@ d.sd <- function(x, weight = NULL, ...){
         if(M == 1){
             NA_real_
         } else {
-            sqrt( sum( w * (x - d.mean(x, w))^2 ) / (M - 1) )
+            sqrt( sum( w * (y - d.mean(y, w))^2 ) / (M - 1) )
         }
     }
 }
@@ -151,7 +179,7 @@ if(FALSE){
 NULL
 
 ##' @rdname desc-bnry
-##' @details bnry.count_prop: (weighted) count and proportion of non-reference value
+##' @details bnry.count_prop: (weighted) count and proportion of non-reference
 ##' @export
 bnry.count_prop <- function(x, weight = NULL, ...){
     ref <- levels(as.factor(x))[1]
@@ -170,7 +198,8 @@ bnry.count_prop <- function(x, weight = NULL, ...){
         Proportion = if(W != 0) count / W else NA_real_
     )
 }
-attr(bnry.count_prop, "part") <- c("meta", "desc", "desc")
+attr(bnry.count_prop, "meta") <- c("Level")
+
 
 ## ------------------------------------------------------------------------ catg
 
@@ -191,22 +220,13 @@ catg.count_prop <- function(x, weight = NULL, ...){
     count <- tapply(X = weight, INDEX = x, FUN = sum, na.rm = TRUE)
     count[is.na(count)] <- 0 ## bad solution?
     W <- sum(weight[!is.na(x)])
-    data.frame(Levels = attr(count, "dimnames")[[1]],
+    data.frame(Level = attr(count, "dimnames")[[1]],
                Count = as.numeric(count),
                Proportion = if(W != 0) count / W else NA_real_)
 }
-attr(catg.count_prop, "part") <- c("meta", "desc", "desc")
-attr(catg.count_prop, "meta") <- "Levels" ## XK ?
+attr(catg.count_prop, "meta") <- "Level" ## XK ?
 
-##' @rdname desc-catg
-##' @details catg.count_prop.bl: (weighted) count and proportion of categorical
-##'     levels
-##' @export
-catg.count_prop.bl <- function(x, weight = NULL, ...){
-    r <- catg.count_prop(x = x, weight = weight)
-    paste0(r$Count, "(", sprintf("%.2f", 100 * r$Proportion),"%)")
-}
-attr(catg.count_prop.bl, "label") <- "Summary"
+
 
 ## ----------------------------------------------------------------------- lcat
 
@@ -218,6 +238,7 @@ attr(catg.count_prop.bl, "label") <- "Summary"
 ##' @name desc-lcat
 NULL
 
+
 ## ------------------------------------------------------------------------ date
 
 ##' 'date' describers
@@ -227,6 +248,7 @@ NULL
 ##' @param weight case weight
 ##' @name desc-date
 NULL
+
 
 ## ------------------------------------------------------------------------ surv
 

@@ -1,11 +1,17 @@
-dform.num <- function(x,
-                      digits = c("small" = 2, "mid" = 2, "large" = 1),
-                      sc = TRUE, sc.low = 1e-8, sc.high = 1e8,
-                      p = FALSE, p.bound = 1e-4,
-                      miss = ""){
+
+dform.num <- function(x, digits = NULL, sc = NULL, sc.low = NULL, sc.high = NULL,
+                      p = NULL, p.bound = NULL, NAtext = NULL){
     properties(x, class = c("numeric", "integer"), length = 1, na.ok = TRUE)
     if(identical(x, 0L)) return("0")
-    if(is.na(x)) return(miss)
+    ## check or get all parameters
+    digits  <- dparam("digits", digits)
+    sc      <- dparam("sc", sc)
+    sc.low  <- dparam("sc.low", sc.low)
+    sc.high <- dparam("sc.high", sc.high)
+    p       <- dparam("p", p)
+    p.bound <- dparam("p.bound", p.bound)
+    NAtext  <- dparam("NAtext", NAtext)
+    if(is.na(x)) return(NAtext)
     dig.s <- digits["small"]
     dig.m <- digits["mid"]
     dig.l <- digits["large"]
@@ -41,6 +47,17 @@ dform.num <- function(x,
     }
 }
 
+dform.num.vec <- function(x, ...){
+    n <- length(x)
+    if(n == 0){
+        character(0)
+    } else {
+        r <- rep(NA_character_, n)
+        for(i in 1:n) r[i] <- dform.num(x[i], ...)
+    }
+    r
+}
+
 dprintf <- function(x, d, type) sprintf(paste0("%.", d, type), x)
 
 dformat.text <- function(x){
@@ -71,5 +88,8 @@ if(FALSE){
 
     dform.num(987654321)
     dform.num(987654321L)
+
+    dform.num(NA_real_)
+    dform.num(NaN)
 
 }

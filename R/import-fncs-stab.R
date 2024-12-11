@@ -224,18 +224,23 @@ stab2vtab <- function(stab, group.name = NULL){
 #' @details combine_vs_tab: create a variable table by combining a variable
 #'     table and a surv table
 #' @export
-combine_vs_tab <- function(vtab, stab, group.name = NULL){
-    vtab2 <- stab2vtab(stab = stab, group.name = group.name)
+combine_vs_tab <- function(vtab, stab, group.name = NULL, stab.first = FALSE){
+    Stab <- stab2vtab(stab = stab, group.name = group.name)
     nm <- c("term", "label", "group")
-    if(any(vtab2$term %in% vtab$term)){
-        if(all(vtab2$term %in% vtab$term) ){
-            vtab
+    if(any(Stab$term %in% vtab$term)){
+        if( all(Stab$term %in% vtab$term) ){
+            if(stab.first){
+                Vtab <- subset(vtab, !(term %in% Stab$term))
+                rbind(Vtab[, nm], Stab[, nm])
+            } else {
+                vtab
+            }
         } else {
             s <- paste0("partially overlapping stab and vtab information\n",
                         " (no overlap or complete overlap is ok)")
             stop(s)
         }
     } else {
-        rbind(vtab[, nm], vtab2[, nm])
+        rbind(vtab[, nm], Stab[, nm])
     }
 }

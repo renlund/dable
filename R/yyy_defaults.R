@@ -13,9 +13,20 @@ dable_parameters <- list(
     dable.vtab.group.name = "Covariates",
     dable.stab.group.name = "Time-to-event",
     dable.gtab.group.name = "All",
+    ## printingish
+    dable.units.name = "subjects",
+    dable.grey.first = FALSE,
+    ## formatting
+    dable.digits = c("small" = 2, "mid" = 2, "large" = 1),
+    dable.sc = TRUE,
+    dable.sc.low = 1e-8,
+    dable.sc.high = 1e8,
+    dable.p = FALSE,
+    dable.p.bound = 1e-4,
+    dable.NAtext = "",
     ## format parameters
     ## default describers --------------------
-    dable.real.desc = "mean_sd",
+    dable.real.desc = "mean_sd", ## "tester2"
     dable.bnry.desc = "bnry.count_prop",
     dable.catg.desc = "catg.count_prop",
     dable.lcat.desc = "n.unique",
@@ -36,12 +47,12 @@ dable_parameters <- list(
     dable.date.test = "date.nonparam",
     dable.surv.test = "logrank",
     ## default baseline describers -----------
-    dable.real.desc.bl = "placeholder",
-    dable.bnry.desc.bl = "placeholder",
+    dable.real.desc.bl = "mean_sd.bl",
+    dable.bnry.desc.bl = "bnry.count_prop.bl",
     dable.catg.desc.bl = "catg.count_prop.bl",
-    dable.lcat.desc.bl = "placeholder",
-    dable.date.desc.bl = "placeholder",
-    dable.surv.desc.bl = "placeholder",
+    dable.lcat.desc.bl = "lcat.bl",
+    dable.date.desc.bl = "date.bl",
+    dable.surv.desc.bl = "eventrate.bl",
     ## default baseline comparers
     dable.real.comp.bl = "real.std",
     dable.bnry.comp.bl = "bnry.std",
@@ -54,8 +65,8 @@ dable_parameters <- list(
     dable.bnry.test.bl = "bnry.chisq.bl",
     dable.catg.test.bl = "catg.chisq.bl",
     dable.lcat.test.bl = "bnry.chisq.bl",
-    dable.date.test.bl = "placeholder2",
-    dable.surv.test.bl = "placeholder2"
+    dable.date.test.bl = "date.nonparam.bl",
+    dable.surv.test.bl = "logrank.bl"
 )
 
 dp_apply_defaults <- function(overwrite = FALSE){
@@ -137,6 +148,15 @@ dparam <- function(param, value = NULL){
         vtab.group.name = dp_vtab.group.name(value),
         stab.group.name = dp_stab.group.name(value),
         gtab.group.name = dp_gtab.group.name(value),
+        units.name = dp_units.name(value),
+        digits = dp_digits(value),
+        sc = dp_sc(value),
+        sc.low = dp_sc.low(value),
+        sc.high = dp_sc.high(value),
+        p = dp_p(value),
+        p.bound = dp_p.bound(value),
+        NAtext = dp_NAtext(value),
+        grey.first = dp_grey.first(value),
         if(is.null(value)) dpget(p) else value
     )
 }
@@ -229,7 +249,7 @@ dp_gtab.defvar.rm <- function(x = NULL){
 }
 
 dp_weight.defvar.rm <- function(x = NULL){
-    if(is.null(x)) x <- dpget("weight.weight.rm")
+    if(is.null(x)) x <- dpget("weight.defvar.rm")
     properties(x, nm = "weight.defvar.rm", class = "logical",
                length = 1, na.ok = FALSE)
     x
@@ -252,6 +272,77 @@ dp_stab.group.name <- function(x = NULL){
 dp_gtab.group.name <- function(x = NULL){
     if(is.null(x)) x <- dpget("gtab.group.name")
     properties(x, nm = "gtab.group.name", class = "character",
+               length = 1, na.ok = FALSE)
+    x
+}
+
+dp_digits <- function(x = NULL){
+    if(is.null(x)) x <- dpget("digits")
+    properties(x, nm = "digits", class = c("numeric", "integer"),
+               length = 3, na.ok = FALSE)
+    if(!setequal(names(x), c("small", "mid", "large"))){
+        s <- paste0("'digits' should be a named length 3 vector ",
+                    "(names: small, mid, large)")
+        stop(s)
+    }
+    x
+}
+
+dp_sc <- function(x = NULL){
+    if(is.null(x)) x <- dpget("sc")
+    properties(x, nm = "sc", class = "logical",
+               length = 1, na.ok = FALSE)
+    x
+}
+
+dp_sc.low <- function(x = NULL){
+    if(is.null(x)) x <- dpget("sc.low")
+    properties(x, nm = "sc.low", class = c("numeric"),
+               length = 1, na.ok = FALSE)
+    if(x < 0) stop("'sc.low' should be positive")
+    x
+}
+
+dp_sc.high <- function(x = NULL){
+    if(is.null(x)) x <- dpget("sc.high")
+    properties(x, nm = "sc.high", class = c("numeric"),
+               length = 1, na.ok = FALSE)
+    if(x < 0) stop("'sc.high' should be positive")
+    x
+}
+
+dp_p <- function(x = NULL){
+    if(is.null(x)) x <- dpget("p")
+    properties(x, nm = "p", class = "logical",
+               length = 1, na.ok = FALSE)
+    x
+}
+
+dp_p.bound <- function(x = NULL){
+    if(is.null(x)) x <- dpget("p.bound")
+    properties(x, nm = "p.bound", class = c("numeric"),
+               length = 1, na.ok = FALSE)
+    if(x < 0) stop("'p.bound' should be positive")
+    x
+}
+
+dp_NAtext <- function(x = NULL){
+    if(is.null(x)) x <- dpget("NAtext")
+    properties(x, nm = "NAtext", class = "character",
+               length = 1, na.ok = FALSE)
+    x
+}
+
+dp_units.name <- function(x = NULL){
+    if(is.null(x)) x <- dpget("units.name")
+    properties(x, nm = "units.name", class = "character",
+               length = 1, na.ok = FALSE)
+    x
+}
+
+dp_grey.first <- function(x = NULL){
+    if(is.null(x)) x <- dpget("grey.first")
+    properties(x, nm = "grey.first", class = "logical",
                length = 1, na.ok = FALSE)
     x
 }

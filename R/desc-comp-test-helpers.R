@@ -56,7 +56,7 @@ merge_2parts <- function(x = NULL, y = NULL){
             stop(s)
         } else {
             if(all(x_ref == 1)){
-                r <- cbind(NAexpandDF(x, times = y_ref, na = same), y)
+                r <- cbind(NAexpandDF(x, times = y_ref, notNA = same), y)
             } else {
                 r <- cbind(x, NAexpandDF(y, times = x_ref, notNA = same))
             }
@@ -128,4 +128,10 @@ meta_fixer <- function(nm, part){
     part.copy[!d] <- ""
     w2 <- which(part.copy == "meta")
     c(w2, setdiff(w1, w2))
+}
+
+stab2guide <- function(s, g){
+    gr_nm <- g$group[g$term %in% c(s$event)]
+    data.frame(term = s$label, type = "surv", class = NA_character_,
+               label = s$label, group = gr_nm)
 }

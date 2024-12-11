@@ -1,3 +1,6 @@
+.unknown.type <- "unknown"
+.hide.type <- "hide"
+
 ##' description guide
 ##'
 ##' Determine how to describe a data frame.
@@ -24,12 +27,13 @@ dguide <- function(data, unit.id = NULL, elim.set = NULL,
             warning(s)
         }
     }
+    vtab_given <- !is.null(vtab)
     if(is.null(vtab)) vtab <- extract_labels(data[, terms, drop = FALSE])
     vtab <- check_vtab(vtab)
     if(is.null(stab)){
         stab <- extract_stab_from_names(names(data))
     } else stab <- check_stab(stab)
-    if(!is.null(stab)) vtab <- combine_vs_tab(vtab, stab)
+    if(!is.null(stab)) vtab <- combine_vs_tab(vtab, stab, stab.first = !vtab_given)
     tt0 <- term_type(term = terms, data = data, stab = stab, ...)
     lev <- attr(tt0, "levels")
     no_vt <- setdiff(terms, vtab$term)
@@ -66,7 +70,7 @@ extract_labels <- function(x){
 }
 
 guidify <- function(data, guide){
-    kill <- guide$term[guide$type == "hide"]
+    kill <- guide$term[guide$type == .unknown.type]
     catgify <- guide$term[guide$type %in% c("catg", "bnry", "lcat")]
     LEV <- attr(guide, "levels")
     for(nm in names(data)){
@@ -157,7 +161,9 @@ value_type <- function(x, bnry.list = list(), real.tol = 0, catg.tol = Inf){
                  sort(unique(na.omit(x)))
              }
     n_val <- length(x_val)
-    type <- if( n_val == 2 && is.bnry(x_val, bnry.list) ){
+    type <- if(n_val == 0){
+                "missing" ## ?
+            } else if( n_val == 2 && is.bnry(x_val, bnry.list) ){
                 "bnry"
             } else if( any( c("character", "factor", "logical") %in% klass ) ){
                 if(n_val <= catg.tol) "catg" else "lcat"
@@ -165,7 +171,7 @@ value_type <- function(x, bnry.list = list(), real.tol = 0, catg.tol = Inf){
                 if(n_val > real.tol) "real" else "catg"
             } else if("Date" %in% klass){
                 "date"
-            } else "hide" ## or "unknown" ?
+            } else .unknown.type
     list(type = type,
          class = klass[1],
          levels = if(type %in% c("bnry", "catg", "lcat")) x_val else NA)
