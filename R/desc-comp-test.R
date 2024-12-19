@@ -10,7 +10,7 @@ table_creator <- function(data, term, type, bl, gtab, stab = NULL,
         Default <- dable.default(paste0(type, What))
         Fnc <- if(!is.null(fnc[[1]])) fnc[[1]] else Default
         R <- descomtes(fnc = Fnc, data = data, term = term, gtab = gtab,
-                       spec = spec[[1]], surv = type == "surv", stab,
+                       spec = spec[[1]], surv = type == "surv", stab = stab,
                        guide = guide, args = dots, part = "desc")
     }
     if(comp){
@@ -18,7 +18,7 @@ table_creator <- function(data, term, type, bl, gtab, stab = NULL,
         Default <- dable.default(paste0(type, What))
         Fnc <- if(!is.null(fnc[[2]])) fnc[[2]] else Default
         CO <- descomtes(fnc = Fnc, data = data, term = term, gtab = gtab,
-                        spec = spec[[2]], surv = type == "surv", stab,
+                        spec = spec[[2]], surv = type == "surv", stab = stab,
                         guide = guide, args = dots, part = "comp")
         R <- merge_parts(R, CO)
     }
@@ -27,7 +27,7 @@ table_creator <- function(data, term, type, bl, gtab, stab = NULL,
         Default <- dable.default(paste0(type, What))
         Fnc <- if(!is.null(fnc[[3]])) fnc[[3]] else Default
         TE <- descomtes(fnc = Fnc, data = data, term = term, gtab = gtab,
-                        spec = spec[[3]], surv = type == "surv", stab,
+                        spec = spec[[3]], surv = type == "surv", stab = stab,
                         guide = guide, args = dots, part = "test")
         R <- merge_parts(R, TE)
     }
@@ -49,10 +49,10 @@ descomtes <- function(fnc, data, term, gtab, spec, surv, stab, guide, args, part
     Weight <- if(is.null(weight)) NULL else data[[weight]]
     RR <- NULL
     if(part == "test") spec <- list(spec) ## special case ...
-    for(i in seq_along(spec)){
+    for(i in seq_along(spec)){ ## i = 1
         l <- list()
         spec_i <- spec[[i]]
-        for(j in seq_along(term)){
+        for(j in seq_along(term)){ ## j = 1
             term_j <- term[j]
             args$.term <- term_j
             args$.label <- guide$label[guide$term == term_j]
@@ -122,6 +122,7 @@ descomtes <- function(fnc, data, term, gtab, spec, surv, stab, guide, args, part
         rownames(r) <- NULL
         nc <- ncol(r)
         names(r) <- labeller(lab = Lab, nm = names(l[[1]]), n = nc)
+        ## browser()
         attr(r, "part") <- parter(part = part, append = names(gtab)[spec_i],
                                   nm = names(r), meta = Meta)
         N <- lapply(l, nrow)

@@ -76,8 +76,11 @@ extract_labels <- function(x){
 
 subset.guide <- function(guide, term){
     stab <- guide2stab(guide)
-    s <- stab$label[stab$time %in% term & stab$event %in% term]
-    guide[guide$term %in% term | guide$label %in% s, ]
+    ## s <- stab$label[stab$time %in% term & stab$event %in% term]
+    st <- stab[stab$time %in% term & stab$event %in% term,]
+    G <- guide[guide$term %in% term | guide$label %in% st$label, ]
+    attr(G, "stab") <- if(nrow(st)>0) st else NULL
+    G
 }
 
 guidify <- function(data, guide){

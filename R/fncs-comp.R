@@ -63,7 +63,7 @@ NULL
 ##' @rdname comp-catg
 ##' @details catg.std: (weighted) standardized difference for 'catg'
 ##' @export
-catg.std <- function(x, g, weight = NULL, catg.full.length = TRUE, ...){
+catg.std <- function(x, g, weight = NULL, catg.full.length = FALSE, ...){
     if(!is.factor(g)) g <- factor(g)
     x_i <- g == levels(g)[1]
     y_i <- g == levels(g)[2]
@@ -93,7 +93,7 @@ catg.std <- function(x, g, weight = NULL, catg.full.length = TRUE, ...){
          } else{
              sqrt(t(p1-p2) %*% INV %*% (p1-p2))
          }
-    if(catg.full.length) c(STDD, rep(NA, max(k-1,0))) else STDD
+    if(catg.full.length) c(STDD, rep(NA, max(k-1,0))) else as.numeric(STDD)
 }
 attr(catg.std, "label") <- .stddiff()
 

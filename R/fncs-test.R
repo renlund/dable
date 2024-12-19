@@ -41,7 +41,7 @@ noTest <- function(x, g, ...){
     ## unusedWeightWarning(..., caller = "noTest")
     META_noTest(x = x, g = g, bl = FALSE)
 }
-## attr(noTest, "part") <- "test"
+## attr(noTest, "label") <- "no test"
 
 ##' @rdname test-all
 ##' @description noTest.bl: no testing (for baseline tables)
@@ -50,7 +50,7 @@ noTest.bl <- function(x, g, ...){
     ## unusedWeightWarning(..., caller = "noTest.bl")
     META_noTest(x = x, g = g, bl = TRUE)
 }
-## attr(noTest.bl, "part") <- c("test", "meta")
+attr(noTest.bl, "meta") <- c("p.info")
 
 ## ------------------------------------------------------------------------ real
 
@@ -68,7 +68,6 @@ META_param <- function(x, g, bl = TRUE){
     p <- NA_real_
     p.info <- if(n_lev<=1) "no test" else if(n_lev==2) "t-test" else "F-test"
     if(n_lev > 1){
-        ## p <- anova(lm(x ~ g))[['Pr(>F)']][1]
         p <- tryElseNA(anova(lm(x ~ g))[['Pr(>F)']][1])
     }
     if(bl){
@@ -86,12 +85,10 @@ META_nonparam <- function(x, g, bl = TRUE){
     p <- NA_real_
     p.info <- "no test"
     if(n_lev == 2){
-        ## p <- stats::wilcox.test(x~g)$p.value
         p <- tryElseNA(stats::wilcox.test(x~g)$p.value)
         p.info <- "Wilcoxon" ## "Wilcoxon-Mann-Whitney"
     }
     if(n_lev > 2){
-        ## p <- stats::kruskal.test(x~g)$p.value
         p <- tryElseNA(stats::kruskal.test(x~g)$p.value)
         p.info <- "Kruskal-Wallis"
     }
@@ -120,7 +117,7 @@ param.bl <- function(x, g, ...){
     unusedWeightWarning(..., caller = "param.bl")
     META_param(x = x, g = g, bl = TRUE)
 }
-##attr(param.bl, "part") <- c("test", "meta")
+attr(param.bl, "meta") <- c("p.info")
 
 ##' @rdname test-real
 ##' @description nonparam: non-parametric test
@@ -129,7 +126,7 @@ nonparam <- function(x, g, ...){
     unusedWeightWarning(..., caller = "nonparam")
     META_nonparam(x = x, g = g, bl = FALSE)
 }
-##attr(nonparam, "part") <- "test"
+## attr(nonparam, "label") <- "p"
 
 ##' @rdname test-real
 ##' @description nonparam.bl: non-parametric test (for baseline tables)
@@ -138,7 +135,7 @@ nonparam.bl <- function(x, g, ...){
     unusedWeightWarning(..., caller = "nonparam.bl")
     META_nonparam(x = x, g = g, bl = TRUE)
 }
-##attr(nonparam.bl, "part") <- c("test", "meta")
+attr(nonparam.bl, "meta") <- c("p.info")
 
 ## ------------------------------------------------------------------------ catg
 
@@ -154,11 +151,11 @@ META_chisq <- function(x, g, bl = TRUE, catg.full.length = TRUE){
     g <- factor(g)
     n_lev <- length(levels(g))
     p <- NA_real_
-    p.info <- "no test"
+    p.info <- "Chi-square"
     if(n_lev > 1){
         ## browser()
         p <- tryElseNA(stats::chisq.test(x,g)$p.value)
-        p.info <- "Chi-square"
+        ## p.info <- "Chi-square"
     }
     if(catg.full.length){
         k <- length(levels(as.factor(x)))
@@ -169,7 +166,7 @@ META_chisq <- function(x, g, bl = TRUE, catg.full.length = TRUE){
         data.frame(p = p, p.info = p.info)
     } else {
         r <- data.frame(p = p)
-        names(r) <- p.info
+        names(r) <- "p"
         r
     }
 }
@@ -179,18 +176,18 @@ META_chisq <- function(x, g, bl = TRUE, catg.full.length = TRUE){
 ##' @export
 catg.chisq <- function(x, g, ...){
     unusedWeightWarning(..., caller = "catg.chisq")
-    META_chisq(x = x, g = g, bl = FALSE, catg.full.length = TRUE)
+    META_chisq(x = x, g = g, bl = FALSE, catg.full.length = FALSE)
 }
-##attr(catg.chisq, "part") <- "test"
+##attr(catg.chisq, "label") <- "p"
 
 ##' @rdname test-catg
 ##' @description catg.chisq.bl: chisquare-test for categorical variables (baseline)
 ##' @export
 catg.chisq.bl <- function(x, g, ...){
     unusedWeightWarning(..., caller = "catg.chisq.bl")
-    META_chisq(x = x, g = g, bl = TRUE, catg.full.length = TRUE)
+    META_chisq(x = x, g = g, bl = TRUE, catg.full.length = FALSE)
 }
-##attr(catg.chisq.bl, "part") <- c("test", "p.info")
+attr(catg.chisq.bl, "meta") <- c("p.info")
 
 ## ------------------------------------------------------------------------ bnry
 
@@ -209,7 +206,7 @@ bnry.chisq <- function(x, g, ...){
     unusedWeightWarning(..., caller = "bnry.chisq")
     META_chisq(x = x, g = g, bl = FALSE, catg.full.length = FALSE)
 }
-##attr(bnry.chisq, "part") <- "test"
+##attr(bnry.chisq, "label") <- "p"
 
 ##' @rdname test-bnry
 ##' @description bnry.chisq.bl: chisquare-test for binary variables (baseline)
@@ -218,7 +215,7 @@ bnry.chisq.bl <- function(x, g, ...){
     unusedWeightWarning(..., caller = "bnry.chisq.bl")
     META_chisq(x = x, g = g, bl = TRUE, catg.full.length = FALSE)
 }
-##attr(bnry.chisq.bl, "part") <- c("test", "p.info")
+attr(bnry.chisq.bl, "meta") <- c("p.info")
 
 ## ----------------------------------------------------------------------- lcat
 
@@ -247,7 +244,7 @@ date.nonparam <- function(x, g, ...){
     unusedWeightWarning(..., caller = "date.nonparam")
     META_nonparam(x = as.integer(x), g = g, bl = FALSE)
 }
-##attr(nonparam, "part") <- "test"
+##attr(nonparam, "label") <- "p"
 
 ##' @rdname test-date
 ##' @description date.nonparam.bl: non-parametric test of dates treated as
@@ -257,7 +254,7 @@ date.nonparam.bl <- function(x, g, ...){
     unusedWeightWarning(..., caller = "date.nonparam.bl")
     META_nonparam(x = as.integer(x), g = g, bl = TRUE)
 }
-##attr(nonparam, "part") <- c("test", "meta")
+attr(nonparam, "meta") <- c("p.info")
 
 ## ------------------------------------------------------------------------ surv
 
@@ -287,4 +284,4 @@ logrank.bl <- function(time, event, g, ...){
     data.frame(p = logrank(time, event, g),
                p.info = "Log rank")
 }
-##attr(logrank.bl, "part") <- c("test", "meta")
+attr(logrank.bl, "meta") <- c("p.info")

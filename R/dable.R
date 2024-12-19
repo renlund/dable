@@ -3,7 +3,7 @@
 
 dable <- function(data,
                   type = "baseline",
-                  bl.rm = NULL, ## "surv" ?
+                  bl.rm = NULL,
                   guide = NULL,
                   gtab = NULL,
                   part = list(desc = TRUE, comp = NA, test = NA),
@@ -19,7 +19,7 @@ dable <- function(data,
         inclusion(names(guide), nm = "names of guide",
                   include = c("term", "type", "class", "label", "group"))
         ## guide <- guide[guide$term %in% names(data), ]
-        guide <- subset.guide(guide, names(data))
+        guide <- subset.guide(guide, term = names(data))
         if(nrow(guide) == 0) stop("no guide terms in data")
     }
     Types <- check_type(type = type, bl.rm = bl.rm, guide = guide)
@@ -72,7 +72,7 @@ dable <- function(data,
     Data <- guidify(data, guide)
     Spec <- part_spec(part, gtab)
     R <- NULL
-    for(t in Types){ ## t = Types[5]
+    for(t in Types){ ## t = Types[1]
         if(t == "surv"){
             Stab <- guide2stab(guide)
             Term <- Stab$label
@@ -90,8 +90,9 @@ dable <- function(data,
         nm_is <- names(R)
         nm_new <- names(r)
         if( !is.null(R) ){
-            if(length(nm_is) != length(nm_new) ||
-               any(nm_is != nm_new)){
+            ## if(length(nm_is) != length(nm_new) ||
+            ##    any(nm_is != nm_new)){
+            if( !setequal(nm_is, nm_new) ){
                 etxt <- paste0("Trying to rbind table with name set {",
                                paste0(nm_new, collapse = ", "),
                                "} onto created table with name set {",
@@ -119,6 +120,20 @@ dable <- function(data,
     R[al$order,]
 }
 
+if(FALSE){
+    d <- test_data()
+    g <- dguide(data = d, unit.id = "pid",
+                    vtab = test_vtab(), stab = test_stab())
+    data <- d[, c("country", "area", "region", "gender")]
+
+    x <- dable(data = data, type = "bl", gtab = "gender", guide=g)
+    y <- dable(data = data, type = "bl", gtab = "gender", guide=g, part = c(F,F,T))
+    merge_2parts(x, y)[,c(1:2,6:8)]
+
+
+}
+
+
 .types <- c("real", "bnry", "catg", "lcat", "surv", "date")
 .baseline <- c("baseline", "bl")
 
@@ -138,8 +153,8 @@ check_type <- function(type, bl.rm, guide){
                    set = .types)
         }
         type <- setdiff(type, bl.rm)
-        type <- type[type %in% unique(guide$type)]
     }
+    type <- type[type %in% unique(guide$type)]
     if(length(type) == 0){
         stop("specification leaves leaves no type")
     } else type
@@ -147,10 +162,10 @@ check_type <- function(type, bl.rm, guide){
 
 attributer <- function(gtab, units = NULL, weight = NULL){
     n <- nrow(gtab)
-    L <- list(size = n)
+    L <- list(rows = n)
     n_gtab <- unlist(lapply(gtab, sum, na.rm = TRUE))
     G <- if(!is.null(n_gtab)) length(n_gtab) > 1 || n_gtab[1] != n else FALSE
-    if(G) L$gtab_size <- n_gtab
+    if(G) L$gtab_rows <- n_gtab
     if(!is.null(units)){
         u_fnc <- function(x) length(unique(x[!is.na(x)]))
         u_fnc2 <- function(x) u_fnc(units[x])

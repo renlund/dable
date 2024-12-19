@@ -181,12 +181,16 @@ surv_search_string <- function(){
 #' @export
 create_stab <- function(s){
     properties(s, class = "character", na.ok = FALSE)
-    nm <- names(s)
-    if(!is.null(nm)) properties(nm, class = "character", na.ok = FALSE)
-    data.frame(label = if(!is.null(nm)) nm else s,
-               time = surv_t(s),
-               event = surv_e(s),
-               group = default.stab.group.name())
+    if(length(s) == 0){
+        as.data.frame(NULL)
+    } else {
+        nm <- names(s)
+        if(!is.null(nm)) properties(nm, class = "character", na.ok = FALSE)
+        data.frame(label = if(!is.null(nm)) nm else s,
+                   time = surv_t(s),
+                   event = surv_e(s),
+                   group = default.stab.group.name())
+    }
 }
 
 #' @rdname stab-fncs

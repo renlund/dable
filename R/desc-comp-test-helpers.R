@@ -21,8 +21,17 @@ parter <- function(part, append, nm, meta){
         if(length(i) > 0) r[i] <- "meta"
     }
     ifelse(r %in% c("desc", "comp", "test"),
-           yes = paste0(r, ":", append),
+           ## yes = paste0(r, ":", append),
+           yes = paste0(r, ":", name_collapse(append)),
            no = r)
+}
+
+name_collapse <- function(x){
+    if(length(x) == 1){
+        x
+    } else {
+        paste0(x, collapse = "/")
+    }
 }
 
 merge_2parts <- function(x = NULL, y = NULL){
@@ -36,9 +45,9 @@ merge_2parts <- function(x = NULL, y = NULL){
 
     foo <- function(x,y) paste0(x, "_/_",y)
     x_same <- Reduce(foo, x = x[, same, drop = FALSE], accumulate = FALSE)
-    x_ref <- tapply(x, INDEX = x_same, FUN = nrow)
+    x_ref <- tapply(x, INDEX = x_same, FUN = nrow)[unique(x_same)]
     y_same <- Reduce(foo, x = y[, same, drop = FALSE], accumulate = FALSE)
-    y_ref <- tapply(y, INDEX = y_same, FUN = nrow)
+    y_ref <- tapply(y, INDEX = y_same, FUN = nrow)[unique(y_same)]
     if( any(names(x_ref) != names(y_ref)) ){
         s <- paste0("[merge_2parts:] trying to merge two parts with ",
                     "non-matching meta variables. Review the functions ",
@@ -92,9 +101,10 @@ if(FALSE){
                fnc = list(NULL,NULL,"bnry.chisq"))
     ## y <- dable(d, "catg", guide=g, gtab = "gender", part = c(F,F,T))
     merge_2parts(x, y)
+    merge_parts(x,y)
 
-    NAexpandDF(y, c(3,5))
-    str(NAexpandDF(y, c(3,5)))
+    NAexpandDF(y, c(3,5), "term")
+    str(NAexpandDF(y, c(3,5), "term"))
 
     rle(x$term)
     rle(y$term)

@@ -60,12 +60,25 @@ dform.num.vec <- function(x, ...){
 
 dprintf <- function(x, d, type) sprintf(paste0("%.", d, type), x)
 
-dformat.text <- function(x){
+dform.text <- function(x){
     properties(x, class = c("character", "factor"), length = 1, na.ok = TRUE)
     ## shorten too long strings with ... ?
     ## options for latexifying text ?
     x
 }
+
+dform.text.vec <- function(x, ...){
+    n <- length(x)
+    if(n == 0){
+        character(0)
+    } else {
+        r <- rep(NA_character_, n)
+        for(i in 1:n) r[i] <- dform.text(x[i], ...)
+    }
+    r
+}
+
+
 
 if(FALSE){
 
