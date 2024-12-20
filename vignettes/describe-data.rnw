@@ -231,6 +231,25 @@ catg.std(X, G, catg.full.length = FALSE) |> str()
 @
 
 \clearpage
+\section{Dots test}
+
+<<"dots-test">>=
+
+test <- test_data()[, c("pid", "gender", "importance", "measA")]
+tg <- dguide(test, unit.id = "pid", vtab = test_vtab())
+
+myFun <- function(x, weight = NULL,  ...){
+    dots <- list(...)
+    data.frame(dot = names(dots),
+               what = unlist(lapply(dots, class)),
+               value = unlist(dots))
+}
+dable(test, type = "real", guide = tg, gtab = "gender",
+      weight = "importance", foo = TRUE, fnc = list("myFun"))
+
+@
+
+\clearpage
 \section{Latex test}
 
 <<"foo", echo = FALSE, results = 'asis'>>=

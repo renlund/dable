@@ -46,6 +46,7 @@ dable <- function(data,
         names(gtab) <- dparam("gtab.group.name")
     } else if( is.character(gtab) ){
         properties(gtab, class = "character", length = 1, na.ok = FALSE)
+        Dots$.gtab.term <- gtab
         if(dparam("gtab.defvar.rm")){
             guide$type[guide$term == gtab] <- .hide.type
         }
@@ -63,10 +64,10 @@ dable <- function(data,
         Weight <- data[[weight]]
         if(any(is.na(Weight))) warning("there are missing weights") ## XK?
         if(any(!is.na(Weight) & Weight < 0)) stop("negative weights not allowed")
-        Dots$.weight <- weight ## Weight ??????
+        Dots$.weight.term <- weight
     } else {
         Weight <- NULL
-        Dots$.weight <- NULL
+        ## Dots$.weight <- NULL
     }
     properties(fnc, class = "list", length = 0:3)
     Data <- guidify(data, guide)

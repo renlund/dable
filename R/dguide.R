@@ -39,6 +39,7 @@ dguide <- function(data, unit.id = NULL, elim.set = NULL,
     tt0 <- term_type(term = terms, data = data, stab = stab, ...)
     ## tt0 <- term_type(term = terms, data = data, stab = stab)
     lev <- attr(tt0, "levels")
+    terms_all <- terms
     terms <- setdiff(terms, c(stab$event, stab$time))
     no_vt <- setdiff(terms, vtab$term)
     if(length(no_vt) > 0){
@@ -55,7 +56,7 @@ dguide <- function(data, unit.id = NULL, elim.set = NULL,
     TT <- tt[al$order, ]
     attr(TT, "stab") <- attr(vtab, "stab")
     attr(TT, "levels") <- lev
-    attr(TT, "missing") <- unlist(lapply(X = data[, terms, drop = FALSE],
+    attr(TT, "missing") <- unlist(lapply(X = data[, terms_all, drop = FALSE],
                                          FUN = function(x) any(is.na(x))))
     if(!is.null(unit.id)) attr(TT, "unit.id") <- unit.id
     TT
@@ -79,7 +80,7 @@ subset.guide <- function(guide, term){
     ## s <- stab$label[stab$time %in% term & stab$event %in% term]
     st <- stab[stab$time %in% term & stab$event %in% term,]
     G <- guide[guide$term %in% term | guide$label %in% st$label, ]
-    attr(G, "stab") <- if(nrow(st)>0) st else NULL
+    attr(G, "stab") <- if(!is.null(st) && nrow(st)>0) st else NULL
     G
 }
 
