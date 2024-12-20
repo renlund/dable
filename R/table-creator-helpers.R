@@ -1,5 +1,3 @@
-## this file should be called describe-compare-test-helpers.R
-
 default.gtab.group.name <- function() options("dable.gtab.group.name")[[1]]
 
 ## get correct names in describer, contraster, etc

@@ -45,9 +45,9 @@ create_stab(s)
 
 extract_stab_from_names(nm)
 
-stab2vtab(stab, group.name = NULL)
+stab2vtab(stab)
 
-combine_vs_tab(vtab, stab, group.name = NULL, stab.first = FALSE)
+combine_vs_tab(vtab, stab)
 }
 \arguments{
 \item{affix}{character; a prefix or suffix}
@@ -66,8 +66,6 @@ might want to merge this information with a "variable table" (vtab).)}
 \item{term}{character; variable name(s)}
 
 \item{nm}{character vector; typically the names of variables in a data set}
-
-\item{group.name}{character; name of grouping for surv variables}
 
 \item{vtab}{data.frame; a "variable table" (vtab)}
 }

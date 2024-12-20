@@ -44,7 +44,7 @@ check_vtab <- function(vtab){
     vtab
 }
 
-rbind.vtab <- function(x, y){
+rbind_vtab <- function(x, y){
     r <- rbind(x, y)
     attr(r, "stab") <- rbind(attr(x, "stab"), attr(y, "stab"))
     rownames(r) <- NULL
@@ -70,29 +70,4 @@ shuffle <- function (x, y){
     r[seq(1, N, 2)] <- x
     r[seq(2, N, 2)] <- y
     r
-}
-
-################################################################################
-##        older things related to 'variable list'                             ##
-################################################################################
-
-##' @rdname vtab-fncs
-##' @details vlist2vtab: convert older variable list specification (vlist, not
-##'     in use anymore) to a vtab
-##' @export
-vlist2vtab <- function(vl){
-    properties(vl, class = "list")
-    n <- unlist(lapply(vl, length))
-    x <- delist(vl)
-    d <- data.frame(term = names(x),
-                    label = x,
-                    group = rep(names(vl), n))
-    rownames(d) <- NULL
-    d
-}
-
-invert_vlist <- function(x){
-    properties(x, class = "list")
-    foo <- function(z) setNames(object = names(z), nm = z)
-    lapply(x, foo)
 }

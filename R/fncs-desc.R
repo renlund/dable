@@ -3,32 +3,6 @@ placeholder <- function(...) "placeholder"
 attr(placeholder, "label") <- "Summary"
 placeholder2 <- function(...) data.frame(p=NA, p.info="no test")
 
-## tester <- function(x, weight = NULL, ...){
-##     dots <- list(...)
-##     foo <- function(z) if(is.null(z)) "" else z
-##     data.frame(
-##         term = foo(dots$.term),
-##         label = foo(dots$.label),
-##         type = foo(dots$.type),
-##         table.type = foo(dots$.table.type),
-##         group = foo(dots$.group),
-##         missing = foo(dots$.missing),
-##         all = paste(names(dots), collapse = ",")
-##     )
-## }
-## tester2 <- function(x, weight = NULL, ...){
-##     data.frame(
-##         term = di.dots("term", ...),
-##         label = di.dots("label", ...),
-##         type = di.dots("type", ...),
-##         table.type = di.dots("table.type", ...),
-##         group = di.dots("group", ...),
-##         missing = di.dots("missing", ...)
-##     )
-## }
-
-
-
 ## --------------------------------------------------------------------- general
 ##' general describers
 ##'

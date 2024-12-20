@@ -1,8 +1,7 @@
 ##' ordering of vector
 ##'
 ##' Order a given vector, which may contain duplicates, according to the wanted
-##'   order given by some other vector. Supercedes 'order_as' and
-##'   'order_by_list' in a single function.
+##'   order given by some other vector.
 ##' @param x the vector that needs ordering
 ##' @param template the wanted order
 ##' @param group possible grouping

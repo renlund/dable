@@ -1,6 +1,22 @@
-## functions should perhaps be organized better so that it is clear which
-## functions (in particular .bl-fncs) play nice with each other
-
+##' Data description
+##'
+##' This function generates a data description.
+##' @param data data.frame
+##' @param type character; either a data type or 'baseline' for all types
+##' @param bl.rm character vector; types to remove from baseline table
+##' @param guide object created with \code{dguide}
+##' @param gtab a grouping table which is a named list of logical vectors equal
+##'     in length to the numbers of rows of data. It can also be created by
+##'     pointing to a term in data.
+##' @param part list that specifies which 'parts' of the table you want. The
+##'     parts are for 'description', 'comparison' and 'test'. There is more
+##'     funcionality hidden here, but that must be explained in a vignette.
+##' @param fnc list of functions for the different parts. Currently only
+##'     supported for a non-baseline type.
+##' @param weight a vector of weights, or the name of a term in data that
+##'     provides these
+##' @param ... arguments passed to functions that describes, compares and tests
+##' @export
 dable <- function(data,
                   type = "baseline",
                   bl.rm = NULL,
@@ -18,8 +34,7 @@ dable <- function(data,
         properties(guide, class = "data.frame")
         inclusion(names(guide), nm = "names of guide",
                   include = c("term", "type", "class", "label", "group"))
-        ## guide <- guide[guide$term %in% names(data), ]
-        guide <- subset.guide(guide, term = names(data))
+        guide <- subset_guide(guide, term = names(data))
         if(nrow(guide) == 0) stop("no guide terms in data")
     }
     Types <- check_type(type = type, bl.rm = bl.rm, guide = guide)
@@ -67,7 +82,6 @@ dable <- function(data,
         Dots$.weight.term <- weight
     } else {
         Weight <- NULL
-        ## Dots$.weight <- NULL
     }
     properties(fnc, class = "list", length = 0:3)
     Data <- guidify(data, guide)
@@ -87,12 +101,9 @@ dable <- function(data,
                            spec = Spec,
                            fnc = expand_list(fnc, n = 3, fill = NULL),
                            guide = guide)
-        ## ---
         nm_is <- names(R)
         nm_new <- names(r)
         if( !is.null(R) ){
-            ## if(length(nm_is) != length(nm_new) ||
-            ##    any(nm_is != nm_new)){
             if( !setequal(nm_is, nm_new) ){
                 etxt <- paste0("Trying to rbind table with name set {",
                                paste0(nm_new, collapse = ", "),
@@ -102,7 +113,6 @@ dable <- function(data,
                 warning(etxt)
             }
         }
-        ## ---
         R <- rbind(R, r)
     }
     if(is.null(R)){
@@ -120,20 +130,6 @@ dable <- function(data,
     al <- align(R$term, template = guide$term)
     R[al$order,]
 }
-
-if(FALSE){
-    d <- test_data()
-    g <- dguide(data = d, unit.id = "pid",
-                    vtab = test_vtab(), stab = test_stab())
-    data <- d[, c("country", "area", "region", "gender")]
-
-    x <- dable(data = data, type = "bl", gtab = "gender", guide=g)
-    y <- dable(data = data, type = "bl", gtab = "gender", guide=g, part = c(F,F,T))
-    merge_2parts(x, y)[,c(1:2,6:8)]
-
-
-}
-
 
 .types <- c("real", "bnry", "catg", "lcat", "surv", "date")
 .baseline <- c("baseline", "bl")
@@ -181,74 +177,6 @@ attributer <- function(gtab, units = NULL, weight = NULL){
     L
 }
 
-if(FALSE){
-
-    dguide(test_data())
-
-    g <- dguide(test_data(), vtab = test_vtab(), stab = test_stab(),
-                unit.id = "id", elim.set = "pid")
-    dable(test_data(), guide = g)
-    dable(test_data(), guide = g, gtab = "gender")
-    dable(test_data(), guide = g, gtab = "gender", weight = "importance")
-
-
-
-    d <- dable(test_data(), guide = g, gtab = "gender", weight = "importance")
-    ## XK check warning ! XK
-    str(d)
-
-    data = test_data()
-    type = "baseline"
-    bl.rm = NULL
-    guide = dguide(test_data(), unit.id = "id")
-    gtab = "gender"
-    part = list(desc = TRUE, comp = NA, test = NA)
-    fnc = list(desc = NULL, comp = NULL, test = NULL)
-    weight = "importance"
-
-    ## ---------
-
-    data <- test_data()
-    vtab <- test_vtab()
-    stab <- test_stab()
-    unit.id <- "id"
-    ## elim.set <- NULL
-
-    type = "baseline"
-    bl.rm = NULL
-    guide = dguide(data, unit.id = "id", vtab = vtab, stab = stab)
-    guide$type[guide$term %in% c("pid")] <- "lcat"
-    gtab = "gender"
-    part = list(desc = TRUE, comp = NA, test = NA)
-    fnc = list(desc = NULL, comp = NULL, test = NULL)
-    weight = "importance"
-    Dots = as.list(NULL)
-
-
-}
-
-
 guide2stab <- function(guide){
     attr(guide, "stab")
 }
-
-## guide2stab <- function(guide){
-##     g <- guide[substr(guide$type, 1, 4) == "surv",]
-##     if(nrow(g) == 0) return(NULL)
-##     g$lab <- sub(pattern = " \\(time\\)$", replacement = "", g$label)
-##     if(length(unique(g$lab)) != nrow(g)/2){
-##         s <- paste0("Trying to identify the surv components from the ",
-##                     "guide labels fails. Either use the same label for ",
-##                     "both components associated with the same time-to-event ",
-##                     "variable or use 'LAB' for the event- and 'LAB (time)' ",
-##                     "for the time component.")
-##         stop(s)
-##     }
-##     g$component <- sub(pattern = "(^.*)(\\.)(.*$)", replacement = "\\3", g$type)
-##     g2 <- g[, c("lab","term", "component")]
-##     g3 <- stats::reshape(g2, direction = "wide", idvar = "lab", timevar = "component")
-##     names(g3)[names(g3) == "lab"] <- "label"
-##     names(g3)[names(g3) == "term.t"] <- "time"
-##     names(g3)[names(g3) == "term.e"] <- "event"
-##     g3[, c("label", "time", "event")]
-## }

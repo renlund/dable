@@ -19,6 +19,5 @@ align(x, template = NULL, group = NULL, all = TRUE, outgroup = ".Other")
 }
 \description{
 Order a given vector, which may contain duplicates, according to the wanted
-order given by some other vector. Supercedes 'order_as' and
-'order_by_list' in a single function.
+order given by some other vector.
 }

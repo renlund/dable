@@ -1,3 +1,112 @@
+##' LaTeX code for a dable
+##'
+##' A wrapper for Hmisc::latex trying to create nice LaTeX code to present a
+##' dable
+##' @param dt object created by dable
+##' @param format logical; format the variables in dt?
+##' @param size character; what entity is presentet in row header 'rows',
+##'     'units' or 'weight'
+##' @param kill character vector; columns to remove for presentation
+##' @param grey character; which rows to make grey-ish in presentation
+##' @param bl.method if dable is a 'baseline', what method to use for
+##'     presentation? This is a vague feature so far and only a 'standard'
+##'     method is implemented.
+##' @param file character; argument for Hmisc::latex
+##' @param where character; argument for Hmisc::latex
+##' @param rowname character; column name to use as rowname in Hmisc::latex
+##' @param row.group logical or NULL; use the grouping in guide? If NULL this
+##'     will be algorithmically decided
+##' @param rgroup character; argument for Hmisc::latex
+##' @param insert.bottom character or logical; text to be placed under the
+##'     table. If TRUE, attr2text will be used to create this text
+##' @param ... arguments passed to Hmisc::latex
+##' @export
+datex <- function(dt,
+                  format = TRUE,
+                  size = "rows",
+                  kill = "term",
+                  grey = "term",
+                  bl.method = "standard",
+                  file = "",
+                  where = "hbt",
+                  rowname = "Variable",
+                  row.group = NULL,
+                  rgroup = NULL,
+                  insert.bottom = TRUE,
+                  ...){
+    properties(format, nm = "format", class = "logical", length = 1, na.ok = FALSE)
+    properties(file, nm = "file", class = "character", length = 1, na.ok = FALSE)
+    properties(where, nm = "where", class = "character", length = 1, na.ok = FALSE)
+    properties(size, nm = "size", class = "character", length = 1, na.ok = FALSE)
+    one_of(size, nm = "size", set = c("rows", "units", "weight"))
+    properties(rowname, nm = "rowname", class = c("NULL", "character"),
+               length = 0:1, na.ok = FALSE)
+    Guide <- attr(dt, "guide")
+    Term <- with(Guide, ifelse(type == "surv", label, term))
+    a <- align(dt$term, template = Term, group = Guide$group)
+    dt <- dt[a$order,]
+    if(!is.null(rowname)){
+        one_of(rowname, nm = "rowname", set = names(dt))
+        Rowname <- dt[[rowname]]
+        dt <- dable_prune(dt, rm = rowname)
+        dup <- duplicated(Rowname)
+        if(any(dup)){
+            mj <- mumbojumbo(n = sum(dup), prefix = "$\\phantom{", suffix = "}$")
+            Rowname[which(dup)] <- paste0(Rowname[which(dup)], mj)
+        }
+    } else Rowname <- NULL
+    if(format) dt <- dable_format(dt)
+    Ntxt <- attr2n(attributes(dt), size)
+    BL <- attr(dt, "type") == "baseline"
+    if(BL){
+        properties(bl.method, nm = "bl.method", class = "character",
+                   length = 1, na.ok = FALSE)
+        one_of(bl.method, nm = "bl.method", set = "standard")
+        if(bl.method == "standard"){
+            if(all(c("p.info", "p") %in% names(dt))){
+                dt <- dable_fnote(dt, info = "p.info", fn.var = "p",
+                                  info.attr = "info", format = TRUE)
+            }
+            if("Summary.info" %in% names(dt)){
+                dt <- dable_prune(dt, rm = "Summary.info", info = TRUE,
+                                  info.attr = "info", info.unique = TRUE,
+                                  split.unique = TRUE)
+            }
+        }
+    }
+    grey <- get_grey(grey, dt)
+    rg_ind <- if(!is.null(rgroup)){
+                  FALSE
+              } else if(is.null(row.group)){
+                  length(unique(a$group)) > 1
+              } else isTRUE(row.group)
+    ib <- if(is.null(insert.bottom) | isTRUE(insert.bottom)){
+              paste0("{\\small\\begin{center}\\emph{",
+                     attr2text(dt),
+                     "}\\end{center}}")
+          } else if(is.character(insert.bottom)){
+              insert.bottom
+          } else NULL
+    DT <- dt
+    for(k in kill) DT <- dable_prune(DT, rm = kill)
+    Part <- attr(DT, "part")
+    Hh <- part2head(Part, names(DT), BL, Ntxt)
+    names(DT) <- Hh$h
+    cg <- rle(Hh$H)
+    Hmisc::latex(object = DT,
+                 file = file,
+                 where = where,
+                 title = "",
+                 rowname = Rowname,
+                 cgroup = cg$values,
+                 n.cgroup = cg$lengths,
+                 rgroup = if(rg_ind) a$group.rle$values else rgroup,
+                 n.rgroup = if(rg_ind) a$group.rle$lengths else n.rgroup,
+                 rownamesTexCmd = grey,
+                 insert.bottom = ib,
+                 ...)
+}
+
 ##' extract attributes
 ##'
 ##' extract tidy version of attributes from a dtable
@@ -334,93 +443,4 @@ mumbojumbo <- function(n, prefix = "", suffix = "",
     if (dummy == threshold & try.unique)
         warning("[mumbojumbo] uniqueness failed!")
     paste0(prefix, R, suffix)
-}
-
-
-
-
-datex <- function(dt,
-                  format = TRUE,
-                  size = "rows",
-                  kill = "term",
-                  grey = "term",
-                  bl.method = "standard",
-                  file = "",
-                  where = "hbt",
-                  rowname = "Variable",
-                  row.group = NULL,
-                  rgroup = NULL,
-                  insert.bottom = NULL,
-                  ...){
-    properties(format, nm = "format", class = "logical", length = 1, na.ok = FALSE)
-    properties(file, nm = "file", class = "character", length = 1, na.ok = FALSE)
-    properties(where, nm = "where", class = "character", length = 1, na.ok = FALSE)
-    properties(size, nm = "size", class = "character", length = 1, na.ok = FALSE)
-    one_of(size, nm = "size", set = c("rows", "units", "weight"))
-    properties(rowname, nm = "rowname", class = c("NULL", "character"),
-               length = 0:1, na.ok = FALSE)
-    Guide <- attr(dt, "guide")
-    Term <- with(Guide, ifelse(type == "surv", label, term))
-    a <- align(dt$term, template = Term, group = Guide$group)
-    dt <- dt[a$order,]
-    if(!is.null(rowname)){
-        one_of(rowname, nm = "rowname", set = names(dt))
-        Rowname <- dt[[rowname]]
-        dt <- dable_prune(dt, rm = rowname)
-        dup <- duplicated(Rowname)
-        if(any(dup)){
-            mj <- mumbojumbo(n = sum(dup), prefix = "$\\phantom{", suffix = "}$")
-            Rowname[which(dup)] <- paste0(Rowname[which(dup)], mj)
-        }
-    } else Rowname <- NULL
-    if(format) dt <- dable_format(dt)
-    Ntxt <- attr2n(attributes(dt), size)
-    BL <- attr(dt, "type") == "baseline"
-    if(BL){
-        properties(bl.method, nm = "bl.method", class = "character",
-                   length = 1, na.ok = FALSE)
-        one_of(bl.method, nm = "bl.method", set = "standard")
-        if(bl.method == "standard"){
-            if(all(c("p.info", "p") %in% names(dt))){
-                dt <- dable_fnote(dt, info = "p.info", fn.var = "p",
-                                  info.attr = "info", format = TRUE)
-            }
-            if("Summary.info" %in% names(dt)){
-                dt <- dable_prune(dt, rm = "Summary.info", info = TRUE,
-                                  info.attr = "info", info.unique = TRUE,
-                                  split.unique = TRUE)
-            }
-        }
-    }
-    grey <- get_grey(grey, dt)
-    rg_ind <- if(!is.null(rgroup)){
-                  FALSE
-              } else if(is.null(row.group)){
-                  length(unique(a$group)) > 1
-              } else isTRUE(row.group)
-    ib <- if(is.null(insert.bottom) | isTRUE(insert.bottom)){
-              paste0("{\\small\\begin{center}\\emph{",
-                     attr2text(dt),
-                     "}\\end{center}}")
-          } else if(is.character(insert.bottom)){
-              insert.bottom
-          } else NULL
-    DT <- dt
-    for(k in kill) DT <- dable_prune(DT, rm = kill)
-    Part <- attr(DT, "part")
-    Hh <- part2head(Part, names(DT), BL, Ntxt)
-    names(DT) <- Hh$h
-    cg <- rle(Hh$H)
-    Hmisc::latex(object = DT,
-                 file = file,
-                 where = where,
-                 title = "",
-                 rowname = Rowname,
-                 cgroup = cg$values,
-                 n.cgroup = cg$lengths,
-                 rgroup = if(rg_ind) a$group.rle$values else rgroup,
-                 n.rgroup = if(rg_ind) a$group.rle$lengths else n.rgroup,
-                 rownamesTexCmd = grey,
-                 insert.bottom = ib,
-                 ...)
 }

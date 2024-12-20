@@ -3,17 +3,12 @@
 \name{vtab-fncs}
 \alias{vtab-fncs}
 \alias{check_vtab}
-\alias{vlist2vtab}
 \title{variable table (vtab) functions}
 \usage{
-check_vtab(vtab, group.name = NULL)
-
-vlist2vtab(vl)
+check_vtab(vtab)
 }
 \arguments{
 \item{vtab}{data.frame; a "variable table" (vtab)}
-
-\item{group.name}{character; group name of variables (if missing)}
 
 \item{vl}{list; a "variable list" (vlist) - older specification of variables
 not really used any more}
@@ -24,7 +19,4 @@ variable table (vtab) functions
 \details{
 check_vtab: check a variable table, i.e. that it contains 'term',
 'label' and possibly 'group'. It will addd variable group if missing.
-
-vlist2vtab: convert older variable list specification (vlist, not
-in use anymore) to a vtab
 }

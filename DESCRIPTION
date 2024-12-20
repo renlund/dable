@@ -1,6 +1,6 @@
 Package: dable
 Title: Package for Summary Tables
-Version: 0.0.0.9001
+Version: 0.0.1.9001
 Authors@R:
     person("Henrik", "Renlund", , "henrikrenlund@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
@@ -8,7 +8,7 @@ Description: Functions for creating summary tables.
 License: GNU GPLv3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Suggests:
     knitr,
     rmarkdown

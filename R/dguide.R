@@ -44,7 +44,7 @@ dguide <- function(data, unit.id = NULL, elim.set = NULL,
     no_vt <- setdiff(terms, vtab$term)
     if(length(no_vt) > 0){
         vt_xtra <- check_vtab(extract_labels(data[, no_vt, drop = FALSE]))
-        vtab <- rbind.vtab(vtab, vt_xtra)
+        vtab <- rbind_vtab(vtab, vt_xtra)
     }
     tt <- merge(x = tt0,
                 y = vtab[, c("term", "label", "group")],
@@ -75,9 +75,8 @@ extract_labels <- function(x){
                label = ifelse(!is.na(ls), ls, terms))
 }
 
-subset.guide <- function(guide, term){
+subset_guide <- function(guide, term){
     stab <- guide2stab(guide)
-    ## s <- stab$label[stab$time %in% term & stab$event %in% term]
     st <- stab[stab$time %in% term & stab$event %in% term,]
     G <- guide[guide$term %in% term | guide$label %in% st$label, ]
     attr(G, "stab") <- if(!is.null(st) && nrow(st)>0) st else NULL
