@@ -19,8 +19,6 @@ non-empty string}
 \item{...}{arguments passed from within 'dable'}
 
 \item{x}{the input variable}
-
-\item{lab.only}{logical, if TRUE don't extend with factorial levels}
 }
 \description{
 functions that work properly inside 'dable'

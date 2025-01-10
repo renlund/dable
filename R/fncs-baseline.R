@@ -1,5 +1,13 @@
+##' standard baseline functions
+##'
+##' Description functions that work together
+##' @param x input vector
+##' @param weight case weight
+##' @param ... arguments passed along
+##' @name baseline-standard
+NULL
 
-##' @rdname desc-real
+##' @rdname baseline-standard
 ##' @details mean_sd.bl: (weighted) mean and standard deviation as single string
 ##' @export
 mean_sd.bl <- function(x, weight = NULL, ...){
@@ -10,7 +18,19 @@ mean_sd.bl <- function(x, weight = NULL, ...){
 }
 attr(mean_sd.bl, "meta") <- c("Summary.info", "Variable")
 
-##' @rdname desc-bnry
+##' @rdname baseline-standard
+##' @details midiqr.bl: (weighted) median and interquartile range as single string
+##' @export
+mediqr.bl <- function(x, weight = NULL, ...){
+    q <- quartiles(x = x, weight = weight)
+    data.frame(Variable = di.Variable(x, ...),
+               Summary = sprintf("%s (%s - %s)", dform.num(q$Q2),
+                                 dform.num(q$Q1), dform.num(q$Q2)),
+               Summary.info = "Numeric variable: Median (Q1-Q3)")
+}
+attr(mean_sd.bl, "meta") <- c("Summary.info", "Variable")
+
+##' @rdname baseline-standard
 ##' @details bnry.count_prop.bl: (weighted) count and proportion of
 ##'     non-reference value as single string
 ##' @export
@@ -24,7 +44,7 @@ bnry.count_prop.bl <- function(x, weight = NULL, ...){
 }
 attr(bnry.count_prop.bl, "meta") <- c("Variable", "Summary.info")
 
-##' @rdname desc-catg
+##' @rdname baseline-standard
 ##' @details catg.count_prop.bl: (weighted) count and proportion of
 ##'     categorical levels as single string
 ##' @export
@@ -38,7 +58,7 @@ catg.count_prop.bl <- function(x, weight = NULL, ...){
 }
 attr(catg.count_prop.bl, "meta") <- c("Variable", "Summary.info")
 
-##' @rdname desc-lcat
+##' @rdname baseline-standard
 ##' @details lcat.bl: number of unique non-missing values in x
 ##' @export
 lcat.bl <- function(x, ...){
@@ -49,7 +69,7 @@ lcat.bl <- function(x, ...){
 }
 attr(lcat.bl, "meta") <- c("Variable", "Summary.info")
 
-##' @rdname desc-date
+##' @rdname baseline-standard
 ##' @details date.bl: min/max
 ##' @export
 date.bl <- function(x, ...){
@@ -60,7 +80,7 @@ date.bl <- function(x, ...){
 }
 attr(date.bl, "meta") <- c("Variable", "Summary.info")
 
-##' @rdname desc-surv
+##' @rdname baseline-standard
 ##' @details eventrate.bl: events; rate
 ##' @export
 eventrate.bl <- function(time, event, weight = NULL, time.unit = NULL, ...){

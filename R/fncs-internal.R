@@ -45,13 +45,10 @@ var_lev_combine <- function(v, l, sep = ": ", indent = "   "){
 ##' @rdname dable-internal
 ##' @details di.Variable: create a 'Variable' column
 ##' @param x the input variable
-##' @param lab.only logical, if TRUE don't extend with factorial levels
 ##' @export
 di.Variable <- function(x, ...){
     lab <- di.dots("label", strict = TRUE, ...)
     type <- di.dots("type", strict = TRUE, ...)
-    ## browser()
-    ## START: this part somewhat superfluous, but is nice for testing
     if(is.null(lab)){
         lab <- deparse(substitute(x))
     }
