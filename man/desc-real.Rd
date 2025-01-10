@@ -9,6 +9,8 @@
 \alias{d.mean}
 \alias{d.sd}
 \alias{mean_sd}
+\alias{d.quantile}
+\alias{quartile}
 \title{'real' describers}
 \usage{
 mean_sd.bl(x, weight = NULL, ...)
@@ -24,6 +26,10 @@ d.mean(x, weight = NULL, ...)
 d.sd(x, weight = NULL, ...)
 
 mean_sd(x, weight = NULL, ...)
+
+d.quantile(x, weight = NULL, probs = c(0.25, 0.5, 0.75), ...)
+
+quartile(x, weight = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -47,4 +53,8 @@ d.mean: (weighted) mean value
 d.sd: (weighted) standard deviation
 
 mean_sd: (weighted) mean and standard deviation
+
+d.quantile: (weighted) quantiles (wrapper for Hmisc::wtd.quantile)
+
+quartiles: (weighted) quartiles
 }

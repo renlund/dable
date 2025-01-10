@@ -134,13 +134,29 @@ mean_sd <- function(x, weight = NULL, ...){
                SD = d.sd(x, weight))
 }
 
-
-if(FALSE){
-
-    ## weighted quantiles
-    ## https://aakinshin.net/posts/weighted-quantiles/
-
+##' @rdname desc-real
+##' @details d.quantile: (weighted) quantiles (wrapper for Hmisc::wtd.quantile)
+##' @export
+d.quantile <- function(x, weight = NULL, probs = c(.25, .5, .75), ...){
+    y <- Hmisc::wtd.quantile(x = x, weights = weight, probs = probs, ...)
+    r <- as.data.frame(t(y))
+    names(r) <- sprintf("Pct%s", probs)
+    r
 }
+
+## not rely on Hmisc??
+## weighted quantiles
+## https://aakinshin.net/posts/weighted-quantiles/
+
+##' @rdname desc-real
+##' @details quartiles: (weighted) quartiles
+##' @export
+quartile <- function(x, weight = NULL, ...){
+    r <- d.quantile(x = x, weight = weight, probs = c(.25, .5, .75))
+    names(r) <- sprintf("Q%s", 1:3)
+    r
+}
+
 
 ## ------------------------------------------------------------------------ bnry
 
