@@ -31,7 +31,7 @@ mediqr.bl <- function(x, weight = NULL, ...){
 attr(mean_sd.bl, "meta") <- c("Summary.info", "Variable")
 
 ##' @rdname baseline-standard
-##' @details bnry.count_prop.bl: (weighted) count and proportion of
+##' @details bnry.count_prop.bl: (weighted) count and percent of
 ##'     non-reference value as single string
 ##' @export
 bnry.count_prop.bl <- function(x, weight = NULL, ...){
