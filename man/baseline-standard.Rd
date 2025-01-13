@@ -2,28 +2,28 @@
 % Please edit documentation in R/fncs-baseline.R
 \name{baseline-standard}
 \alias{baseline-standard}
-\alias{mean_sd.bl}
-\alias{mediqr.bl}
-\alias{bnry.count_prop.bl}
-\alias{catg.count_prop.bl}
+\alias{real.bl}
+\alias{real2.bl}
+\alias{bnry.bl}
+\alias{catg.bl}
 \alias{lcat.bl}
 \alias{date.bl}
-\alias{eventrate.bl}
+\alias{surv.bl}
 \title{standard baseline functions}
 \usage{
-mean_sd.bl(x, weight = NULL, ...)
+real.bl(x, weight = NULL, ...)
 
-mediqr.bl(x, weight = NULL, ...)
+real2.bl(x, weight = NULL, ...)
 
-bnry.count_prop.bl(x, weight = NULL, ...)
+bnry.bl(x, weight = NULL, ...)
 
-catg.count_prop.bl(x, weight = NULL, ...)
+catg.bl(x, weight = NULL, ...)
 
 lcat.bl(x, ...)
 
 date.bl(x, ...)
 
-eventrate.bl(time, event, weight = NULL, time.unit = NULL, ...)
+surv.bl(time, event, weight = NULL, time.unit = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -36,19 +36,19 @@ eventrate.bl(time, event, weight = NULL, time.unit = NULL, ...)
 Description functions that work together
 }
 \details{
-mean_sd.bl: (weighted) mean and standard deviation as single string
+real.bl: (weighted) median and interquartile range
 
-midiqr.bl: (weighted) median and interquartile range as single string
+real2.bl: (weighted) mean and standard deviation
 
-bnry.count_prop.bl: (weighted) count and proportion of
+bnry.bl: (weighted) count and percent of
 non-reference value as single string
 
-catg.count_prop.bl: (weighted) count and proportion of
+catg.bl: (weighted) count and proportion of
 categorical levels as single string
 
 lcat.bl: number of unique non-missing values in x
 
 date.bl: min/max
 
-eventrate.bl: events; rate
+surv.bl: events; rate
 }
