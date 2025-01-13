@@ -15,7 +15,7 @@ di.dots <- function(iinfo, strict = FALSE, ...){
     properties(strict, class = "logical", length = 1, na.ok = FALSE)
     properties(iinfo, class = "character", length = 1, na.ok = FALSE)
     one_of(iinfo, set = c("term", "label", "type", "group",
-                         "missing", "table.type"))
+                         "missing", "table.type", "gtab.term", "weight.term"))
     dots <- list(...)
     r <- dots[[paste0(".", iinfo)]]
     if(is.null(r) & strict){
