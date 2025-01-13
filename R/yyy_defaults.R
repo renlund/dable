@@ -24,6 +24,7 @@ dable_parameters <- list(
     dable.p = FALSE,
     dable.p.bound = 1e-4,
     dable.NAtext = "",
+    dable.NAalias = "Missing",
     ## format parameters
     ## default describers --------------------
     dable.real.desc = "mean_sd", ## "tester2"
@@ -140,23 +141,39 @@ dparam <- function(param, value = NULL){
         bnry.list = dp_bnry.list(value),
         real.tol = dp_real.tol(value),
         catg.tol = dp_catg.tol(value),
-        surv.prefix = dp_surv.prefix(value),
+        ## surv.prefix = dp_surv.prefix(value),
+        surv.prefix = logic1(value, p),
         surv.affix = dp_surv.affix(value),
-        unit.id = dp_unit.id(value),
-        gtab.defvar.rm = dp_gtab.defvar.rm(value),
-        weight.defvar.rm = dp_weight.defvar.rm(value),
-        vtab.group.name = dp_vtab.group.name(value),
-        stab.group.name = dp_stab.group.name(value),
-        gtab.group.name = dp_gtab.group.name(value),
-        units.name = dp_units.name(value),
+        ## unit.id = dp_unit.id(value),
+        unit.id = char1(value, p),
+        ## gtab.defvar.rm = dp_gtab.defvar.rm(value),
+        gtab.defvar.rm = logic1(value, p),
+        ## weight.defvar.rm = dp_weight.defvar.rm(value),
+        weight.defvar.rm = logic1(value, p),
+        ## stab.group.name = dp_stab.group.name(value),
+        stab.group.name = char1(value, p),
+        ## vtab.group.name = dp_vtab.group.name(value),
+        vtab.group.name = char1(value, p),
+        ## gtab.group.name = dp_gtab.group.name(value),
+        gtab.group.name = char1(value, p),
+        ## units.name = dp_units.name(value),
+        units.name = char1(value, p),
         digits = dp_digits(value),
-        sc = dp_sc(value),
-        sc.low = dp_sc.low(value),
-        sc.high = dp_sc.high(value),
-        p = dp_p(value),
-        p.bound = dp_p.bound(value),
-        NAtext = dp_NAtext(value),
-        grey.first = dp_grey.first(value),
+        ## sc = dp_sc(value),
+        sc = logic1(value, p),
+        ## sc.low = dp_sc.low(value),
+        sc.low = positive1(value, p),
+        ## sc.high = dp_sc.high(value),
+        sc.high = positive1(value, p),
+        ## p = dp_p(value),
+        p = logic1(value, p),
+        ## p.bound = dp_p.bound(value),
+        p.bound = positive1(value, p),
+        ## NAtext = dp_NAtext(value),
+        NAtext = char1(value, p),
+        NAalias = char1(value, p),
+        ## grey.first = dp_grey.first(value),
+        grey.first = logic1(value, p),
         if(is.null(value)) dpget(p) else value
     )
 }
@@ -212,14 +229,6 @@ dp_catg.tol <- function(x = NULL){
 }
 
 ## a test for this param also exists in import-fncs-stab.R
-dp_surv.prefix <- function(x = NULL){
-    if(is.null(x)) x <- dpget("surv.prefix")
-    properties(x, nm = "surv.prefix", class = "logical",
-               length = 1, na.ok = FALSE)
-    x
-}
-
-## a test for this param also exists in import-fncs-stab.R
 dp_surv.affix <- function(x = NULL){
     if(is.null(x)) x = dpget("surv.affix")
     properties(x, class = "character", length = 2, na.ok = FALSE)
@@ -229,50 +238,6 @@ dp_surv.affix <- function(x = NULL){
     if(names(x)[1] != "time"){
         stop("first component of 'affix' should be named 'time'")
     }
-    x
-}
-
-dp_unit.id <- function(x = NULL){
-    if(is.null(x)) x <- dpget("unit.id")
-    if(!is.null(x)){
-        properties(x, nm = "unit.id", class = "character",
-                   length = 1, na.ok = FALSE)
-    }
-    x
-}
-
-dp_gtab.defvar.rm <- function(x = NULL){
-    if(is.null(x)) x <- dpget("gtab.defvar.rm")
-    properties(x, nm = "gtab.defvar.rm", class = "logical",
-               length = 1, na.ok = FALSE)
-    x
-}
-
-dp_weight.defvar.rm <- function(x = NULL){
-    if(is.null(x)) x <- dpget("weight.defvar.rm")
-    properties(x, nm = "weight.defvar.rm", class = "logical",
-               length = 1, na.ok = FALSE)
-    x
-}
-
-dp_vtab.group.name <- function(x = NULL){
-    if(is.null(x)) x <- dpget("vtab.group.name")
-    properties(x, nm = "vtab.group.name", class = "character",
-               length = 1, na.ok = FALSE)
-    x
-}
-
-dp_stab.group.name <- function(x = NULL){
-    if(is.null(x)) x <- dpget("stab.group.name")
-    properties(x, nm = "stab.group.name", class = "character",
-               length = 1, na.ok = FALSE)
-    x
-}
-
-dp_gtab.group.name <- function(x = NULL){
-    if(is.null(x)) x <- dpget("gtab.group.name")
-    properties(x, nm = "gtab.group.name", class = "character",
-               length = 1, na.ok = FALSE)
     x
 }
 
@@ -288,61 +253,136 @@ dp_digits <- function(x = NULL){
     x
 }
 
-dp_sc <- function(x = NULL){
-    if(is.null(x)) x <- dpget("sc")
-    properties(x, nm = "sc", class = "logical",
-               length = 1, na.ok = FALSE)
+char1 <- function(x, nm){
+    if(is.null(x)) x <- dpget(nm)
+    properties(x, nm = nm, class = "character", length = 1, na.ok = FALSE)
     x
 }
 
-dp_sc.low <- function(x = NULL){
-    if(is.null(x)) x <- dpget("sc.low")
-    properties(x, nm = "sc.low", class = c("numeric"),
-               length = 1, na.ok = FALSE)
-    if(x < 0) stop("'sc.low' should be positive")
+logic1 <- function(x, nm){
+    if(is.null(x)) x <- dpget(nm)
+    properties(x, nm = nm, class = "logical", length = 1, na.ok = FALSE)
     x
 }
 
-dp_sc.high <- function(x = NULL){
-    if(is.null(x)) x <- dpget("sc.high")
-    properties(x, nm = "sc.high", class = c("numeric"),
-               length = 1, na.ok = FALSE)
-    if(x < 0) stop("'sc.high' should be positive")
+positive1 <- function(x, nm){
+    if(is.null(x)) x <- dpget(nm)
+    properties(x, nm = nm, class = "numeric", length = 1, na.ok = FALSE)
+    if(x < 0){
+        s <- paste0("'", nm,"' should be positive")
+        stop(s)
+    }
     x
 }
 
-dp_p <- function(x = NULL){
-    if(is.null(x)) x <- dpget("p")
-    properties(x, nm = "p", class = "logical",
-               length = 1, na.ok = FALSE)
-    x
-}
+## a test for this param also exists in import-fncs-stab.R
+## dp_surv.prefix <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("surv.prefix")
+##     properties(x, nm = "surv.prefix", class = "logical",
+##                length = 1, na.ok = FALSE)
+##     x
+## }
 
-dp_p.bound <- function(x = NULL){
-    if(is.null(x)) x <- dpget("p.bound")
-    properties(x, nm = "p.bound", class = c("numeric"),
-               length = 1, na.ok = FALSE)
-    if(x < 0) stop("'p.bound' should be positive")
-    x
-}
+## dp_unit.id <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("unit.id")
+##     if(!is.null(x)){
+##         properties(x, nm = "unit.id", class = "character",
+##                    length = 1, na.ok = FALSE)
+##     }
+##     x
+## }
 
-dp_NAtext <- function(x = NULL){
-    if(is.null(x)) x <- dpget("NAtext")
-    properties(x, nm = "NAtext", class = "character",
-               length = 1, na.ok = FALSE)
-    x
-}
+## dp_gtab.defvar.rm <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("gtab.defvar.rm")
+##     properties(x, nm = "gtab.defvar.rm", class = "logical",
+##                length = 1, na.ok = FALSE)
+##     x
+## }
 
-dp_units.name <- function(x = NULL){
-    if(is.null(x)) x <- dpget("units.name")
-    properties(x, nm = "units.name", class = "character",
-               length = 1, na.ok = FALSE)
-    x
-}
+## dp_weight.defvar.rm <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("weight.defvar.rm")
+##     properties(x, nm = "weight.defvar.rm", class = "logical",
+##                length = 1, na.ok = FALSE)
+##     x
+## }
 
-dp_grey.first <- function(x = NULL){
-    if(is.null(x)) x <- dpget("grey.first")
-    properties(x, nm = "grey.first", class = "logical",
-               length = 1, na.ok = FALSE)
-    x
-}
+## dp_vtab.group.name <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("vtab.group.name")
+##     properties(x, nm = "vtab.group.name", class = "character",
+##                length = 1, na.ok = FALSE)
+##     x
+## }
+
+## dp_stab.group.name <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("stab.group.name")
+##     properties(x, nm = "stab.group.name", class = "character",
+##                length = 1, na.ok = FALSE)
+##     x
+## }
+
+## dp_gtab.group.name <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("gtab.group.name")
+##     properties(x, nm = "gtab.group.name", class = "character",
+##                length = 1, na.ok = FALSE)
+##     x
+## }
+
+
+## dp_sc <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("sc")
+##     properties(x, nm = "sc", class = "logical",
+##                length = 1, na.ok = FALSE)
+##     x
+## }
+
+## dp_sc.low <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("sc.low")
+##     properties(x, nm = "sc.low", class = c("numeric"),
+##                length = 1, na.ok = FALSE)
+##     if(x < 0) stop("'sc.low' should be positive")
+##     x
+## }
+
+## dp_sc.high <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("sc.high")
+##     properties(x, nm = "sc.high", class = c("numeric"),
+##                length = 1, na.ok = FALSE)
+##     if(x < 0) stop("'sc.high' should be positive")
+##     x
+## }
+
+## dp_p <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("p")
+##     properties(x, nm = "p", class = "logical",
+##                length = 1, na.ok = FALSE)
+##     x
+## }
+
+## dp_p.bound <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("p.bound")
+##     properties(x, nm = "p.bound", class = c("numeric"),
+##                length = 1, na.ok = FALSE)
+##     if(x < 0) stop("'p.bound' should be positive")
+##     x
+## }
+
+## dp_NAtext <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("NAtext")
+##     properties(x, nm = "NAtext", class = "character",
+##                length = 1, na.ok = FALSE)
+##     x
+## }
+
+## dp_units.name <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("units.name")
+##     properties(x, nm = "units.name", class = "character",
+##                length = 1, na.ok = FALSE)
+##     x
+## }
+
+## dp_grey.first <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("grey.first")
+##     properties(x, nm = "grey.first", class = "logical",
+##                length = 1, na.ok = FALSE)
+##     x
+## }
