@@ -29,7 +29,7 @@ dable_parameters <- list(
     dable.sep = ": " ,
     dable.indent = "    ",
     ## default describers --------------------
-    dable.real.desc = "mean_sd", ## "tester2"
+    dable.real.desc = "mean_sd",
     dable.bnry.desc = "bnry.count_prop",
     dable.catg.desc = "catg.count_prop",
     dable.lcat.desc = "n.unique",
@@ -41,7 +41,7 @@ dable_parameters <- list(
     dable.catg.comp = "catg.std",
     dable.lcat.comp = "bnry.std",
     dable.date.comp = "date.std",
-    dable.surv.comp = "rate_ratio",
+    dable.surv.comp = "surv.std",
     ## default testers
     dable.real.test = "param",
     dable.bnry.test = "bnry.chisq",
@@ -50,12 +50,12 @@ dable_parameters <- list(
     dable.date.test = "date.nonparam",
     dable.surv.test = "logrank",
     ## default baseline describers -----------
-    dable.real.desc.bl = "mean_sd.bl",
-    dable.bnry.desc.bl = "bnry.count_prop.bl",
-    dable.catg.desc.bl = "catg.count_prop.bl",
-    dable.lcat.desc.bl = "lcat.bl",
-    dable.date.desc.bl = "date.bl",
-    dable.surv.desc.bl = "eventrate.bl",
+    dable.real.desc.bl = "real.bl0",
+    dable.bnry.desc.bl = "bnry.bl0",
+    dable.catg.desc.bl = "catg.bl0",
+    dable.lcat.desc.bl = "lcat.bl0",
+    dable.date.desc.bl = "date.bl0",
+    dable.surv.desc.bl = "surv.bl0",
     ## default baseline comparers
     dable.real.comp.bl = "real.std",
     dable.bnry.comp.bl = "bnry.std",
@@ -110,6 +110,14 @@ dpset <- function(param, value = NULL){
     invisible()
 }
 
+##' @describeIn dpset dpset_list: set all paramaters in a list
+##' @param l list of values, the names of which correspond to parameter names
+##' @export
+dpset_list <- function(l){
+    for(i in seq_along(l)) dpset(param = names(l)[i],
+                                 value = l[[i]])
+}
+
 ##' @describeIn dpset dpget: get package parameter
 ##' @param verbose logical; get(possibly) helpful messages?
 ##' @export
@@ -120,7 +128,14 @@ dpget <- function(param, verbose = FALSE){
     }
     r
 }
-dable.default <- dpget
+dable.default <- dpget ## ??
+
+##' @describeIn dpset dpget_all: get all package parameters
+##' @export
+dpget_all <- function(){
+    z <- names(options())
+    options()[grep(pattern = "^dable\\.", x = z, value = TRUE)]
+}
 
 ##' @describeIn dpset dp_restore_defaults: restores the dable package parameter defaults
 ##' @export

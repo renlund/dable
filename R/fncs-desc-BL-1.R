@@ -1,6 +1,33 @@
-##' standard baseline functions
+##' Set baseline functions
 ##'
-##' Description functions that work together
+##' Quickly set baseline functions to some predefined set of functions.
+##' @param desc the 'theme' for descriptives
+##' @param comp the 'theme' for comparisons (not yet implemented)
+##' @param test the 'theme' for testers (not yet implemented)
+##' @export
+bl_theme <- function(desc = "default", comp = NULL, test = NULL){
+    param <- dpget_all()
+    properties(desc, class = c("character", "numeric"), length = 1, na.ok = FALSE)
+    if(!is.null(comp) || !is.null(test)){
+        s <- paste0("options for 'comp' and 'test' not yet implemented")
+        warning(s)
+    }
+    types <- c("real", "bnry", "catg", "lcat", "date", "surv")
+    d <- if(is.character(desc)){
+             switch(desc,
+                    "default" = 0)
+         } else desc
+    x <- sprintf(paste0("%s.bl", d), types)
+    p <- sprintf("%s.desc.bl", types)
+    for(i in seq_along(x)) dpset(param = p[i], value = x[i])
+    invisible(param)
+}
+
+##' default baseline functions (0-1)
+##'
+##' Description functions that work together. Function sets 0 and 1 are
+##' identical except for type real; in set 0 description is by median (Q1-Q3)
+##' and in set 1 by mean (standard deviation).
 ##' @param x input vector
 ##' @param weight case weight
 ##' @param ... arguments passed along
@@ -8,33 +35,33 @@
 NULL
 
 ##' @rdname baseline-standard
-##' @details real.bl: (weighted) median and interquartile range
+##' @details real.bl0: (weighted) median and interquartile range
 ##' @export
-real.bl <- function(x, weight = NULL, ...){
-    q <- quartiles(x = x, weight = weight)
+real.bl0 <- function(x, weight = NULL, ...){
+    q <- quartile(x = x, weight = weight)
     data.frame(Variable = di.Variable(x, ...),
                Summary = sprintf("%s (%s - %s)", dform.num(q$Q2),
                                  dform.num(q$Q1), dform.num(q$Q2)),
                Summary.info = "Numeric variable: Median (Q1-Q3)")
 }
-attr(real.bl, "meta") <- c("Summary.info", "Variable")
+attr(real.bl0, "meta") <- c("Summary.info", "Variable")
 
 ##' @rdname baseline-standard
-##' @details real2.bl: (weighted) mean and standard deviation
+##' @details real.bl1: (weighted) mean and standard deviation
 ##' @export
-real2.bl <- function(x, weight = NULL, ...){
+real.bl1 <- function(x, weight = NULL, ...){
     r <- mean_sd(x = x, weight = weight, ...)
     data.frame(Variable = di.Variable(x, ...),
                Summary = sprintf("%s (%s)", dform.num(r$Mean), dform.num(r$SD)),
                Summary.info = "Numeric variable: Mean(SD)")
 }
-attr(real2.bl, "meta") <- c("Summary.info", "Variable")
+attr(real.bl1, "meta") <- c("Summary.info", "Variable")
 
 ##' @rdname baseline-standard
-##' @details bnry.bl: (weighted) count and percent of
+##' @details bnry.bl0/1: (weighted) count and percent of
 ##'     non-reference value as single string
 ##' @export
-bnry.bl <- function(x, weight = NULL, ...){
+bnry.bl0 <- function(x, weight = NULL, ...){
     r <- bnry.count_prop(x = x, weight = weight, ...)
     data.frame(Variable = di.Variable(x, ...),
                Summary = sprintf("%s (%s%%)",
@@ -42,13 +69,14 @@ bnry.bl <- function(x, weight = NULL, ...){
                                  dform.num(100 * r$Proportion)),
                Summary.info = "Categorical variable: Count (Percent)")
 }
-attr(bnry.bl, "meta") <- c("Variable", "Summary.info")
+attr(bnry.bl0, "meta") <- c("Variable", "Summary.info")
+bnry.bl1 <- bnry.bl0
 
 ##' @rdname baseline-standard
-##' @details catg.bl: (weighted) count and proportion of
+##' @details catg.bl0/1: (weighted) count and proportion of
 ##'     categorical levels as single string
 ##' @export
-catg.bl <- function(x, weight = NULL, ...){
+catg.bl0 <- function(x, weight = NULL, ...){
     r <- catg.count_prop(x = x, weight = weight, ...)
     data.frame(Variable = di.Variable(x, ...),
                Summary = sprintf("%s (%s%%)",
@@ -56,34 +84,37 @@ catg.bl <- function(x, weight = NULL, ...){
                                  dform.num.vec(100 * r$Proportion)),
                Summary.info = "Categorical variable: Count (Percent)")
 }
-attr(catg.bl, "meta") <- c("Variable", "Summary.info")
+attr(catg.bl0, "meta") <- c("Variable", "Summary.info")
+catg.bl1 <- catg.bl0
 
 ##' @rdname baseline-standard
-##' @details lcat.bl: number of unique non-missing values in x
+##' @details lcat.bl0/1: number of unique non-missing values in x
 ##' @export
-lcat.bl <- function(x, ...){
+lcat.bl0 <- function(x, ...){
     r <- n.unique(x)
     data.frame(Variable = di.Variable(x, ...),
                Summary = sprintf("{%s}", r),
                Summary.info = "Categorical variable: {unique values}")
 }
-attr(lcat.bl, "meta") <- c("Variable", "Summary.info")
+attr(lcat.bl0, "meta") <- c("Variable", "Summary.info")
+lcat.bl1 <- lcat.bl0
 
 ##' @rdname baseline-standard
-##' @details date.bl: min/max
+##' @details date.bl0/1: min/max
 ##' @export
-date.bl <- function(x, ...){
+date.bl0 <- function(x, ...){
     r <- min_max(x)
     data.frame(Variable = di.Variable(x, ...),
                Summary = sprintf("%s/%s", r$Min, r$Max),
                Summary.info = "Date variables: min/max")
 }
-attr(date.bl, "meta") <- c("Variable", "Summary.info")
+attr(date.bl0, "meta") <- c("Variable", "Summary.info")
+date.bl1 <- date.bl0
 
 ##' @rdname baseline-standard
-##' @details surv.bl: events; rate
+##' @details surv.bl0/1: events; rate
 ##' @export
-surv.bl <- function(time, event, weight = NULL, time.unit = NULL, ...){
+surv.bl0 <- function(time, event, weight = NULL, time.unit = NULL, ...){
     r <- eventrate(time = time, event = event, weight = weight,
                    time.unit = time.unit, ...)
     data.frame(Variable = di.Variable(event, ...),
@@ -92,4 +123,5 @@ surv.bl <- function(time, event, weight = NULL, time.unit = NULL, ...){
                                  dform.num(r$Rate)),
                Summary.info = "Time-to-event variable: events; rate")
 }
-attr(surv.bl, "meta") <- c("Variable", "Summary.info")
+attr(surv.bl0, "meta") <- c("Variable", "Summary.info")
+surv.bl1 <- surv.bl0

@@ -41,7 +41,7 @@ real.bl2 <- function(x, weight = NULL, ...){
 attr(real.bl2, "meta") <- c("Variable")
 
 ##' @rdname baseline-standard-2
-##' @details catg.bl2: (weighted) count and percent
+##' @details catg.bl2 / bnry.bl2: (weighted) count and percent
 ##' @export
 catg.bl2 <- function(x, weight = NULL, ...){
     r <- catg.count_prop(x = x, weight = weight, ...)
@@ -59,6 +59,7 @@ catg.bl2 <- function(x, weight = NULL, ...){
                Summary = S)
 }
 attr(catg.bl2, "meta") <- c("Variable")
+bnry.bl2 <- catg.bl2
 
 ##' @rdname baseline-standard-2
 ##' @details lcat.bl2: unique values
