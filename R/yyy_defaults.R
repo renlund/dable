@@ -25,7 +25,9 @@ dable_parameters <- list(
     dable.p.bound = 1e-4,
     dable.NAtext = "",
     dable.NAalias = "Missing",
-    ## format parameters
+    dable.output = "latex",
+    dable.sep = ": " ,
+    dable.indent = "    ",
     ## default describers --------------------
     dable.real.desc = "mean_sd", ## "tester2"
     dable.bnry.desc = "bnry.count_prop",
@@ -174,6 +176,9 @@ dparam <- function(param, value = NULL){
         NAalias = char1(value, p),
         ## grey.first = dp_grey.first(value),
         grey.first = logic1(value, p),
+        output = char1(value, p),
+        dable.sep = char1(value, p),
+        dable.indent = char1(value, p),
         if(is.null(value)) dpget(p) else value
     )
 }

@@ -39,7 +39,7 @@ META_noTest <- function(bl = TRUE){
 ##' @export
 noTest <- function(x, g, ...){
     ## unusedWeightWarning(..., caller = "noTest")
-    META_noTest(x = x, g = g, bl = FALSE)
+    META_noTest(bl = FALSE)
 }
 ## attr(noTest, "label") <- "no test"
 
@@ -48,7 +48,7 @@ noTest <- function(x, g, ...){
 ##' @export
 noTest.bl <- function(x, g, ...){
     ## unusedWeightWarning(..., caller = "noTest.bl")
-    META_noTest(x = x, g = g, bl = TRUE)
+    META_noTest(bl = TRUE)
 }
 attr(noTest.bl, "meta") <- c("p.info")
 

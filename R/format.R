@@ -54,16 +54,21 @@ dform.num.vec <- function(x, ...){
     } else {
         r <- rep(NA_character_, n)
         for(i in 1:n) r[i] <- dform.num(x[i], ...)
+        r
     }
-    r
 }
 
 dprintf <- function(x, d, type) sprintf(paste0("%.", d, type), x)
 
-dform.text <- function(x){
+dform.text <- function(x, output = NULL){
     properties(x, class = c("character", "factor"), length = 1, na.ok = TRUE)
     ## shorten too long strings with ... ?
     ## options for latexifying text ?
+    ut <- dparam("output", output)
+    if(ut == "latex"){
+        x <- gsub(pattern = "(.*)([^\\\\])(%)(.*)",
+                  replacement = "\\1\\2\\\\%\\4", x = x)
+    }
     x
 }
 

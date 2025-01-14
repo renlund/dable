@@ -31,7 +31,9 @@ di.dots <- function(iinfo, strict = FALSE, ...){
 ## di.dots("label", strict = TRUE)
 
 ## sep and indent should be package options
-var_lev_combine <- function(v, l, sep = ": ", indent = "   "){
+var_lev_combine <- function(v, l, sep = NULL, indent = NULL){
+    sep = dparam("sep", sep)
+    indent = dparam("indent", indent)
     n <- length(l)
     if(n == 1){
         paste0(v, sep, l)

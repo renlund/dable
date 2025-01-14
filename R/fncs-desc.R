@@ -149,7 +149,7 @@ d.quantile <- function(x, weight = NULL, probs = c(.25, .5, .75), ...){
 ## https://aakinshin.net/posts/weighted-quantiles/
 
 ##' @rdname desc-real
-##' @details quartiles: (weighted) quartiles
+##' @details quartile: (weighted) quartiles
 ##' @export
 quartile <- function(x, weight = NULL, ...){
     r <- d.quantile(x = x, weight = weight, probs = c(.25, .5, .75))
