@@ -2,14 +2,20 @@
 % Please edit documentation in R/yyy_defaults.R
 \name{dpset}
 \alias{dpset}
+\alias{dpset_list}
 \alias{dpget}
+\alias{dpget_all}
 \alias{dp_restore_defaults}
 \alias{add2bnry.list}
 \title{set package parameter}
 \usage{
 dpset(param, value = NULL)
 
+dpset_list(l)
+
 dpget(param, verbose = FALSE)
+
+dpget_all()
 
 dp_restore_defaults()
 
@@ -20,6 +26,8 @@ add2bnry.list(value)
 
 \item{value}{the value to be set}
 
+\item{l}{list of values, the names of which correspond to parameter names}
+
 \item{verbose}{logical; get(possibly) helpful messages?}
 }
 \description{
@@ -27,7 +35,11 @@ set a dable package parameter
 }
 \section{Functions}{
 \itemize{
+\item \code{dpset_list()}: dpset_list: set all paramaters in a list
+
 \item \code{dpget()}: dpget: get package parameter
+
+\item \code{dpget_all()}: dpget_all: get all package parameters
 
 \item \code{dp_restore_defaults()}: dp_restore_defaults: restores the dable package parameter defaults
 

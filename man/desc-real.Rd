@@ -51,5 +51,5 @@ mean_sd: (weighted) mean and standard deviation
 
 d.quantile: (weighted) quantiles (wrapper for Hmisc::wtd.quantile)
 
-quartiles: (weighted) quartiles
+quartile: (weighted) quartiles
 }

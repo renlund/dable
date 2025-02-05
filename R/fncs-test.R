@@ -68,6 +68,7 @@ META_param <- function(x, g, bl = TRUE){
     p <- NA_real_
     p.info <- if(n_lev<=1) "no test" else if(n_lev==2) "t-test" else "F-test"
     if(n_lev > 1){
+        ## p <- tryElseNA(anova(lm(x ~ g, weights = weight))[['Pr(>F)']][1])
         p <- tryElseNA(anova(lm(x ~ g))[['Pr(>F)']][1])
     }
     if(bl){

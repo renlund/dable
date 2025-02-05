@@ -32,7 +32,7 @@ Description functions that work together
 \details{
 stats.bl2: (weighted) various stats
 
-catg.bl2: (weighted) count and percent
+catg.bl2 / bnry.bl2: (weighted) count and percent
 
 lcat.bl2: unique values
 
