@@ -16,6 +16,7 @@ datex(
   rowname = "Variable",
   row.group = NULL,
   rgroup = NULL,
+  n.rgroup = NULL,
   insert.bottom = TRUE,
   ...
 )
@@ -46,6 +47,8 @@ method is implemented.}
 will be algorithmically decided}
 
 \item{rgroup}{character; argument for Hmisc::latex}
+
+\item{n.rgroup}{integer; argument for Hmisc::latex}
 
 \item{insert.bottom}{character or logical; text to be placed under the
 table. If TRUE, attr2text will be used to create this text}

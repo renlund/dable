@@ -17,6 +17,7 @@
 ##' @param row.group logical or NULL; use the grouping in guide? If NULL this
 ##'     will be algorithmically decided
 ##' @param rgroup character; argument for Hmisc::latex
+##' @param n.rgroup integer; argument for Hmisc::latex
 ##' @param insert.bottom character or logical; text to be placed under the
 ##'     table. If TRUE, attr2text will be used to create this text
 ##' @param ... arguments passed to Hmisc::latex
@@ -32,6 +33,7 @@ datex <- function(dt,
                   rowname = "Variable",
                   row.group = NULL,
                   rgroup = NULL,
+                  n.rgroup = NULL,
                   insert.bottom = TRUE,
                   ...){
     properties(format, nm = "format", class = "logical", length = 1, na.ok = FALSE)
@@ -127,8 +129,10 @@ dable_attr <- function(dt){
         stringsAsFactors = FALSE
     )
     if(!is.null(a$gtab_rows)){
+        gw <- a$gtab_weight
         tmp <- rbind(rows = a$gtab_rows,
-                     weight = dform.num.vec(a$gtab_weight),
+                     ## what if weight is NULL here ?
+                     weight = if(!is.null(gw)) dform.num.vec(gw) else NULL,
                      units = a$gtab_units)
         Q <- as.data.frame(tmp)
         Q$measure <- rownames(tmp)
