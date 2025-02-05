@@ -33,7 +33,9 @@ surv.bl0(time, event, weight = NULL, time.unit = NULL, ...)
 \item{...}{arguments passed along}
 }
 \description{
-Description functions that work together
+Description functions that work together. Function sets 0 and 1 are
+identical except for type real; in set 0 description is by median (Q1-Q3)
+and in set 1 by mean (standard deviation).
 }
 \details{
 real.bl0: (weighted) median and interquartile range
