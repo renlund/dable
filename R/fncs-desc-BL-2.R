@@ -83,7 +83,7 @@ attr(lcat.bl2, "meta") <- c("Variable")
 ##' @export
 date.bl2 <- function(x, ...){
     stat <- c("Min", "Max")
-    value <- c(d.min(x), d.max(x))
+    value <- as.character(c(d.min(x), d.max(x)))
     has_missing <- di.dots("missing", strict = TRUE, ...)
     if(isTRUE(has_missing)){
         stat <- c(stat, dpget("NAalias"))

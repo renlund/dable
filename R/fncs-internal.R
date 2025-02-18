@@ -27,10 +27,6 @@ di.dots <- function(iinfo, strict = FALSE, ...){
     } else r
 }
 
-## di.dots("label")
-## di.dots("label", strict = TRUE)
-
-## sep and indent should be package options
 var_lev_combine <- function(v, l, sep = NULL, indent = NULL){
     sep = dparam("sep", sep)
     indent = dparam("indent", indent)
@@ -51,8 +47,9 @@ var_lev_combine <- function(v, l, sep = NULL, indent = NULL){
 di.Variable <- function(x, ...){
     lab <- di.dots("label", strict = TRUE, ...)
     type <- di.dots("type", strict = TRUE, ...)
-    if(is.null(lab)){
-        lab <- deparse(substitute(x))
+    if(is.null(lab)){ ## can this happen?
+        lab <- di.dots("term")
+        if(is.null(lab)) lab <- deparse(substitute(x))
     }
     if(is.null(type)){
         type <- "real"
@@ -62,7 +59,6 @@ di.Variable <- function(x, ...){
             x <- factor(x)
         }
     }
-    ## : END
     lev <- levels(x)
     if(type %in% c("real", "lcat", "date", "surv")){
         lab
@@ -72,24 +68,3 @@ di.Variable <- function(x, ...){
         var_lev_combine(v = lab, l = lev[2])
     } else stop("[di.Variable] out of options")
 }
-
-## di.Variable <- function(x, lab.only = FALSE, ...){
-##     properties(lab.only, class = "logical", length = 1, na.ok = FALSE)
-##     lab <- di.dots("label", strict = TRUE, ...)
-##     if(is.null(lab)){
-##         lab <- deparse(substitute(x))
-##     }
-##     lev <- levels(x)
-##     if(lab.only || is.null(lev)){
-##         lab
-##     } else {
-##         var_lev_combine(v = lab, l = lev)
-##     }
-## }
-
-
-## foo <- 1:7
-## di.Variable(foo)
-## di.Variable(1:7)
-## foo <- factor(sample(letters[1:3]))
-## di.Variable(foo)

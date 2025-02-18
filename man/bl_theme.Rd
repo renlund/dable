@@ -2,7 +2,7 @@
 % Please edit documentation in R/fncs-desc-BL-1.R
 \name{bl_theme}
 \alias{bl_theme}
-\title{Set baseline functions}
+\title{set baseline functions}
 \usage{
 bl_theme(desc = "default", comp = NULL, test = NULL)
 }

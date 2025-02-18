@@ -2,7 +2,8 @@
 dform.num <- function(x, digits = NULL, sc = NULL, sc.low = NULL, sc.high = NULL,
                       p = NULL, p.bound = NULL, NAtext = NULL){
     properties(x, class = c("numeric", "integer"), length = 1, na.ok = TRUE)
-    if(identical(x, 0L)) return("0")
+    ## if(identical(x, 0L)) return("0")
+    if(isTRUE(x == 0)) return("0")
     ## check or get all parameters
     digits  <- dparam("digits", digits)
     sc      <- dparam("sc", sc)

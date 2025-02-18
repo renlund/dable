@@ -65,7 +65,7 @@ dable <- function(data,
         if(dparam("gtab.defvar.rm")){
             guide$type[guide$term == gtab] <- .hide.type
         }
-        gtab <- create_gtab(term = gtab, data = data)
+        gtab <- gtab_maker(term = gtab, data = data)
     } else {
         check_gtab(gtab, n = N)
     }

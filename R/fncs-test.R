@@ -179,7 +179,6 @@ catg.chisq <- function(x, g, ...){
     unusedWeightWarning(..., caller = "catg.chisq")
     META_chisq(x = x, g = g, bl = FALSE, catg.full.length = FALSE)
 }
-##attr(catg.chisq, "label") <- "p"
 
 ##' @rdname test-catg
 ##' @description catg.chisq.bl: chisquare-test for categorical variables (baseline)
@@ -190,43 +189,6 @@ catg.chisq.bl <- function(x, g, ...){
 }
 attr(catg.chisq.bl, "meta") <- c("p.info")
 
-## ------------------------------------------------------------------------ bnry
-
-##' 'bnry' testers
-##'
-##' functions to test bnry variables
-##' @param x input vector
-##' @param g grouping variable
-##' @name test-bnry
-NULL
-
-##' @rdname test-bnry
-##' @description bnry.chisq: chisquare-test for binary variables
-##' @export
-bnry.chisq <- function(x, g, ...){
-    unusedWeightWarning(..., caller = "bnry.chisq")
-    META_chisq(x = x, g = g, bl = FALSE, catg.full.length = FALSE)
-}
-##attr(bnry.chisq, "label") <- "p"
-
-##' @rdname test-bnry
-##' @description bnry.chisq.bl: chisquare-test for binary variables (baseline)
-##' @export
-bnry.chisq.bl <- function(x, g, ...){
-    unusedWeightWarning(..., caller = "bnry.chisq.bl")
-    META_chisq(x = x, g = g, bl = TRUE, catg.full.length = FALSE)
-}
-attr(bnry.chisq.bl, "meta") <- c("p.info")
-
-## ----------------------------------------------------------------------- lcat
-
-##' 'lcat' testers
-##'
-##' functions to test lcat variables
-##' @param x input vector
-##' @param g grouping variable
-##' @name test-lcat
-NULL
 
 ## ------------------------------------------------------------------------ date
 

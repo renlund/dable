@@ -14,9 +14,9 @@
 NULL
 
 ##' @rdname gtab-fncs
-##' @details create_gtab: create grouping table from a term in data
+##' @details gtab_maker: create grouping table from a term in data
 ##' @export
-create_gtab <- function(term, data, all = FALSE, all.first = FALSE,
+gtab_maker <- function(term, data, all = FALSE, all.first = FALSE,
                         all.nm = NULL, rev = FALSE){
     if(is.null(all.nm)) all.nm <- default.gtab.group.name() ## XK manually changed
     properties(term, class = "character", length = 1, na.ok = FALSE)
@@ -41,9 +41,9 @@ create_gtab <- function(term, data, all = FALSE, all.first = FALSE,
     as.data.frame(R)
 }
 
-##' @rdname gtab-fncs
-##' @details check_gtab: check a grouping table
-##' @export
+# - #' @rdname gtab-fncs
+# - #' @details check_gtab: check a grouping table
+# - #' @export
 check_gtab <- function(gtab, n = NULL){
     properties(gtab, class = "data.frame")
     if(!is.null(n)){
@@ -76,10 +76,10 @@ check_gtab <- function(gtab, n = NULL){
     gtab
 }
 
-##' @rdname gtab-fncs
-##' @details gtab_equiv2factor: test if grouping table could be defined by a
-##'     single factor
-##' @export
+# - #' @rdname gtab-fncs
+# - #' @details gtab_equiv2factor: test if grouping table could be defined by a
+# - #'     single factor
+# - #' @export
 gtab_equiv2factor <- function(gtab, na.ok = FALSE, verbose = TRUE){
     check_gtab(gtab)
     cs <- colSums(gtab)
@@ -108,9 +108,9 @@ gtab_equiv2factor <- function(gtab, na.ok = FALSE, verbose = TRUE){
     }
 }
 
-##' @rdname gtab-fncs
-##' @details gtab2factor: create a factor from a grouping table (if possible)
-##' @export
+# - #' @rdname gtab-fncs
+# - #' @details gtab2factor: create a factor from a grouping table (if possible)
+# - #' @export
 gtab2factor <- function(gtab, na.ok = TRUE, verbose = FALSE){
     equiv <- gtab_equiv2factor(gtab, na.ok = na.ok, verbose = verbose)
     if(equiv){

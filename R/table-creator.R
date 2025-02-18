@@ -7,7 +7,7 @@ table_creator <- function(data, term, type, bl, gtab, stab = NULL,
     R <- NULL
     if(desc){
         What <- if(bl) ".desc.bl" else ".desc"
-        Default <- dable.default(paste0(type, What))
+        Default <- dpget(paste0(type, What))
         Fnc <- if(!is.null(fnc[[1]])) fnc[[1]] else Default
         R <- descomtes(fnc = Fnc, data = data, term = term, gtab = gtab,
                        spec = spec[[1]], surv = type == "surv", stab = stab,
@@ -15,7 +15,7 @@ table_creator <- function(data, term, type, bl, gtab, stab = NULL,
     }
     if(comp){
         What <- if(bl) ".comp.bl" else ".comp"
-        Default <- dable.default(paste0(type, What))
+        Default <- dpget(paste0(type, What))
         Fnc <- if(!is.null(fnc[[2]])) fnc[[2]] else Default
         CO <- descomtes(fnc = Fnc, data = data, term = term, gtab = gtab,
                         spec = spec[[2]], surv = type == "surv", stab = stab,
@@ -24,7 +24,7 @@ table_creator <- function(data, term, type, bl, gtab, stab = NULL,
     }
     if(test){
         What <- if(bl) ".test.bl" else ".test"
-        Default <- dable.default(paste0(type, What))
+        Default <- dpget(paste0(type, What))
         Fnc <- if(!is.null(fnc[[3]])) fnc[[3]] else Default
         TE <- descomtes(fnc = Fnc, data = data, term = term, gtab = gtab,
                         spec = spec[[3]], surv = type == "surv", stab = stab,

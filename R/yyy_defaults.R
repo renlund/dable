@@ -30,58 +30,47 @@ dable_parameters <- list(
     dable.indent = "    ",
     ## default describers --------------------
     dable.real.desc = "mean_sd",
-    dable.bnry.desc = "bnry.count_prop",
     dable.catg.desc = "catg.count_prop",
+    dable.bnry.desc = "bnry.count_prop",
     dable.lcat.desc = "n.unique",
     dable.date.desc = "min_max",
     dable.surv.desc = "eventrate",
     ## default comparers
     dable.real.comp = "real.std",
-    dable.bnry.comp = "bnry.std",
     dable.catg.comp = "catg.std",
-    dable.lcat.comp = "bnry.std",
+    dable.bnry.comp = NULL,
+    dable.lcat.comp = NULL,
     dable.date.comp = "date.std",
     dable.surv.comp = "surv.std",
     ## default testers
     dable.real.test = "param",
-    dable.bnry.test = "bnry.chisq",
     dable.catg.test = "catg.chisq",
-    dable.lcat.test = "bnry.chisq",
+    dable.bnry.test = NULL,
+    dable.lcat.test = NULL,
     dable.date.test = "date.nonparam",
     dable.surv.test = "logrank",
     ## default baseline describers -----------
     dable.real.desc.bl = "real.bl0",
-    dable.bnry.desc.bl = "bnry.bl0",
     dable.catg.desc.bl = "catg.bl0",
+    dable.bnry.desc.bl = "bnry.bl0",
     dable.lcat.desc.bl = "lcat.bl0",
     dable.date.desc.bl = "date.bl0",
     dable.surv.desc.bl = "surv.bl0",
     ## default baseline comparers
     dable.real.comp.bl = "real.std",
-    dable.bnry.comp.bl = "bnry.std",
     dable.catg.comp.bl = "catg.std",
-    dable.lcat.comp.bl = "bnry.std",
+    dable.bnry.comp.bl = NULL,
+    dable.lcat.comp.bl = NULL,
     dable.date.comp.bl = "date.std",
     dable.surv.comp.bl = "surv.std",
     ## default baseline tester
     dable.real.test.bl = "param.bl",
-    dable.bnry.test.bl = "bnry.chisq.bl",
     dable.catg.test.bl = "catg.chisq.bl",
-    dable.lcat.test.bl = "bnry.chisq.bl",
+    dable.bnry.test.bl = NULL,
+    dable.lcat.test.bl = NULL,
     dable.date.test.bl = "date.nonparam.bl",
     dable.surv.test.bl = "logrank.bl"
 )
-
-dp_apply_defaults <- function(overwrite = FALSE){
-    if(overwrite){
-        options(dable_parameters)
-    } else {
-        op <- options()
-        toset <- !(names(dable_parameters) %in% names(op))
-        if(any(toset)) options(dable_parameters[toset])
-    }
-    invisible()
-}
 
 ## make sure parameter name follows standard for options (i.e. begins with 'dable.')
 optName <- function(x){
@@ -94,58 +83,93 @@ pName <- function(x){
     ifelse(grepl("^dable\\.", x), yes = sub("^dable\\.", "", x), no = x)
 }
 
-##' @title set package parameter
-##' @description set a dable package parameter
-##' @param param character; name of parameter
+##' dable parameter functions
+##'
+##' functions to set and retrieve dable parameters
+##' @name parameter-fncs
+NULL
+
+##' @rdname parameter-fncs
+##' @details set a dable package parameter
+##' @param param character; name of parameter OR a named list of parameter values
 ##' @param value the value to be set
 ##' @export
 dpset <- function(param, value = NULL){
-    properties(param, class = "character", length = 1, na.ok = FALSE)
-    one_of(pName(param), nm = "name of parameter",
-           set = pName(names(dable_parameters)))
-    value <- dparam(param = param, value = value)
-    op <- list()
-    op[[optName(param)]] <- value
-    options(op)
+    if(is.list(param)){
+        for(i in seq_along(param)) dpset(param = names(param)[i],
+                                         value = param[[i]])
+    } else {
+        properties(param, class = "character", length = 1, na.ok = FALSE)
+        one_of(pName(param), nm = "name of parameter",
+               set = pName(names(dable_parameters)))
+        value <- dparam(param = param, value = value)
+        op <- list()
+        op[[optName(param)]] <- value
+        options(op)
+    }
     invisible()
 }
 
-##' @describeIn dpset dpset_list: set all paramaters in a list
-##' @param l list of values, the names of which correspond to parameter names
+##' @rdname parameter-fncs
+##' @details set default parameter values
+##' @param overwrite logical; overwrite parameter values already set?
 ##' @export
-dpset_list <- function(l){
-    for(i in seq_along(l)) dpset(param = names(l)[i],
-                                 value = l[[i]])
+dpset_defaults <- function(overwrite = TRUE){
+    if(overwrite){
+        options(dable_parameters)
+    } else {
+        op <- options()
+        toset <- !(names(dable_parameters) %in% names(op))
+        if(any(toset)) options(dable_parameters[toset])
+    }
+    invisible()
 }
 
-##' @describeIn dpset dpget: get package parameter
-##' @param verbose logical; get(possibly) helpful messages?
+subtypes.key <- setNames(object = c("catg", "catg"),
+                         nm = c("bnry", "lcat"))
+
+##' @rdname parameter-fncs
+##' @details get package parameter
+##' @param verbose logical; get (possibly) helpful messages?
+##' @param sub logical; search for possible replacement values?
 ##' @export
-dpget <- function(param, verbose = FALSE){
+dpget <- function(param, verbose = FALSE, sub = TRUE){
     r <- options(optName(param))[[1]]
+    if(is.null(r) & sub){
+        param2 <- NULL
+        for(i in seq_along(subtypes.key)){
+            sub <- names(subtypes.key)[i]
+            main <- subtypes.key[i]
+            if(grepl(pattern = sub, x = param)){
+                param2 <- sub(pattern = sub, replacement = main,
+                              x = param, fixed = TRUE)
+                break
+            }
+        }
+        if(!is.null(param2)) r <- options(optName(param2))[[1]]
+    }
     if(verbose & is.null(r)){
         message(paste0("no default for '", pName(param), "' found"))
     }
     r
 }
-dable.default <- dpget ## ??
+## dable.default <- dpget ##
 
-##' @describeIn dpset dpget_all: get all package parameters
+##' @rdname parameter-fncs
+##' @details get all package parameters
 ##' @export
 dpget_all <- function(){
     z <- names(options())
     options()[grep(pattern = "^dable\\.", x = z, value = TRUE)]
 }
 
-##' @describeIn dpset dp_restore_defaults: restores the dable package parameter defaults
+##' @rdname parameter-fncs
+##' @details add a value to the 'bnry.list'
+##' @param bl list of binary values
 ##' @export
-dp_restore_defaults <- function() dp_apply_defaults(overwrite = TRUE)
-
-##' @describeIn dpset add2bnry.list: add a value to the 'bnry.list'
-##' @export
-add2bnry.list <- function(value){
-    if(!is.list(value)) value <- list(value)
-    dpset(param = "bnry.list", value = c(dpget("bnry.list"), value))
+add2bnry.list <- function(bl){
+    add <- dp_bnry.list(bl)
+    dpset(param = "bnry.list", value = c(dpget("bnry.list"), add))
 }
 
 ## get parameter value and (in some cases) perform a sanity test
@@ -209,8 +233,9 @@ dp_bnry.list <- function(x = NULL){
     }
     l <- unlist(lapply(x, foo))
     if(!is.null(l) && any(!l)){
-        s <- paste0("the bnry.list needs to be a list of length 2 vectors ",
-                    "with unique values not containing any missing")
+        s <- paste0("the bnry.list needs to be a an empty list or a ",
+                    "list of length 2 vectors with unique values ",
+                    "not containing any missing")
         stop(s)
     }
     x
@@ -294,115 +319,3 @@ positive1 <- function(x, nm){
     }
     x
 }
-
-## a test for this param also exists in import-fncs-stab.R
-## dp_surv.prefix <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("surv.prefix")
-##     properties(x, nm = "surv.prefix", class = "logical",
-##                length = 1, na.ok = FALSE)
-##     x
-## }
-
-## dp_unit.id <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("unit.id")
-##     if(!is.null(x)){
-##         properties(x, nm = "unit.id", class = "character",
-##                    length = 1, na.ok = FALSE)
-##     }
-##     x
-## }
-
-## dp_gtab.defvar.rm <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("gtab.defvar.rm")
-##     properties(x, nm = "gtab.defvar.rm", class = "logical",
-##                length = 1, na.ok = FALSE)
-##     x
-## }
-
-## dp_weight.defvar.rm <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("weight.defvar.rm")
-##     properties(x, nm = "weight.defvar.rm", class = "logical",
-##                length = 1, na.ok = FALSE)
-##     x
-## }
-
-## dp_vtab.group.name <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("vtab.group.name")
-##     properties(x, nm = "vtab.group.name", class = "character",
-##                length = 1, na.ok = FALSE)
-##     x
-## }
-
-## dp_stab.group.name <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("stab.group.name")
-##     properties(x, nm = "stab.group.name", class = "character",
-##                length = 1, na.ok = FALSE)
-##     x
-## }
-
-## dp_gtab.group.name <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("gtab.group.name")
-##     properties(x, nm = "gtab.group.name", class = "character",
-##                length = 1, na.ok = FALSE)
-##     x
-## }
-
-
-## dp_sc <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("sc")
-##     properties(x, nm = "sc", class = "logical",
-##                length = 1, na.ok = FALSE)
-##     x
-## }
-
-## dp_sc.low <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("sc.low")
-##     properties(x, nm = "sc.low", class = c("numeric"),
-##                length = 1, na.ok = FALSE)
-##     if(x < 0) stop("'sc.low' should be positive")
-##     x
-## }
-
-## dp_sc.high <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("sc.high")
-##     properties(x, nm = "sc.high", class = c("numeric"),
-##                length = 1, na.ok = FALSE)
-##     if(x < 0) stop("'sc.high' should be positive")
-##     x
-## }
-
-## dp_p <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("p")
-##     properties(x, nm = "p", class = "logical",
-##                length = 1, na.ok = FALSE)
-##     x
-## }
-
-## dp_p.bound <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("p.bound")
-##     properties(x, nm = "p.bound", class = c("numeric"),
-##                length = 1, na.ok = FALSE)
-##     if(x < 0) stop("'p.bound' should be positive")
-##     x
-## }
-
-## dp_NAtext <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("NAtext")
-##     properties(x, nm = "NAtext", class = "character",
-##                length = 1, na.ok = FALSE)
-##     x
-## }
-
-## dp_units.name <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("units.name")
-##     properties(x, nm = "units.name", class = "character",
-##                length = 1, na.ok = FALSE)
-##     x
-## }
-
-## dp_grey.first <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("grey.first")
-##     properties(x, nm = "grey.first", class = "logical",
-##                length = 1, na.ok = FALSE)
-##     x
-## }

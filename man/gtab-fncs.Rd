@@ -2,13 +2,10 @@
 % Please edit documentation in R/import-fncs-gtab.R
 \name{gtab-fncs}
 \alias{gtab-fncs}
-\alias{create_gtab}
-\alias{check_gtab}
-\alias{gtab_equiv2factor}
-\alias{gtab2factor}
+\alias{gtab_maker}
 \title{group table (gtab) functions}
 \usage{
-create_gtab(
+gtab_maker(
   term,
   data,
   all = FALSE,
@@ -16,12 +13,6 @@ create_gtab(
   all.nm = NULL,
   rev = FALSE
 )
-
-check_gtab(gtab, n = NULL)
-
-gtab_equiv2factor(gtab, na.ok = FALSE, verbose = TRUE)
-
-gtab2factor(gtab, na.ok = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{term}{character; name of variable in data}
@@ -47,12 +38,5 @@ values permissible?}
 group table (gtab) functions
 }
 \details{
-create_gtab: create grouping table from a term in data
-
-check_gtab: check a grouping table
-
-gtab_equiv2factor: test if grouping table could be defined by a
-single factor
-
-gtab2factor: create a factor from a grouping table (if possible)
+gtab_maker: create grouping table from a term in data
 }

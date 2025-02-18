@@ -1,4 +1,4 @@
-##' Set baseline functions
+##' set baseline functions
 ##'
 ##' Quickly set baseline functions to some predefined set of functions.
 ##' @param desc the 'theme' for descriptives
@@ -184,7 +184,7 @@ surv.bl0 <- function(time, event, weight = NULL, time.unit = NULL, ...){
                  dform.num(r$Events),
                  dform.num(r$Rate))
     si <- "Time-to-event variable: events; rate"
-    data.frame(Variable = di.Variable(x, ...),
+    data.frame(Variable = di.Variable(event, ...),
                Summary = NA_desc_append(s, n.na),
                Summary.info = NA_info_append(si, n.na))
 }

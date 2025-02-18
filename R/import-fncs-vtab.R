@@ -1,24 +1,22 @@
 ## Note: these functions are 'imported' (copied) from another package, but will
 ## probably undergo many changes.
 
-default.vtab.group.name <- function() dparam("vtab.group.name")
+## default.vtab.group.name <- function() dparam("vtab.group.name")
 
-##' variable table (vtab) functions
-##'
-##' @param vtab data.frame; a "variable table" (vtab)
-##' @param vl list; a "variable list" (vlist) - older specification of variables
-##'     not really used any more
-##' @name vtab-fncs
-NULL
+# - #' variable table (vtab) functions
+# - #'
+# - #' @param vtab data.frame; a "variable table" (vtab)
+# - #' @name vtab-fncs
+## NULL
 
-##' @rdname vtab-fncs
-##' @details check_vtab: check a variable table, i.e. that it contains 'term',
-##'     'label' and possibly 'group'. It will addd variable group if missing.
-##' @export
+# - #' @rdname vtab-fncs
+# - #' @details check_vtab: check a variable table, i.e. that it contains 'term',
+# - #'     'label' and possibly 'group'. It will addd variable group if missing.
+# - #' @export
 check_vtab <- function(vtab){
     properties(vtab, class = "data.frame")
     if( !("group" %in% names(vtab)) ){
-        vtab$group <- default.vtab.group.name()
+        vtab$group <- dparam("vtab.group.name")
     }
     inclusion(names(vtab), nm = "names of variable table",
               include = c("term", "label", "group"))

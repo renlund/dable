@@ -35,8 +35,9 @@ test_data <- function(n = 1000, seed = 1){
     )
 
     ## some random missing
-    d$area[sample(1:n, size = 5)] <- NA_real_
+    d$area[sample(1:n, size = 5)] <- NA_character_
     d$measA[sample(1:n, size = 7)] <- NA_real_
+    d$index[sample(1:n, size = 1)] <- as.Date(NA_character_)
 
     ## some internal dependencies
     d <- within(

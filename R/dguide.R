@@ -59,8 +59,22 @@ dguide <- function(data, unit.id = NULL, elim.set = NULL,
     attr(TT, "missing") <- unlist(lapply(X = data[, terms_all, drop = FALSE],
                                          FUN = function(x) any(is.na(x))))
     if(!is.null(unit.id)) attr(TT, "unit.id") <- unit.id
+    class(TT) <- c("dguide", class(TT))
     TT
 }
+
+##' @exportS3Method
+print.dguide <- function(x, ...){
+    cat("data guide:\n")
+    print(as.data.frame(x))
+    stab <- attr(x, "stab")
+    if(!is.null(stab)){
+        cat("with stab:\n")
+        print(as.data.frame(stab))
+    }
+    invisible(NULL)
+}
+
 
 extract_labels <- function(x){
     terms <- names(x)
@@ -181,7 +195,6 @@ value_type <- function(x, bnry.list = list(), real.tol = 0, catg.tol = Inf){
     properties(bnry.list, class = c("list"))
     properties(real.tol, class = c("integer", "numeric"), length = 1, na.ok = FALSE)
     properties(catg.tol, class = c("integer", "numeric"), length = 1, na.ok = FALSE)
-    ## BNRY <- use_bnry.value(bnry.list)
     klass <- class(x)
     x_val <- if("factor" %in% klass){
                  levels(x)
@@ -206,7 +219,7 @@ value_type <- function(x, bnry.list = list(), real.tol = 0, catg.tol = Inf){
 }
 
 is.bnry <- function(x, bnry.list){
-    if(is.null(bnry.list)){
+    if(length(bnry.list) == 0){
         FALSE
     } else {
         foo <- function(z) setequal(z, x)
@@ -214,15 +227,6 @@ is.bnry <- function(x, bnry.list){
     }
 }
 
-## shuffle <- function (x, y){
-##     n <- length(x)
-##     if (length(y) != n) stop("no shuffle for you!")
-##     N <- 2 * n
-##     r <- rep(NA, N)
-##     r[seq(1, N, 2)] <- x
-##     r[seq(2, N, 2)] <- y
-##     r
-## }
 
 if(FALSE){
 
@@ -232,6 +236,8 @@ if(FALSE){
     unit.id <- "id"
     elim.set <- NULL
 
-    dguide(data, unit.id = "id", vtab=vtab, stab=stab)
+    g <- dguide(data, unit.id = "id", vtab=vtab, stab=stab)
+    class(g)
+    print(g)
 
 }
