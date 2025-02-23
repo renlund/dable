@@ -25,17 +25,18 @@
 datex <- function(dt,
                   format = TRUE,
                   size = "rows",
-                  kill = "term",
+                  kill = NULL,
                   grey = "term",
                   bl.method = "standard",
                   file = "",
                   where = "hbt",
-                  rowname = "Variable",
+                  rowname = NULL,
                   row.group = NULL,
                   rgroup = NULL,
                   n.rgroup = NULL,
                   insert.bottom = TRUE,
                   ...){
+    Dots <- list(...) ## Dots <- list()
     properties(format, nm = "format", class = "logical", length = 1, na.ok = FALSE)
     properties(file, nm = "file", class = "character", length = 1, na.ok = FALSE)
     properties(where, nm = "where", class = "character", length = 1, na.ok = FALSE)
@@ -45,18 +46,10 @@ datex <- function(dt,
                length = 0:1, na.ok = FALSE)
     Guide <- attr(dt, "guide")
     Term <- with(Guide, ifelse(type == "surv", label, term))
-    a <- align(dt$term, template = Term, group = Guide$group)
+    a <- align(dt$term, template = Term, group = Guide$group,
+               outgroup = dpget("vtab.group.name"))
     dt <- dt[a$order,]
-    if(!is.null(rowname)){
-        one_of(rowname, nm = "rowname", set = names(dt))
-        Rowname <- dt[[rowname]]
-        dt <- dable_prune(dt, rm = rowname)
-        dup <- duplicated(Rowname)
-        if(any(dup)){
-            mj <- mumbojumbo(n = sum(dup), prefix = "$\\phantom{", suffix = "}$")
-            Rowname[which(dup)] <- paste0(Rowname[which(dup)], mj)
-        }
-    } else Rowname <- NULL
+    grey <- get_grey(grey, dt)
     if(format) dt <- dable_format(dt)
     Ntxt <- attr2n(attributes(dt), size)
     BL <- attr(dt, "type") == "baseline"
@@ -64,6 +57,11 @@ datex <- function(dt,
         properties(bl.method, nm = "bl.method", class = "character",
                    length = 1, na.ok = FALSE)
         one_of(bl.method, nm = "bl.method", set = "standard")
+        if("Variable" %in% names(dt)){
+            rowname <- "Variable"
+            kill <- c(kill, "term")
+        } else rowname <- "term"
+        if(is.null(row.group)) row.group <- TRUE
         if(bl.method == "standard"){
             if(all(c("p.info", "p") %in% names(dt))){
                 dt <- dable_fnote(dt, info = "p.info", fn.var = "p",
@@ -76,11 +74,23 @@ datex <- function(dt,
             }
         }
     }
-    grey <- get_grey(grey, dt)
+    if(!is.null(rowname)){
+        one_of(rowname, nm = "rowname", set = names(dt))
+        Rowname <- dt[[rowname]]
+        dt <- dable_prune(dt, rm = rowname)
+        dup <- duplicated(Rowname)
+        if(any(dup)){
+            mj <- mumbojumbo(n = sum(dup), prefix = "$\\phantom{", suffix = "}$")
+            Rowname[which(dup)] <- paste0(Rowname[which(dup)], mj)
+        }
+    } else {
+        rowname <- "term"
+        Rowname <- dt[[rowname]]
+    }
     rg_ind <- if(!is.null(rgroup)){
                   FALSE
               } else if(is.null(row.group)){
-                  length(unique(a$group)) > 1
+                  length(unique(a$group.rle$values)) > 1
               } else isTRUE(row.group)
     ib <- if(is.null(insert.bottom) | isTRUE(insert.bottom)){
               paste0("{\\small\\begin{center}\\emph{",
@@ -90,12 +100,12 @@ datex <- function(dt,
               insert.bottom
           } else NULL
     DT <- dt
-    for(k in kill) DT <- dable_prune(DT, rm = kill)
+    for(k in unique(c(kill, rowname))) DT <- dable_prune(DT, rm = k)
     Part <- attr(DT, "part")
     Hh <- part2head(Part, names(DT), BL, Ntxt)
     names(DT) <- Hh$h
     cg <- rle(Hh$H)
-    Hmisc::latex(object = DT,
+    Args <- list(object = DT,
                  file = file,
                  where = where,
                  title = "",
@@ -105,9 +115,155 @@ datex <- function(dt,
                  rgroup = if(rg_ind) a$group.rle$values else rgroup,
                  n.rgroup = if(rg_ind) a$group.rle$lengths else n.rgroup,
                  rownamesTexCmd = grey,
-                 insert.bottom = ib,
-                 ...)
+                 insert.bottom = ib)
+    ## Hmisc::latex(object = DT,
+    ##              file = file,
+    ##              where = where,
+    ##              title = "",
+    ##              rowname = Rowname,
+    ##              cgroup = cg$values,
+    ##              n.cgroup = cg$lengths,
+    ##              rgroup = if(rg_ind) a$group.rle$values else rgroup,
+    ##              n.rgroup = if(rg_ind) a$group.rle$lengths else n.rgroup,
+    ##              rownamesTexCmd = grey,
+    ##              insert.bottom = ib,
+    ##              ...)
+    if(is.null(Dots$label)) Args$label <- paste0("tab:", mumbojumbo(1, m = 10))
+    do.call(what = Hmisc::latex, args = c(Args, Dots))
 }
+
+##' LaTeX code for a dable
+##'
+##' A wrapper for Hmisc::latex trying to create nice LaTeX code to present a
+##' dable
+##' @param dt object created by dable
+##' @param format logical; format the variables in dt?
+##' @param size character; what entity is presentet in row header 'rows',
+##'     'units' or 'weight'
+##' @param kill character vector; columns to remove for presentation
+##' @param grey character; which rows to make grey-ish in presentation
+##' @param file character; argument for Hmisc::latex
+##' @param where character; argument for Hmisc::latex
+##' @param row.group logical or NULL; use the grouping in guide? If NULL this
+##'     will be algorithmically decided
+##' @param insert.bottom character or logical; text to be placed under the
+##'     table. If TRUE, attr2text will be used to create this text
+##' @param ... arguments passed to Hmisc::latex
+##' @export
+datex.bl <- function(dt,
+                     format = TRUE,
+                     size = "rows",
+                     kill = "term",
+                     grey = "term",
+                     file = "",
+                     where = "hbt",
+                     row.group = NULL,
+                     insert.bottom = TRUE,
+                     ...){
+    Dots <- list(...) ## Dots <- list()
+
+    ## check arguments:
+    logi1(format)
+    char1(list('file' = file, 'where' = where, 'size' = size))
+    one_of(size, nm = "size", set = c("rows", "units", "weight"))
+    logi1(row.group, null.ok = TRUE)
+    char1(grey, null.ok = TRUE)
+    properties(insert.bottom, class = c("logical", "character"), length = 1,
+               na.ok = FALSE)
+
+    ## order according to guide:
+    A <- align_with_guide(d = dt)
+    dt <- dt[A$order,]
+
+    ## format:
+    if(format) dt <- dable_format(dt)
+
+    ## if NULL set row.group to TRUE if more than 1 group
+    if(is.null(row.group)) row.group <- length(unique(A$group.rle$values)) > 1
+
+    ## display p-value info as footnotes on the values
+    if(all(c("p.info", "p") %in% names(dt))){
+        dt <- dable_fnote(dt, info = "p.info", fn.var = "p",
+                          info.attr = "info", format = TRUE)
+    }
+
+    ## display info on summary measures as text inserted below the table
+    if("Summary.info" %in% names(dt)){
+        dt <- dable_prune(dt, rm = "Summary.info", info = TRUE,
+                          info.attr = "info", info.unique = TRUE,
+                          split.unique = TRUE)
+    }
+
+    ## the rowname argument is only necessary when rgroups are used, but easier
+    ## to always use them in this function. They have to be unique, so add some
+    ## hiden noise if not:
+    Rowname <- unique_latex_rownames(dt[["Variable"]])
+    dt <- dable_prune(dt, rm = "Variable")
+
+    ## establish what text to put below table, if any
+    ib <- x_true_then_y_else_x(x = insert.bottom,
+                               y = attr2text(dt),
+                               latex = TRUE)
+
+    ## create a copy of input and polish it for output
+    DT <- dt
+    for(k in unique(kill)) DT <- dable_prune(DT, rm = k)
+    Hh <- part2head(part = attr(DT, "part"),
+                    cnm = names(DT),
+                    bl = TRUE,
+                    ntxt = attr2n(attributes(dt), size))
+    names(DT) <- Hh$h
+    cg <- rle(Hh$H)
+
+    ## create list of arguments
+    Args <- list(object = DT,
+                 file = file,
+                 where = where,
+                 title = "",
+                 rowname = Rowname,
+                 cgroup = cg$values,
+                 n.cgroup = cg$lengths,
+                 rgroup = if(row.group) A$group.rle$values else NULL,
+                 n.rgroup = if(row.group) A$group.rle$lengths else NULL,
+                 rownamesTexCmd = get_grey(grey, dt),
+                 insert.bottom = ib)
+
+    ## if no label given, create one
+    if(is.null(Dots$label)) Args$label <- paste0("tab:", mumbojumbo(1, m = 10))
+
+    ## function call
+    do.call(what = Hmisc::latex, args = c(Args, Dots))
+}
+
+align_with_guide <- function(d){
+    Guide <- attr(d, "guide")
+    Term <- with(Guide, ifelse(type == "surv", label, term))
+    align(x = d$term,
+          template = Term,
+          group = Guide$group,
+          outgroup = dpget("vtab.group.name"))
+}
+
+unique_latex_rownames <- function(x){
+    dup <- duplicated(x)
+    if(any(dup)){
+        mj <- mumbojumbo(n = sum(dup), prefix = "$\\phantom{", suffix = "}$")
+        x[which(dup)] <- paste0(x[which(dup)], mj)
+    }
+    x
+}
+
+x_true_then_y_else_x <- function(x, y, latex = FALSE){
+    txt <- if(is.logical(x)){
+               if(isTRUE(x)) y else NULL
+           } else as.character(x)
+    if(latex){
+        if(!is.null(txt)){
+            paste0("{\\small\\begin{center}\\emph{", txt, "}\\end{center}}")
+        } else NULL
+    } else txt
+}
+
 
 ##' extract attributes
 ##'
@@ -196,8 +352,8 @@ capitalize <- function(s){
 }
 
 ## - ##' determine sequence of colors
-get_grey <- function(grey = NULL, x = NULL){
-    color_vec <- c("","rowcolor[gray]{.9}")
+get_grey <- function(grey = NULL, x = NULL, latex = TRUE){
+    color_vec <- if(latex) c("","rowcolor[gray]{.9}") else c(FALSE, TRUE)
     if(dparam("grey.first")) color_vec <- rev(color_vec)
     if(is.null(grey)){
         NULL

@@ -1,6 +1,6 @@
 Package: dable
 Title: Package for Summary Tables
-Version: 0.0.1.9100
+Version: 0.0.1.9101
 Authors@R:
     person("Henrik", "Renlund", , "henrikrenlund@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
