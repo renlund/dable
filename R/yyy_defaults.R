@@ -183,44 +183,46 @@ dparam <- function(param, value = NULL){
         real.tol = dp_real.tol(value),
         catg.tol = dp_catg.tol(value),
         ## surv.prefix = dp_surv.prefix(value),
-        surv.prefix = logic1(value, p),
+        surv.prefix = dp_logic1_(value, p),
         surv.affix = dp_surv.affix(value),
         ## unit.id = dp_unit.id(value),
-        unit.id = char1(value, p),
+        unit.id = dp_char1_(value, p, null.ok = TRUE),
         ## gtab.defvar.rm = dp_gtab.defvar.rm(value),
-        gtab.defvar.rm = logic1(value, p),
+        gtab.defvar.rm = dp_logic1_(value, p),
         ## weight.defvar.rm = dp_weight.defvar.rm(value),
-        weight.defvar.rm = logic1(value, p),
+        weight.defvar.rm = dp_logic1_(value, p),
         ## stab.group.name = dp_stab.group.name(value),
-        stab.group.name = char1(value, p),
+        stab.group.name = dp_char1_(value, p),
         ## vtab.group.name = dp_vtab.group.name(value),
-        vtab.group.name = char1(value, p),
+        vtab.group.name = dp_char1_(value, p),
         ## gtab.group.name = dp_gtab.group.name(value),
-        gtab.group.name = char1(value, p),
+        gtab.group.name = dp_char1_(value, p),
         ## units.name = dp_units.name(value),
-        units.name = char1(value, p),
+        units.name = dp_char1_(value, p),
         digits = dp_digits(value),
         ## sc = dp_sc(value),
-        sc = logic1(value, p),
+        sc = dp_logic1_(value, p),
         ## sc.low = dp_sc.low(value),
-        sc.low = positive1(value, p),
+        sc.low = dp_positive1_(value, p),
         ## sc.high = dp_sc.high(value),
-        sc.high = positive1(value, p),
+        sc.high = dp_positive1_(value, p),
         ## p = dp_p(value),
-        p = logic1(value, p),
+        p = dp_logic1_(value, p),
         ## p.bound = dp_p.bound(value),
-        p.bound = positive1(value, p),
+        p.bound = dp_positive1_(value, p),
         ## NAtext = dp_NAtext(value),
-        NAtext = char1(value, p),
-        NAalias = char1(value, p),
+        NAtext = dp_char1_(value, p),
+        NAalias = dp_char1_(value, p),
         ## grey.first = dp_grey.first(value),
-        grey.first = logic1(value, p),
-        output = char1(value, p),
-        dable.sep = char1(value, p),
-        dable.indent = char1(value, p),
+        grey.first = dp_logic1_(value, p),
+        output = dp_char1_(value, p),
+        dable.sep = dp_char1_(value, p),
+        ## dable.indent = dp_char1_(value, p),
+        dable.indent = dp_indent(value, p),
         if(is.null(value)) dpget(p) else value
     )
 }
+
 
 ## dp_-functions below are sanity tests for parameter values
 dp_bnry.list <- function(x = NULL){
@@ -298,19 +300,36 @@ dp_digits <- function(x = NULL){
     x
 }
 
-char1 <- function(x, nm){
-    if(is.null(x)) x <- dpget(nm)
-    properties(x, nm = nm, class = "character", length = 1, na.ok = FALSE)
+dp_indent <- function(x){
+    dp_char1(x = x, nm = "indent")
+    if(x == ""){
+        s <- paste0("indent should not be a zero length string")
+        stop(s)
+    }
     x
 }
 
-logic1 <- function(x, nm){
+dp_char1_ <- function(x, nm, null.ok = FALSE){
     if(is.null(x)) x <- dpget(nm)
-    properties(x, nm = nm, class = "logical", length = 1, na.ok = FALSE)
+    if(null.ok && is.null(x)){
+        "nothing needs doing"
+    } else {
+        properties(x, nm = nm, class = "character", length = 1, na.ok = FALSE)
+    }
     x
 }
 
-positive1 <- function(x, nm){
+dp_logic1_ <- function(x, nm, null.ok = FALSE){
+    if(is.null(x)) x <- dpget(nm)
+    if(null.ok && is.null(x)){
+        "nothing needs doing"
+    } else {
+        properties(x, nm = nm, class = "logical", length = 1, na.ok = FALSE)
+    }
+    x
+}
+
+dp_positive1_ <- function(x, nm){
     if(is.null(x)) x <- dpget(nm)
     properties(x, nm = nm, class = "numeric", length = 1, na.ok = FALSE)
     if(x < 0){

@@ -62,6 +62,7 @@ dform.num.vec <- function(x, ...){
 dprintf <- function(x, d, type) sprintf(paste0("%.", d, type), x)
 
 dform.text <- function(x, output = NULL){
+    if("Date" %in% class(x)) x <- as.character(x)
     properties(x, class = c("character", "factor"), length = 1, na.ok = TRUE)
     ## shorten too long strings with ... ?
     ## options for latexifying text ?
