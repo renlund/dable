@@ -6,25 +6,55 @@
 #-# @param class required class
 #-# @param length required length
 #-# @param na.ok are missing values ok?
-properties <- function(x, nm = NULL, class = NULL, length = NULL, na.ok = NULL){
+#-# @param null.ok is a NULL value ok?
+properties <- function(x, nm = NULL, class = NULL, length = NULL,
+                       na.ok = NULL, null.ok = NULL){
+    if(class(x)[1] == "list" && !("list" %in% class)){
+        for(i in seq_along(x)){
+            properties(x = x[[i]], nm = names(x)[i], class = class, length = length,
+                       na.ok = na.ok, null.ok = null.ok)
+        }
+        return(invisible(TRUE))
+    }
     if(is.null(nm)) nm <- paste0(as.character(substitute(x)), collapse = " ")
-    if(!is.null(class)){
-        s <- sprintf("\n%s fails to be in class {%s}", nm,
-                     paste0(class, collapse = ", "))
-        if(!any(class(x) %in% class)) stop(s)
-    }
-    if(!is.null(length)){
-        s <- sprintf("\n%s fails to have length in {%s}", nm,
-                     paste0(length, collapse = ", "))
-        if(!length(x) %in% length) stop(s)
-    }
-    if(!is.null(na.ok)){
-        if(!na.ok){
-            s <- sprintf("\n%s contains missing values", nm)
-            if(any(is.na(x))) stop(s)
+    if(is.null(x) && isTRUE(null.ok)){
+        "nothing to do here"
+    } else {
+        if(isFALSE(null.ok)){
+            s <- sprintf("\n%s cannot be NULL", nm)
+            if(is.null(x)) stop(s)
+        }
+        if(!is.null(class)){
+            s <- sprintf("\n%s fails to be in class {%s}", nm,
+                         paste0(class, collapse = ", "))
+            if(!any(class(x) %in% class)) stop(s)
+        }
+        if(!is.null(length)){
+            s <- sprintf("\n%s fails to have length in {%s}", nm,
+                         paste0(length, collapse = ", "))
+            if(!length(x) %in% length) stop(s)
+        }
+        if(!is.null(na.ok)){
+            if(!na.ok){
+                s <- sprintf("\n%s contains missing values", nm)
+                if(any(is.na(x))) stop(s)
+            }
         }
     }
     invisible(TRUE)
+}
+
+char1 <- function(x, nm = NULL, null.ok = FALSE){
+    properties(x = x, nm = nm, class = "character", length = 1,
+               na.ok = FALSE, null.ok = null.ok)
+}
+logi1 <- function(x, nm = NULL, null.ok = FALSE){
+    properties(x = x, nm = nm, class = "logical", length = 1,
+               na.ok = FALSE, null.ok = null.ok)
+}
+numi1 <- function(x, nm = NULL, null.ok = FALSE){
+    properties(x = x, nm = nm, class = c("numeric", "integer"), length = 1,
+               na.ok = FALSE, null.ok = null.ok)
 }
 
 #-# required inclusion
@@ -128,4 +158,58 @@ rename <- function(x, avoid, prefix = ".", suffix = NULL, limit = 10){
         dummy <- dummy + 1
     }
     if(dummy > limit) stop("fail") else x
+}
+
+
+
+if(FALSE){
+
+    test0 <- function(foo){
+        properties(foo, class = "integer", na.ok = FALSE)
+        if(!is.null(foo)) foo else 0L
+    }
+    test0(1L)
+    test0(NULL)
+    test0("a")
+
+    test1 <- function(foo){
+        properties(foo, class = "integer", na.ok = FALSE, null.ok = TRUE)
+        if(!is.null(foo)) foo else 0L
+    }
+    test1(1L)
+    test1(NULL)
+    test1("a")
+
+    test2 <- function(foo){
+        properties(foo, class = "integer", na.ok = FALSE, null.ok = FALSE)
+        if(!is.null(foo)) foo else 0L
+    }
+    test2(1L)
+    test2(NULL)
+    test2("a")
+
+    test3 <- function(foo, bar){
+        properties(x = list(foo = foo, bar = bar),
+                   class = "logical", length = 1,
+                   na.ok = FALSE,
+                   null.ok = FALSE)
+        foo && bar
+    }
+    test3(T,T)
+    test3(T,F)
+    test3(T, c(T,F))
+    test3(NULL, T)
+
+    test4 <- function(foo, bar){
+        properties(x = list(foo, bar),
+                   class = "logical", length = 1,
+                   na.ok = FALSE,
+                   null.ok = FALSE)
+        foo && bar
+    }
+    test4(T,T)
+    test4(T,F)
+    test4(T, c(T,F))
+    test4(NULL, T)
+
 }
