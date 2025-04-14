@@ -21,7 +21,7 @@ align <- function(x, template = NULL, group = NULL, all = TRUE, outgroup = ".Oth
     }
     if(is.null(template)) template = sort(unique(x))
     m <- match(x, template)
-    distinct_m <- sort(unique(na.omit(m)))
+    distinct_m <- sort(unique(stats::na.omit(m)))
     order <- rep(NA_integer_, length(x))
     dummy <- 0L
     for(d in distinct_m){

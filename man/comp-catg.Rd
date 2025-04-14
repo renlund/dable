@@ -13,6 +13,11 @@ catg.std(x, g, weight = NULL, catg.full.length = FALSE, ...)
 \item{g}{grouping variable}
 
 \item{weight}{case weight}
+
+\item{catg.full.length}{logical; return dimension equal to the input (is
+this EVER wanted?)}
+
+\item{...}{arguments passed}
 }
 \description{
 functions to compare catg variables

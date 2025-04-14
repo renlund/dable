@@ -21,6 +21,7 @@
 ##' @param insert.bottom character or logical; text to be placed under the
 ##'     table. If TRUE, attr2text will be used to create this text
 ##' @param ... arguments passed to Hmisc::latex
+##' @importFrom Hmisc latex
 ##' @export
 datex <- function(dt,
                   format = TRUE,
@@ -369,13 +370,13 @@ get_grey <- function(grey = NULL, x = NULL, latex = TRUE){
                            "recognised as a column"))
             NULL
         } else {
-            if(class(grey_var) == "factor") grey_var <- as.character(grey_var)
+            if("factor" %in% class(grey_var)) grey_var <- as.character(grey_var)
             ns <- rle(grey_var)$lengths
             rep(rep(color_vec, length.out = length(ns)), ns)
         }
     } else {
         if(length(grey) == nrow(x)){
-            if(class(grey) == "factor") grey <- as.character(grey)
+            if("factor" %in% class(grey)) grey <- as.character(grey)
             ns <- rle(grey)$lengths
             rep(rep(color_vec, length.out = length(ns)), ns)
         } else {
@@ -483,6 +484,7 @@ concatenate_attributes <- function(x, a){
 ##' @param fn.var variable to get footnotes
 ##' @param info.attr name of attribute to store info in
 ##' @param format format the dable?
+##' @importFrom stats na.omit
 ##' @export
 dable_fnote <- function(dt, info, fn.var,
                          info.attr = "info",
@@ -555,7 +557,7 @@ attr2n <- function(attr, n){
                c(rows = "n", units = "u", weight = "w")[n]
            }
     if(!is.null(Ng)){
-        setNames(paste(Nnm, "=", Ng), nm = names(Ng))
+        stats::setNames(paste(Nnm, "=", Ng), nm = names(Ng))
     } else paste(Nnm, "=", N)
 }
 

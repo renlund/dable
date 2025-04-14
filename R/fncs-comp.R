@@ -8,6 +8,7 @@
 ##' @param x input vector
 ##' @param weight case weight
 ##' @param g grouping variable
+##' @param ... arguments passed
 ##' @name comp-real
 NULL
 
@@ -32,8 +33,12 @@ attr(real.std, "label") <- .stddiff()
 ##'
 ##' functions to compare catg variables
 ##' @param x input vector
-##' @param weight case weight
 ##' @param g grouping variable
+##' @param weight case weight
+##' @param catg.full.length logical; return dimension equal to the input (is
+##'     this EVER wanted?)
+##' @param ... arguments passed
+##' @importFrom MASS ginv
 ##' @name comp-catg
 NULL
 
@@ -82,6 +87,7 @@ attr(catg.std, "label") <- .stddiff()
 ##' @param x input vector
 ##' @param weight case weight
 ##' @param g grouping variable
+##' @param ... arguments passed
 ##' @name comp-date
 NULL
 
@@ -103,6 +109,7 @@ attr(date.std, "label") <- .stddiff()
 ##' @param event event component of time-to-event variable
 ##' @param weight case weight
 ##' @param g grouping variable
+##' @param ... arguments passed
 ##' @name comp-surv
 NULL
 

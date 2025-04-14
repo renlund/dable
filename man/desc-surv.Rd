@@ -15,6 +15,8 @@ eventrate(time, event, weight = NULL, time.unit = NULL, ...)
 \item{weight}{case weight}
 
 \item{time.unit}{numeric; if provided 'time' will be divided by this number}
+
+\item{...}{arguments passed}
 }
 \description{
 functions to describe surv variables

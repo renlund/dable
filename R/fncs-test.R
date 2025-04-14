@@ -23,6 +23,7 @@ tryElseNA <- function(expr){
 ##' functions to test any variables
 ##' @param x input vector
 ##' @param g grouping variable
+##' @param ... arguments passed
 ##' @name test-all
 NULL
 
@@ -59,6 +60,8 @@ attr(noTest.bl, "meta") <- c("p.info")
 ##' functions to test real variables
 ##' @param x input vector
 ##' @param g grouping variable
+##' @param ... arguments passed
+##' @importFrom stats wilcox.test kruskal.test anova lm
 ##' @name test-real
 NULL
 
@@ -69,7 +72,7 @@ META_param <- function(x, g, bl = TRUE){
     p.info <- if(n_lev<=1) "no test" else if(n_lev==2) "t-test" else "F-test"
     if(n_lev > 1){
         ## p <- tryElseNA(anova(lm(x ~ g, weights = weight))[['Pr(>F)']][1])
-        p <- tryElseNA(anova(lm(x ~ g))[['Pr(>F)']][1])
+        p <- tryElseNA(stats::anova(stats::lm(x ~ g))[['Pr(>F)']][1])
     }
     if(bl){
        data.frame(p = p, p.info = p.info)
@@ -145,6 +148,8 @@ attr(nonparam.bl, "meta") <- c("p.info")
 ##' functions to test catg variables
 ##' @param x input vector
 ##' @param g grouping variable
+##' @param ... arguments passed
+##' @importFrom stats chisq.test
 ##' @name test-catg
 NULL
 
@@ -197,6 +202,7 @@ attr(catg.chisq.bl, "meta") <- c("p.info")
 ##' functions to test date variables
 ##' @param x input vector
 ##' @param g grouping variable
+##' @param ... arguments passed
 ##' @name test-date
 NULL
 
@@ -227,6 +233,8 @@ attr(nonparam, "meta") <- c("p.info")
 ##' @param time time component of time-to-event variable
 ##' @param event event component of time-to-event variable
 ##' @param g grouping variable
+##' @param ... arguments passed
+##' @importFrom survival survdiff Surv
 ##' @name test-surv
 NULL
 

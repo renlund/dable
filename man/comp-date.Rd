@@ -13,6 +13,8 @@ date.std(x, g, weight = NULL, ...)
 \item{g}{grouping variable}
 
 \item{weight}{case weight}
+
+\item{...}{arguments passed}
 }
 \description{
 functions to compare date variables

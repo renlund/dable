@@ -26,6 +26,8 @@ d.mode(x, weight = NULL, ...)
 \item{x}{input vector}
 
 \item{weight}{case weight}
+
+\item{...}{arguments passed}
 }
 \description{
 functions to describe any variable

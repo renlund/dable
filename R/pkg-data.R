@@ -3,6 +3,7 @@
 ##' @title test data
 ##' @param n integer; number of rows (at least 10)
 ##' @param seed numeric; seed for random number generator
+##' @importFrom stats rnorm rexp rbinom runif
 ##' @return A data.frame
 ##' @export
 test_data <- function(n = 1000, seed = 1){
@@ -22,16 +23,16 @@ test_data <- function(n = 1000, seed = 1){
                          levels = c("SW", "NO", "DE")),
         area = sample(c("rural", "urban"), size = n, replace = TRUE, prob = c(1,4)),
         offspring = sample(c(TRUE, FALSE), size = n, replace = TRUE, prob = c(3,1)),
-        age = round(rnorm(n, 55, 10)),
+        age = round(stats::rnorm(n, 55, 10)),
         male = sample(0:1, size = n, replace = TRUE, prob = c(.55,.45)),
-        measA = rexp(n, 1/40),
+        measA = stats::rexp(n, 1/40),
         measNA = NA_real_,
-        forgotten = runif(n, -1,1),
+        forgotten = stats::runif(n, -1,1),
         importance = sample(seq(0.1, 6, by = .1), size = n, replace = TRUE),
-        index = as.Date("2017-01-01") + runif(n, min = 0, max = 729),
-        posix = as.POSIXct(runif(n, 1485000000, 1495000000)),
-        ev.foo = rbinom(n, 1, prob = .2),
-        ev.bar = rbinom(n, 1, prob = .3)
+        index = as.Date("2017-01-01") + stats::runif(n, min = 0, max = 729),
+        posix = as.POSIXct(stats::runif(n, 1485000000, 1495000000)),
+        ev.foo = stats::rbinom(n, 1, prob = .2),
+        ev.bar = stats::rbinom(n, 1, prob = .3)
     )
 
     ## some random missing
@@ -56,14 +57,14 @@ test_data <- function(n = 1000, seed = 1){
             gender <- factor(ifelse(male == 1, "male", "female"),
                              levels = c("male", "female"))
             measM <- ifelse(male == 1,
-                            yes = rexp(n, 1/50),
+                            yes = stats::rexp(n, 1/50),
                             no = NA_real_)
             measB <- ifelse(country != "NO",
-                            yes = rexp(n, 1/60),
+                            yes = stats::rexp(n, 1/60),
                             no = NA_real_)
             end <- index + 365
-            t.foo <- ifelse(ev.foo == 1, runif(n, 1, 365), 365)
-            t.bar <- ifelse(ev.bar == 1, runif(n, 10, 365), 365)
+            t.foo <- ifelse(ev.foo == 1, stats::runif(n, 1, 365), 365)
+            t.bar <- ifelse(ev.bar == 1, stats::runif(n, 10, 365), 365)
         }
     )
 
@@ -75,9 +76,10 @@ test_data <- function(n = 1000, seed = 1){
 ##'     each term.
 ##' @param include.tte logical; include time-to-event variables? These are
 ##'     perhaps better kept track of in a 'stab'
+##' @importFrom utils read.csv
 ##' @export
 test_vtab <- function(include.tte = FALSE){
-    meta <- read.csv(text = "
+    meta <- utils::read.csv(text = "
 term, label
 id, ID (integer)
 pid, ID
@@ -125,7 +127,7 @@ t.bar, Bar
 ##'     relevant variables
 ##' @export
 test_stab <- function(){
-    read.csv(text = "
+    utils::read.csv(text = "
 label, time, event
 Foo, t.foo, ev.foo
 Bar, t.bar, ev.bar

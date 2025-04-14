@@ -14,6 +14,9 @@
 ##'     and footnotes
 ##' @param insert.bottom character or logical; text to be placed under the
 ##'     table. If TRUE, attr2text will be used to create this text
+##' @importFrom flextable flextable set_table_properties merge_h
+##'     add_footer_lines footnote as_paragraph bg add_header_row
+##'     fp_border_default bold italic fontsize
 ##' @export
 flexdable <- function(dt,
                       format = TRUE,
@@ -102,33 +105,32 @@ flexdable <- function(dt,
     names(DT) <- Hh$H
 
     ## initiate flextable
-    library(flextable) ## XK fix this with import
-    ft <- flextable(DT)
-    ft <- set_table_properties(ft, opts_pdf = list(tabcolsep = 3),
-                               layout = "autofit")
+    ft <- flextable::flextable(DT)
+    ft <- flextable::set_table_properties(ft, opts_pdf = list(tabcolsep = 3),
+                                          layout = "autofit")
 
     ## make row group rows into a single cell
     if(row.group){
         for(i in rg_index){
-            ft <- merge_h(ft, i = i)
+            ft <- flextable::merge_h(ft, i = i)
         }
     }
 
     ## add text below
-    ft <- add_footer_lines(ft, values = paste0(ib, ". "))
+    ft <- flextable::add_footer_lines(ft, values = paste0(ib, ". "))
 
     ## add footnotes on p-values
     if(!is.null(p.info)){
-        tests <- unique(na.omit(p.info))
+        tests <- unique(stats::na.omit(p.info))
         j <- which(names(DT) == "Test")
         dummy <- FALSE
         for(i in seq_along(tests)){ ## i = 1
             t <- tests[i]
             indx <- which(!is.na(DT$Test) & DT$Test != "" &
                           !is.na(p.info) & p.info == t)
-            ft <- footnote(ft, i = indx, j = j,
-                           value = as_paragraph(t),
-                           ref_symbols = letters[i], inline = dummy)
+            ft <- flextable::footnote(ft, i = indx, j = j,
+                                      value = flextable::as_paragraph(t),
+                                      ref_symbols = letters[i], inline = dummy)
             dummy <- TRUE
         }
     }
@@ -141,23 +143,24 @@ flexdable <- function(dt,
     ## iindx <- which(grepl(paste0("^", dable.indent), dt$Variable))
 
     ## grey
-    ft <- bg(ft, i = which(gindex), bg = "#EFEFEF")
+    ft <- flextable::bg(ft, i = which(gindex), bg = "#EFEFEF")
 
     ## remains: insert line in head (n = ... )
-    ft <- add_header_row(ft, values = Hh$h, top = FALSE)
-    ft <- hline(ft, i = 1, border = fp_border_default(width = 0),
-                part = "header")
+    ft <- flextable::add_header_row(ft, values = Hh$h, top = FALSE)
+    ft <- flextable::hline(ft, i = 1,
+                           border = flextable::fp_border_default(width = 0),
+                           part = "header")
 
-    ft <- bold(ft, i = 1, part = "header")
-    ft <- italic(ft, i = 2, part = "header")
+    ft <- flextable::bold(ft, i = 1, part = "header")
+    ft <- flextable::italic(ft, i = 2, part = "header")
 
-    ft <- fontsize(ft, size = fontsize[1], part = "header")
-    ft <- fontsize(ft, size = fontsize[2], part = "body")
-    ft <- fontsize(ft, size = fontsize[3], part = "footer")
+    ft <- flextable::fontsize(ft, size = fontsize[1], part = "header")
+    ft <- flextable::fontsize(ft, size = fontsize[2], part = "body")
+    ft <- flextable::fontsize(ft, size = fontsize[3], part = "footer")
 
     ## ft <- bold(ft, i = 1, part = "head")
-    ft <- bold(ft, i = rg_index, j = 1)
-    ft <- italic(ft, i = setdiff(1:nrow(DT), rg_index), j = 1)
+    ft <- flextable::bold(ft, i = rg_index, j = 1)
+    ft <- flextable::italic(ft, i = setdiff(1:nrow(DT), rg_index), j = 1)
 
     ## print(ft, preview = "docx")
     ## print(ft, preview = "html")

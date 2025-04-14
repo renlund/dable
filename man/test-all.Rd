@@ -14,6 +14,8 @@ noTest.bl(x, g, ...)
 \item{x}{input vector}
 
 \item{g}{grouping variable}
+
+\item{...}{arguments passed}
 }
 \description{
 functions to test any variables

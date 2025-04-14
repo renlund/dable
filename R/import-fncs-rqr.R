@@ -146,7 +146,7 @@ renaming_key <- function(x, nm = NULL, avoid, prefix = '.', suffix = NULL,
             z <- paste(paste0(x.org[i], " -> ", x[i]), collapse = ", ")
             message("Suggested changes: ", z)
         }
-        setNames(x, nm = x.org)
+        stats::setNames(x, nm = x.org)
     }
 }
 

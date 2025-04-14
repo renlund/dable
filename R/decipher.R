@@ -57,7 +57,7 @@ decipher <- function (x, key, flexible = TRUE, within = FALSE) {
             n1 <- sum(names(key) %in% x)
             n2 <- sum(key %in% x)
         }
-        if(n2 > n1) key <- setNames(names(key), nm = key)
+        if(n2 > n1) key <- stats::setNames(names(key), nm = key)
     }
     if(within){
         r <- x

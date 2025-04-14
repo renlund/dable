@@ -3,6 +3,9 @@
 ##' Description functions that work together
 ##' @param x input vector
 ##' @param weight case weight
+##' @param time time component of time-to-event variable
+##' @param event event component of time-to-event variable
+##' @param time.unit unit of time to present in
 ##' @param ... arguments passed along
 ##' @name baseline-standard-2
 NULL

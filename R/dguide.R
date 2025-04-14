@@ -199,7 +199,7 @@ value_type <- function(x, bnry.list = list(), real.tol = 0, catg.tol = Inf){
     x_val <- if("factor" %in% klass){
                  levels(x)
              } else {
-                 sort(unique(na.omit(x)))
+                 sort(unique(stats::na.omit(x)))
              }
     n_val <- length(x_val)
     type <- if(n_val == 0){

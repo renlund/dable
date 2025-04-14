@@ -11,6 +11,8 @@ bnry.count_prop(x, weight = NULL, ...)
 \item{x}{input vector}
 
 \item{weight}{case weight}
+
+\item{...}{arguments passed}
 }
 \description{
 functions to describe bnry variables

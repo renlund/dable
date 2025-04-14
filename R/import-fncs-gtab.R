@@ -6,10 +6,6 @@
 ##' @param all.first logical; put 'all' first
 ##' @param all.nm character; name of 'all' column
 ##' @param rev logical; reverse order of the levels of 'term
-##' @param gtab data.frame; a "grouping table" (gtab)
-##' @param n optional; number of rows wanted
-##' @param na.ok logical; when considering a gtab as a factor, are missing
-##' values permissible?
 ##' @name gtab-fncs
 NULL
 

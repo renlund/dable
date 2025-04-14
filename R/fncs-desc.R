@@ -9,6 +9,7 @@ placeholder2 <- function(...) data.frame(p=NA, p.info="no test")
 ##' functions to describe any variable
 ##' @param x input vector
 ##' @param weight case weight
+##' @param ... arguments passed
 ##' @name desc-all
 NULL
 
@@ -16,7 +17,7 @@ NULL
 ##' @details d.n: length of non-missing x or sum of weights (if given)
 ##' @export
 d.n <- function(x, weight = NULL, ...){
-    if(is.null(weight)) length(x[!is.na(x)]) else sum(w[!is.na(x)])
+    if(is.null(weight)) length(x[!is.na(x)]) else sum(weight[!is.na(x)])
 }
 attr(d.n, "label") <- "N"
 
@@ -67,6 +68,10 @@ attr(d.mode, "label") <- "Mode"
 ##' functions to describe real variables
 ##' @param x input vector
 ##' @param weight case weight
+##' @param probs probabilities
+##' @param ... arguments passed
+##' @importFrom stats weighted.mean
+##' @importFrom Hmisc wtd.quantile
 ##' @name desc-real
 NULL
 
@@ -112,7 +117,7 @@ attr(d.mean, "label") <- "Mean"
 ##' @export
 d.sd <- function(x, weight = NULL, ...){
     if(is.null(weight)){
-        sd(x, na.rm = TRUE)
+        stats::sd(x, na.rm = TRUE)
     } else {
         y <- x[!is.na(x)]
         w <- weight[!is.na(x)]
@@ -165,6 +170,7 @@ quartile <- function(x, weight = NULL, ...){
 ##' functions to describe bnry variables
 ##' @param x input vector
 ##' @param weight case weight
+##' @param ... arguments passed
 ##' @name desc-bnry
 NULL
 
@@ -198,6 +204,7 @@ attr(bnry.count_prop, "meta") <- c("Level")
 ##' functions to describe catg variables
 ##' @param x input vector
 ##' @param weight case weight
+##' @param ... arguments passed
 ##' @name desc-catg
 NULL
 
@@ -225,6 +232,7 @@ attr(catg.count_prop, "meta") <- "Level" ## XK ?
 ##' functions to describe lcat variables
 ##' @param x input vector
 ##' @param weight case weight
+##' @param ... arguments passed
 ##' @name desc-lcat
 NULL
 
@@ -236,6 +244,7 @@ NULL
 ##' functions to describe date variables
 ##' @param x input vector
 ##' @param weight case weight
+##' @param ... arguments passed
 ##' @name desc-date
 NULL
 
@@ -247,6 +256,7 @@ NULL
 ##' @param time time component of time-to-event variable
 ##' @param event event component of time-to-event variable
 ##' @param weight case weight
+##' @param ... arguments passed
 ##' @name desc-surv
 NULL
 

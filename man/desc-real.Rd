@@ -31,7 +31,11 @@ quartile(x, weight = NULL, ...)
 \arguments{
 \item{x}{input vector}
 
+\item{...}{arguments passed}
+
 \item{weight}{case weight}
+
+\item{probs}{probabilities}
 }
 \description{
 functions to describe real variables

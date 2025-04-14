@@ -30,6 +30,9 @@ bl_theme <- function(desc = "default", comp = NULL, test = NULL){
 ##' and in set 1 by mean (standard deviation).
 ##' @param x input vector
 ##' @param weight case weight
+##' @param time time component of time-to-event variable
+##' @param event event component of time-to-event variable
+##' @param time.unit unit of time to present in
 ##' @param ... arguments passed along
 ##' @name baseline-standard
 NULL

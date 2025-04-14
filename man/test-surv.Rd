@@ -16,6 +16,8 @@ logrank.bl(time, event, g, ...)
 \item{event}{event component of time-to-event variable}
 
 \item{g}{grouping variable}
+
+\item{...}{arguments passed}
 }
 \description{
 functions to test surv variables

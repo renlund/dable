@@ -31,6 +31,12 @@ surv.bl0(time, event, weight = NULL, time.unit = NULL, ...)
 \item{weight}{case weight}
 
 \item{...}{arguments passed along}
+
+\item{time}{time component of time-to-event variable}
+
+\item{event}{event component of time-to-event variable}
+
+\item{time.unit}{unit of time to present in}
 }
 \description{
 Description functions that work together. Function sets 0 and 1 are

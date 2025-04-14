@@ -26,13 +26,6 @@ gtab_maker(
 \item{all.nm}{character; name of 'all' column}
 
 \item{rev}{logical; reverse order of the levels of 'term}
-
-\item{gtab}{data.frame; a "grouping table" (gtab)}
-
-\item{n}{optional; number of rows wanted}
-
-\item{na.ok}{logical; when considering a gtab as a factor, are missing
-values permissible?}
 }
 \description{
 group table (gtab) functions

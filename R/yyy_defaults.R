@@ -125,13 +125,15 @@ dpset_defaults <- function(overwrite = TRUE){
     invisible()
 }
 
-subtypes.key <- setNames(object = c("catg", "catg"),
-                         nm = c("bnry", "lcat"))
+
+subtypes.key <- stats::setNames(object = c("catg", "catg"),
+                                nm = c("bnry", "lcat"))
 
 ##' @rdname parameter-fncs
 ##' @details get package parameter
 ##' @param verbose logical; get (possibly) helpful messages?
 ##' @param sub logical; search for possible replacement values?
+##' @importFrom stats setNames
 ##' @export
 dpget <- function(param, verbose = FALSE, sub = TRUE){
     r <- options(optName(param))[[1]]
@@ -218,7 +220,7 @@ dparam <- function(param, value = NULL){
         output = dp_char1_(value, p),
         dable.sep = dp_char1_(value, p),
         ## dable.indent = dp_char1_(value, p),
-        dable.indent = dp_indent(value, p),
+        dable.indent = dp_indent(value),
         if(is.null(value)) dpget(p) else value
     )
 }
@@ -301,7 +303,7 @@ dp_digits <- function(x = NULL){
 }
 
 dp_indent <- function(x){
-    dp_char1(x = x, nm = "indent")
+    dp_char1_(x = x, nm = "indent")
     if(x == ""){
         s <- paste0("indent should not be a zero length string")
         stop(s)
