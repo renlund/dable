@@ -1,0 +1,173 @@
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{dable-latex}
+%\VignetteEncoding{UTF-8}
+\documentclass{article}
+\addtolength{\hoffset}{-1cm}
+\addtolength{\textwidth}{2cm}
+\usepackage{longtable}
+% \usepackage[table]{xcolor}
+% \addtolength{\voffset}{-1.5cm}
+% \addtolength{\textheight}{3cm}
+
+\title{dable and \LaTeX}
+\author{Henrik Renlund}
+
+<<"setup", cache = FALSE, echo = FALSE, include = FALSE>>=
+library(knitr)
+library(dable)
+## devtools::load_all()
+opts_chunk$set(include = TRUE,
+               echo = TRUE,
+               cache = FALSE,
+               error = FALSE)
+if(FALSE){
+    knitr::knit2pdf("dable-and-latex.rnw", clean = TRUE)
+    shell.exec("dable-and-latex.pdf")
+}
+dpset_defaults(overwrite = TRUE)
+@
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Setup}
+
+<<"data">>=
+d <- test_data()
+vt <- test_vtab()
+st <- test_stab()
+g <- dguide(d, unit.id = "id", vtab = vt, stab = st, catg.tol = 15)
+## key <- with(subset(g, type != "surv"), setNames(label, term))
+key <- with(g, setNames(label, ifelse(type == "surv", label, term)))
+@
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Non-baseline default tables}
+
+%%==============================================================================
+\subsection{No choices}
+
+For type real, see Table \ref{real}.
+
+<<include = TRUE, results = 'asis'>>=
+dt <- dable(d, type = "real")
+datex(dt, caption = "Type real", label = "real")
+@
+
+For type catg (but let us ignore \texttt{pid}), see Table \ref{catg}.
+
+<<include = TRUE, results = 'asis'>>=
+dt <- dable(d[, -which(names(d)=="pid")], type = "catg")
+datex(dt, caption = "Type catg", label = "catg")
+@
+
+Note: it is easy to convert \texttt{term} to its 'label' value with
+\texttt{decipher}, see Table \ref{catglab}.
+
+<<include = TRUE, results = 'asis'>>=
+dt$term <- decipher(dt$term, key)
+cap <- paste0("Type catg, manually adding labels and using row groups ",
+              "(only 1 row group unless oterwise specificed).")
+datex(dt, row.group = TRUE, caption = cap, label = "catglab")
+@
+
+Incorporate stratification by using \texttt{gtab} as in Table \ref{dateguide}.
+
+<<include = TRUE, results = 'asis'>>=
+dt <- dable(d, type = "date", guide = g, gtab = "gender")
+cap <- paste0("Type date, with guide and grouping by reference")
+datex(dt, caption = cap, label = "dateguide")
+@
+
+\clearpage
+%%==============================================================================
+\subsection{Using the guide}
+
+Using the guide, created with a 'vtab' with variable grouping, will generally
+yield an output with grouping.  The \texttt{gtab\_maker} can create groupings
+which also incorporate everyone, see Table \ref{realguidegtab}. (Also, grouping
+are easy to create without a function.)
+
+<<include = TRUE, results = 'asis'>>=
+dt <- dable(d, type = "real", guide = g,
+            gtab = gtab_maker("gender", data = d,
+                              all = TRUE, all.first = TRUE))
+cap <- paste0("Type real, with guide and more created grouping")
+datex(dt, caption = cap, label = "realguidegtab")
+@
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Baseline default tables}
+
+A default baseline table is given in Table \ref{bl}.
+
+<<include = TRUE, results = 'asis'>>=
+dt <- dable(d, guide = g, gtab = "area")
+cap <- paste0("Baseline")
+datex(dt, caption = cap, label = "bl")
+@
+
+A default baseline table with comparisons and tests is given in Table
+\ref{blct}.
+
+<<include = TRUE, results = 'asis'>>=
+dt <- dable(d, guide = g, gtab = "area", time.unit = 365.25,
+            part = list(T,T,T))
+cap <- paste0("Baseline, with comparisons and tests ",
+              "(and specified time unit for rates).")
+datex(dt, caption = cap, label = "blct")
+@
+
+\clearpage
+%%==============================================================================
+\subsection{Specific function test \ldots}
+
+A default baseline table is given in Table \ref{bl.bl}.
+
+<<include = TRUE, results = 'asis'>>=
+dt <- dable(d, guide = g, gtab = "area")
+cap <- paste0("Baseline")
+datex.bl(dt, caption = cap, label = "bl.bl")
+@
+
+A default baseline table with comparisons and tests is given in Table
+\ref{blct.bl}.
+
+<<include = TRUE, results = 'asis'>>=
+dt <- dable(d, guide = g, gtab = "area", time.unit = 365.25,
+            part = list(T,T,T))
+cap <- paste0("Baseline, with comparisons and tests ",
+              "(and specified time unit for rates).")
+datex.bl(dt, caption = cap, label = "blct.bl")
+@
+
+\clearpage
+%%==============================================================================
+\subsection{Specific function test again \ldots}
+
+<<include = TRUE, results = 'asis'>>=
+
+bl_theme(desc = 2)
+
+dt <- dable(d, guide = g, gtab = "area", time.unit = 365.25,
+            part = list(T,T,T))
+tmp <- setNames(paste0("XK1", key, "XK2"), nm = key)
+x1 <- decipher(dt$Variable, tmp, within = TRUE)
+x2 <- sub("XK1", "\\\\textbf{\\\\emph{", x1)
+x3 <- sub("XK2", "}}", x2)
+dt$Variable <- x3
+
+cap <- paste0("Baseline, with comparisons and tests ",
+              "(and specified time unit for rates).")
+datex.bl(dt, caption = cap, label = "blct.bl2", longtable = TRUE)
+dpset_defaults()
+
+@
+
+\end{document}
