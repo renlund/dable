@@ -33,10 +33,15 @@ dpset_defaults(overwrite = TRUE)
 %% \tableofcontents
 %% \newpage
 
+\setcounter{section}{-1}
+\section{About}
+This is a vignette for \texttt{dable}, a package for making \textbf{d}escriptive
+t\textbf{able}s. And like so many other vignettes, it is a work in progress.
+
 \section{A first look}
 
-The package includes a test data set along with associated \texttt{vtab} and
-\texttt{stab} objects.
+The package includes a test data set along with associated \texttt{vtab} (table
+of variables) and \texttt{stab} (table of survival variables) objects.
 
 <<"test">>=
 d <- test_data()
@@ -50,8 +55,8 @@ The test data contains variables of different classes:
 str(d)
 @
 
-The "variable table" (\texttt{vtab}) is a data set that assigns a label and (possibly)
-a grouping to all the terms of interest
+The "variable table" (\texttt{vtab}) is a data set that assigns a label and
+(possibly) a grouping to all the terms of interest
 
 <<"test-vtab">>=
 vt
@@ -80,12 +85,24 @@ also be changed manually
 g$type[g$term == "pid"] <- "lcat"
 @
 
-Now, a baseline table can be created using
+The test data set has been created so as to be somewhat difficult.
+\begin{itemize}
+\item \texttt{measNA} is completely missing,
+\item \texttt{status} is a constant, and
+\item \texttt{measM} only exists for males (\texttt{male == 1}).
+\end{itemize}
+
+The table function in this package will try to \textbf{not} stop due to errors,
+but rather return an \texttt{NA} if so, and then carry on - returning
+\emph{error} and \emph{warning} messages as \emph{messages}.
+
+A baseline table can be created using \texttt{dable}
 
 <<"test-dable">>=
 dt <- dable(d, type = "bl", guide = g, gtab = "gender",
             part = c(T,T,T), time.unit = 365.25)
 @
+
 
 Note that \texttt{gtab} is the terminology for a "grouping table" - although
 this can be created here by just refering to the grouping term.
@@ -110,14 +127,15 @@ There is a function to create nice \LaTeX\, tables.
 
 <<"datex", results = 'asis'>>=
 datex(dt)
-## datex(dt, kill = NULL)
-
 @
 
 
 
 \clearpage
-\section{Dots test}
+\section{The Dots}
+
+This section seves as a reminder that additional info is being passed to the
+descriptive functions.
 
 <<"dots-test">>=
 
@@ -138,6 +156,9 @@ dable(test, type = "real", guide = tg, gtab = "gender",
 \clearpage
 \section{Changing baseline functions}
 
+This section should describe the predefined options one has for different types
+of baseline structure.
+
 <<"bl-change", include = TRUE, results = 'asis'>>=
 old <- bl_theme(desc = 2)
 dpset("indent", "\\quad\\quad ")
@@ -155,6 +176,9 @@ dpset(old)
 
 \clearpage
 \section{Default tests}
+
+This section runs through lots of default values and serves as a test (there
+should be no errors here).
 
 \subsection{Default describers}
 
