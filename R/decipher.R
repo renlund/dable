@@ -68,7 +68,7 @@ decipher <- function (x, key, flexible = TRUE, within = FALSE) {
         }
         r
     } else {
-        r <- key[x]
+        r <- key[as.character(x)]
         as.character(ifelse(is.na(r), x, r))
     }
 }
