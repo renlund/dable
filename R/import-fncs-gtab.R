@@ -23,7 +23,8 @@ gtab_maker <- function(term, data, all = FALSE, all.first = FALSE,
     properties(rev, class = "logical", length = 1, na.ok = FALSE)
     inclusion(names(data), nm = "names of data", include = term)
     y <- data[[term]]
-    properties(y, class = c("character", "factor"))
+    properties(y, nm = paste0("the variable used ('", term, "') for making groups"),
+               class = c("character", "factor"))
     L <- if(is.factor(y)) levels(y) else sort(unique(y[!is.na(y)]))
     if(rev) L <- rev(L)
     all.nm <- rename(all.nm, avoid = L)

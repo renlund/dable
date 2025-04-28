@@ -25,7 +25,7 @@ properties <- function(x, nm = NULL, class = NULL, length = NULL,
             if(is.null(x)) stop(s)
         }
         if(!is.null(class)){
-            s <- sprintf("\n%s fails to be in class {%s}", nm,
+            s <- sprintf("\n%s fails to be of class {%s}", nm,
                          paste0(class, collapse = ", "))
             if(!any(class(x) %in% class)) stop(s)
         }
