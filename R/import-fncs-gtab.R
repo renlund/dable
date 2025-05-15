@@ -35,7 +35,7 @@ gtab_maker <- function(term, data, all = FALSE, all.first = FALSE,
         R[[L[i]]] <- !is.na(y) & y == L[i]
     }
     if(all & !all.first) R[[all.nm]] <- rep(TRUE, n)
-    as.data.frame(R)
+    as.data.frame(R, check.names = FALSE)
 }
 
 # - #' @rdname gtab-fncs
