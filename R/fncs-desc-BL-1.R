@@ -51,6 +51,12 @@ NA_info_append <- function(s, na){
     paste0(s, ". ", NA_info())
 }
 
+NAsign <- "-"
+changeNA <- function(x){
+    if(is.na(x) || is.null(x)){
+       NAsign
+    } else x
+}
 
 ##' @rdname baseline-standard
 ##' @details real.bl0: (weighted) median and interquartile range
@@ -62,8 +68,14 @@ real.bl0 <- function(x, weight = NULL, ...){
     ##                              dform.num(q$Q1), dform.num(q$Q2)),
     ##            Summary.info = "Numeric variable: Median (Q1-Q3)")
     n.na <- sum(is.na(x))
-    s <- sprintf("%s (%s - %s)", dform.num(q$Q2),
-                 dform.num(q$Q1), dform.num(q$Q2))
+    s <- if(is.na(q$Q2)){
+             NAsign
+         } else {
+             sprintf("%s (%s - %s)", dform.num(q$Q2),
+                     dform.num(q$Q1), dform.num(q$Q2))
+         }
+    ## s <- sprintf("%s (%s - %s)", dform.num(q$Q2),
+    ##              dform.num(q$Q1), dform.num(q$Q2))
     si <- "Numeric variable: Median (Q1-Q3)"
     data.frame(Variable = di.Variable(x, ...),
                Summary = NA_desc_append(s, n.na),
@@ -81,7 +93,12 @@ real.bl1 <- function(x, weight = NULL, ...){
     ##            Summary = sprintf("%s (%s)", dform.num(r$Mean), dform.num(r$SD)),
     ##            Summary.info = "Numeric variable: Mean(SD)")
     n.na <- sum(is.na(x))
-    s <- sprintf("%s (%s)", dform.num(r$Mean), dform.num(r$SD))
+    s <- if(is.na(r$Mean)){
+             NAsign
+         } else {
+             sprintf("%s (%s)", dform.num(r$Mean), dform.num(r$SD))
+         }
+    ## s <- sprintf("%s (%s)", dform.num(r$Mean), dform.num(r$SD))
     si <- "Numeric variable: Mean (SD)"
     data.frame(Variable = di.Variable(x, ...),
                Summary = NA_desc_append(s, n.na),
@@ -101,9 +118,16 @@ bnry.bl0 <- function(x, weight = NULL, ...){
     ##                              dform.num(100 * r$Proportion)),
     ##            Summary.info = "Categorical variable: Count (Percent)")
     n.na <- sum(is.na(x))
-    s <- sprintf("%s (%s%%)",
-                 dform.num(r$Count),
-                 dform.num(100 * r$Proportion))
+    s <- if(is.na(r$Proportion)){
+             NAsign
+         } else {
+             sprintf("%s (%s%%)",
+                     dform.num(r$Count),
+                     dform.num(100 * r$Proportion))
+         }
+    ## s <- sprintf("%s (%s%%)",
+    ##              dform.num(r$Count),
+    ##              dform.num(100 * r$Proportion))
     si <- "Categorical variable: Count (Percent)"
     data.frame(Variable = di.Variable(x, ...),
                Summary = NA_desc_append(s, n.na),
@@ -124,9 +148,16 @@ catg.bl0 <- function(x, weight = NULL, ...){
     ##                              dform.num.vec(100 * r$Proportion)),
     ##            Summary.info = "Categorical variable: Count (Percent)")
     n.na <- sum(is.na(x))
-    s <- sprintf("%s (%s%%)",
-                 dform.num.vec(r$Count),
-                 dform.num.vec(100 * r$Proportion))
+    s <- if(all(is.na(r$Proportion))){
+             rep(NAsign, nrow(r))
+         } else {
+             sprintf("%s (%s%%)",
+                     dform.num.vec(r$Count),
+                     dform.num.vec(100 * r$Proportion))
+         }
+    ## s <- sprintf("%s (%s%%)",
+    ##              dform.num.vec(r$Count),
+    ##              dform.num.vec(100 * r$Proportion))
     si <- "Categorical variable: Count (Percent)"
     data.frame(Variable = di.Variable(x, ...),
                Summary = NA_desc_append(s, n.na),
@@ -146,7 +177,7 @@ lcat.bl0 <- function(x, ...){
     n.na <- sum(is.na(x))
     ## s <- sprintf("{%s}", r)
     ## si <- "Categorical variable: {unique values}"
-    s <- sprintf("=%s=", r)
+    s <- if(is.na(r) || is.null(r) || length(r) == 0) "" else sprintf("=%s=", r)
     si <- "Categorical variable: =unique values="
     data.frame(Variable = di.Variable(x, ...),
                Summary = NA_desc_append(s, n.na),
@@ -164,7 +195,7 @@ date.bl0 <- function(x, ...){
     ##            Summary = sprintf("%s/%s", r$Min, r$Max),
     ##            Summary.info = "Date variables: min/max")
     n.na <- sum(is.na(x))
-    s <- sprintf("%s/%s", r$Min, r$Max)
+    s <- sprintf("%s/%s", changeNA(r$Min), changeNA(r$Max))
     si <- "Date variables: min/max"
     data.frame(Variable = di.Variable(x, ...),
                Summary = NA_desc_append(s, n.na),
@@ -186,8 +217,8 @@ surv.bl0 <- function(time, event, weight = NULL, time.unit = NULL, ...){
     ##            Summary.info = "Time-to-event variable: events; rate")
     n.na <- sum(is.na(time) | is.na(event))
     s <- sprintf("%s; %s",
-                 dform.num(r$Events),
-                 dform.num(r$Rate))
+                 changeNA(dform.num(r$Events)),
+                 changeNA(dform.num(r$Rate)))
     si <- "Time-to-event variable: events; rate"
     data.frame(Variable = di.Variable(event, ...),
                Summary = NA_desc_append(s, n.na),
