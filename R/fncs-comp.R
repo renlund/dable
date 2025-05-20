@@ -79,6 +79,31 @@ catg.std <- function(x, g, weight = NULL, catg.full.length = FALSE, ...){
 }
 attr(catg.std, "label") <- .stddiff()
 
+## ------------------------------------------------------------------------ bnry
+
+##' 'bnry' comparers
+##'
+##' functions to compare bnry variables
+##' @param x input vector
+##' @param weight case weight
+##' @param g grouping variable
+##' @param ... arguments passed
+##' @name comp-bnry
+NULL
+
+##' @rdname comp-bnry
+##' @description bnry.std: (weighted) standardized difference for 'bnry'
+##' @export
+bnry.std <- function(x, g, weight = NULL, ...){
+    if(!is.factor(g)) g <- factor(g)
+    x_i <- g == levels(g)[1]
+    y_i <- g == levels(g)[2]
+    p1 <- bnry.count_prop(x = x[x_i], weight = weight[x_i])[["Proportion"]]
+    p2 <- bnry.count_prop(x = x[y_i], weight = weight[y_i])[["Proportion"]]
+    (p1 - p2) / sqrt((p1*(1-p1) + p2*(1-p2)) / 2)
+}
+attr(bnry.std, "label") <- .stddiff()
+
 ## ------------------------------------------------------------------------ date
 
 ##' 'date' comparers
