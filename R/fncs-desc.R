@@ -178,7 +178,8 @@ NULL
 ##' @details bnry.count_prop: (weighted) count and proportion of non-reference
 ##' @export
 bnry.count_prop <- function(x, weight = NULL, ...){
-    ref <- levels(as.factor(x))[1]
+    l <- levels(as.factor(x))
+    ref <- l[1]
     if(is.null(weight)) weight <- rep(1L, length(x))
     i <- !is.na(x)
     if(any(!i)){
@@ -189,7 +190,7 @@ bnry.count_prop <- function(x, weight = NULL, ...){
     count[is.na(count)] <- 0 ## bad soution?
     W <- sum(weight)
     data.frame(
-        Level = ref,
+        Level = l[2],
         Count = count,
         Proportion = if(W != 0) count / W else NA_real_
     )
