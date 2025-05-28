@@ -549,16 +549,33 @@ latex_symbols <- function(n, pre = "\\", suff  = "", start = 1){
 
 attr2n <- function(attr, n){
     one_of(x = n, nm = "'n'", set = c("rows", "units", "weight"))
-    N <- attr[[n]]
-    Ng <- attr[[paste0("gtab_", n)]]
     Nnm <- if(!is.null(names(n))){
                names(n)
            } else {
                c(rows = "n", units = "u", weight = "w")[n]
            }
-    if(!is.null(Ng)){
-        stats::setNames(paste(Nnm, "=", Ng), nm = names(Ng))
-    } else paste(Nnm, "=", N)
+    test <- length(attr[["gtab_rows"]])
+    if(test == 0){
+        N <- attr[[n]]
+        if(!is.null(N)){
+            stats::setNames(object = paste(Nnm, "=", N),
+                            nm = dpget("gtab.group.name"))
+        } else {
+            w <- paste0("[attr2n] no ", n, " info detected")
+            warning(w)
+            stats::setNames(object = paste("n =", attr[["rows"]]),
+                            nm = dpget("gtab.group.name"))
+        }
+    } else {
+        Ng <- attr[[paste0("gtab_", n)]]
+        if(!is.null(Ng)){
+            stats::setNames(paste(Nnm, "=", Ng), nm = names(Ng))
+        } else {
+            w <- paste0("[attr2n] no ", n, " info detected")
+            warning(w)
+            stats::setNames(paste("n =", attr[["gtab_rows"]]), nm = names(Ng))
+        }
+    }
 }
 
 part2head <- function(part, cnm, bl, ntxt){
