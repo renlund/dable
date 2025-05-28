@@ -7,7 +7,7 @@
 datex(
   dt,
   format = TRUE,
-  size = "rows",
+  count = "rows",
   kill = NULL,
   grey = "term",
   bl.method = "standard",
@@ -26,7 +26,7 @@ datex(
 
 \item{format}{logical; format the variables in dt?}
 
-\item{size}{character; what entity is presentet in row header 'rows',
+\item{count}{character; what entity is presented in row header 'rows',
 'units' or 'weight'}
 
 \item{kill}{character vector; columns to remove for presentation}

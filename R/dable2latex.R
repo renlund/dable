@@ -4,7 +4,7 @@
 ##' dable
 ##' @param dt object created by dable
 ##' @param format logical; format the variables in dt?
-##' @param size character; what entity is presentet in row header 'rows',
+##' @param count character; what entity is presented in row header 'rows',
 ##'     'units' or 'weight'
 ##' @param kill character vector; columns to remove for presentation
 ##' @param grey character; which rows to make grey-ish in presentation
@@ -25,7 +25,7 @@
 ##' @export
 datex <- function(dt,
                   format = TRUE,
-                  size = "rows",
+                  count = "rows",
                   kill = NULL,
                   grey = "term",
                   bl.method = "standard",
@@ -41,8 +41,8 @@ datex <- function(dt,
     properties(format, nm = "format", class = "logical", length = 1, na.ok = FALSE)
     properties(file, nm = "file", class = "character", length = 1, na.ok = FALSE)
     properties(where, nm = "where", class = "character", length = 1, na.ok = FALSE)
-    properties(size, nm = "size", class = "character", length = 1, na.ok = FALSE)
-    one_of(size, nm = "size", set = c("rows", "units", "weight"))
+    properties(count, nm = "count", class = "character", length = 1, na.ok = FALSE)
+    one_of(count, nm = "count", set = c("rows", "units", "weight"))
     properties(rowname, nm = "rowname", class = c("NULL", "character"),
                length = 0:1, na.ok = FALSE)
     Guide <- attr(dt, "guide")
@@ -52,7 +52,7 @@ datex <- function(dt,
     dt <- dt[a$order,]
     grey <- get_grey(grey, dt)
     if(format) dt <- dable_format(dt)
-    Ntxt <- attr2n(attributes(dt), size)
+    Ntxt <- attr2n(attributes(dt), count)
     BL <- attr(dt, "type") == "baseline"
     if(BL){
         properties(bl.method, nm = "bl.method", class = "character",
@@ -62,7 +62,7 @@ datex <- function(dt,
             rowname <- "Variable"
             kill <- c(kill, "term")
         } else rowname <- "term"
-        if(is.null(row.group)) row.group <- TRUE
+        if(is.null(row.group)) row.group <- length(unique(a$group.rle$values)) > 1
         if(bl.method == "standard"){
             if(all(c("p.info", "p") %in% names(dt))){
                 dt <- dable_fnote(dt, info = "p.info", fn.var = "p",
@@ -139,7 +139,7 @@ datex <- function(dt,
 ##' dable
 ##' @param dt object created by dable
 ##' @param format logical; format the variables in dt?
-##' @param size character; what entity is presentet in row header 'rows',
+##' @param count character; what entity is presentet in row header 'rows',
 ##'     'units' or 'weight'
 ##' @param kill character vector; columns to remove for presentation
 ##' @param grey character; which rows to make grey-ish in presentation
@@ -153,7 +153,7 @@ datex <- function(dt,
 ##' @export
 datex.bl <- function(dt,
                      format = TRUE,
-                     size = "rows",
+                     count = "rows",
                      kill = "term",
                      grey = "term",
                      file = "",
@@ -165,8 +165,8 @@ datex.bl <- function(dt,
 
     ## check arguments:
     logi1(format)
-    char1(list('file' = file, 'where' = where, 'size' = size))
-    one_of(size, nm = "size", set = c("rows", "units", "weight"))
+    char1(list('file' = file, 'where' = where, 'count' = count))
+    one_of(count, nm = "count", set = c("rows", "units", "weight"))
     logi1(row.group, null.ok = TRUE)
     char1(grey, null.ok = TRUE)
     properties(insert.bottom, class = c("logical", "character"), length = 1,
@@ -212,7 +212,7 @@ datex.bl <- function(dt,
     Hh <- part2head(part = attr(DT, "part"),
                     cnm = names(DT),
                     bl = TRUE,
-                    ntxt = attr2n(attributes(dt), size))
+                    ntxt = attr2n(attributes(dt), count))
     names(DT) <- Hh$h
     cg <- rle(Hh$H)
 
@@ -577,6 +577,7 @@ attr2n <- function(attr, n){
         }
     }
 }
+
 
 part2head <- function(part, cnm, bl, ntxt){
     i_m <- which(grepl("^meta", part))
