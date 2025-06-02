@@ -20,6 +20,7 @@ bl_theme <- function(desc = "default", comp = NULL, test = NULL){
     x <- sprintf(paste0("%s.bl", d), types)
     p <- sprintf("%s.desc.bl", types)
     for(i in seq_along(x)) dpset(param = p[i], value = x[i])
+
     invisible(param)
 }
 

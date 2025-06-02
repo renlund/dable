@@ -8,9 +8,6 @@
 ##'     'units' or 'weight'
 ##' @param kill character vector; columns to remove for presentation
 ##' @param grey character; which rows to make grey-ish in presentation
-##' @param bl.method if dable is a 'baseline', what method to use for
-##'     presentation? This is a vague feature so far and only a 'standard'
-##'     method is implemented.
 ##' @param file character; argument for Hmisc::latex
 ##' @param where character; argument for Hmisc::latex
 ##' @param rowname character; column name to use as rowname in Hmisc::latex
@@ -28,7 +25,6 @@ datex <- function(dt,
                   count = "rows",
                   kill = NULL,
                   grey = "term",
-                  bl.method = "standard",
                   file = "",
                   where = "hbt",
                   rowname = NULL,
@@ -55,25 +51,27 @@ datex <- function(dt,
     Ntxt <- attr2n(attributes(dt), count)
     BL <- attr(dt, "type") == "baseline"
     if(BL){
-        properties(bl.method, nm = "bl.method", class = "character",
-                   length = 1, na.ok = FALSE)
-        one_of(bl.method, nm = "bl.method", set = "standard")
-        if("Variable" %in% names(dt)){
-            rowname <- "Variable"
-            kill <- c(kill, "term")
-        } else rowname <- "term"
-        if(is.null(row.group)) row.group <- length(unique(a$group.rle$values)) > 1
-        if(bl.method == "standard"){
-            if(all(c("p.info", "p") %in% names(dt))){
-                dt <- dable_fnote(dt, info = "p.info", fn.var = "p",
-                                  info.attr = "info", format = TRUE)
-            }
-            if("Summary.info" %in% names(dt)){
-                dt <- dable_prune(dt, rm = "Summary.info", info = TRUE,
-                                  info.attr = "info", info.unique = TRUE,
-                                  split.unique = TRUE)
-            }
-        }
+        ## if("Variable" %in% names(dt)){
+        ##     rowname <- "Variable"
+        ##     kill <- c(kill, "term")
+        ## } else rowname <- "term"
+        ## if(is.null(row.group)) row.group <- length(unique(a$group.rle$values)) > 1
+        ## if(bl.method == "standard"){
+        ##     if(all(c("p.info", "p") %in% names(dt))){
+        ##         dt <- dable_fnote(dt, info = "p.info", fn.var = "p",
+        ##                           info.attr = "info", format = TRUE)
+        ##     }
+        ##     if("Summary.info" %in% names(dt)){
+        ##         dt <- dable_prune(dt, rm = "Summary.info", info = TRUE,
+        ##                           info.attr = "info", info.unique = TRUE,
+        ##                           split.unique = TRUE)
+        ##     }
+        ## }
+        w <- paste0("[datex] you've called datex with a baseline table - ",
+                    "it is better to use blatex or blatex_default")
+        message(w)
+        blatex(bl = dt, .blatex.theme.strict = 0, ...)
+        return(invisible(NULL))
     }
     if(!is.null(rowname)){
         one_of(rowname, nm = "rowname", set = names(dt))
@@ -117,28 +115,28 @@ datex <- function(dt,
                  n.rgroup = if(rg_ind) a$group.rle$lengths else n.rgroup,
                  rownamesTexCmd = grey,
                  insert.bottom = ib)
-    ## Hmisc::latex(object = DT,
-    ##              file = file,
-    ##              where = where,
-    ##              title = "",
-    ##              rowname = Rowname,
-    ##              cgroup = cg$values,
-    ##              n.cgroup = cg$lengths,
-    ##              rgroup = if(rg_ind) a$group.rle$values else rgroup,
-    ##              n.rgroup = if(rg_ind) a$group.rle$lengths else n.rgroup,
-    ##              rownamesTexCmd = grey,
-    ##              insert.bottom = ib,
-    ##              ...)
     if(is.null(Dots$label)) Args$label <- paste0("tab:", mumbojumbo(1, m = 10))
     do.call(what = Hmisc::latex, args = c(Args, Dots))
 }
 
-##' LaTeX code for a dable
+c_list <- function(x, y, overwrite = TRUE){
+    properties(x, class = "list")
+    properties(y, class = "list")
+    nm_x <- names(x)
+    nm_y <- names(y)
+    set <- if(overwrite) nm_y else setdiff(nm_y, nm_x)
+    for(s in set) x[[s]] <- y[[s]]
+    x
+}
+## c_list(list(x=1,y=2,z=3), list(z=-3,u=-4), overwrite = TRUE)
+## c_list(list(x=1,y=2,z=3), list(z=-3,u=-4), overwrite = FALSE)
+
+##' Default LaTeX code for a baseline table
 ##'
 ##' A wrapper for Hmisc::latex trying to create nice LaTeX code to present a
-##' dable
-##' @param dt object created by dable
-##' @param format logical; format the variables in dt?
+##' baseline dable
+##' @param bl object created by dable
+##' @param format logical; format the variables in bl?
 ##' @param count character; what entity is presentet in row header 'rows',
 ##'     'units' or 'weight'
 ##' @param kill character vector; columns to remove for presentation
@@ -151,16 +149,16 @@ datex <- function(dt,
 ##'     table. If TRUE, attr2text will be used to create this text
 ##' @param ... arguments passed to Hmisc::latex
 ##' @export
-datex.bl <- function(dt,
-                     format = TRUE,
-                     count = "rows",
-                     kill = "term",
-                     grey = "term",
-                     file = "",
-                     where = "hbt",
-                     row.group = NULL,
-                     insert.bottom = TRUE,
-                     ...){
+blatex_default <- function(bl,
+                           format = TRUE,
+                           count = "rows",
+                           kill = "term",
+                           grey = "term",
+                           file = "",
+                           where = "hbt",
+                           row.group = NULL,
+                           insert.bottom = TRUE,
+                           ...){
     Dots <- list(...) ## Dots <- list()
 
     ## check arguments:
@@ -173,51 +171,51 @@ datex.bl <- function(dt,
                na.ok = FALSE)
 
     ## order according to guide:
-    A <- align_with_guide(d = dt)
-    dt <- dt[A$order,]
+    A <- align_with_guide(d = bl)
+    bl <- bl[A$order,]
 
     ## format:
-    if(format) dt <- dable_format(dt)
+    if(format) bl <- dable_format(bl)
 
     ## if NULL set row.group to TRUE if more than 1 group
     if(is.null(row.group)) row.group <- length(unique(A$group.rle$values)) > 1
 
     ## display p-value info as footnotes on the values
-    if(all(c("p.info", "p") %in% names(dt))){
-        dt <- dable_fnote(dt, info = "p.info", fn.var = "p",
+    if(all(c("p.info", "p") %in% names(bl))){
+        bl <- dable_fnote(bl, info = "p.info", fn.var = "p",
                           info.attr = "info", format = TRUE)
     }
 
     ## display info on summary measures as text inserted below the table
-    if("Summary.info" %in% names(dt)){
-        dt <- dable_prune(dt, rm = "Summary.info", info = TRUE,
+    if("Summary.info" %in% names(bl)){
+        bl <- dable_prune(bl, rm = "Summary.info", info = TRUE,
                           info.attr = "info", info.unique = TRUE,
                           split.unique = TRUE)
     }
 
     ## the rowname argument is only necessary when rgroups are used, but easier
     ## to always use them in this function. They have to be unique, so add some
-    ## hiden noise if not:
-    Rowname <- unique_latex_rownames(dt[["Variable"]])
-    dt <- dable_prune(dt, rm = "Variable")
+    ## hidden noise if not:
+    Rowname <- unique_latex_rownames(bl[["Variable"]])
+    bl <- dable_prune(bl, rm = "Variable")
 
     ## establish what text to put below table, if any
     ib <- x_true_then_y_else_x(x = insert.bottom,
-                               y = attr2text(dt),
+                               y = attr2text(bl),
                                latex = TRUE)
 
     ## create a copy of input and polish it for output
-    DT <- dt
-    for(k in unique(kill)) DT <- dable_prune(DT, rm = k)
-    Hh <- part2head(part = attr(DT, "part"),
-                    cnm = names(DT),
+    BL <- bl
+    for(k in unique(kill)) BL <- dable_prune(BL, rm = k)
+    Hh <- part2head(part = attr(BL, "part"),
+                    cnm = names(BL),
                     bl = TRUE,
-                    ntxt = attr2n(attributes(dt), count))
-    names(DT) <- Hh$h
+                    ntxt = attr2n(attributes(bl), count))
+    names(BL) <- Hh$h
     cg <- rle(Hh$H)
 
     ## create list of arguments
-    Args <- list(object = DT,
+    Args <- list(object = BL,
                  file = file,
                  where = where,
                  title = "",
@@ -226,7 +224,7 @@ datex.bl <- function(dt,
                  n.cgroup = cg$lengths,
                  rgroup = if(row.group) A$group.rle$values else NULL,
                  n.rgroup = if(row.group) A$group.rle$lengths else NULL,
-                 rownamesTexCmd = get_grey(grey, dt),
+                 rownamesTexCmd = get_grey(grey, bl),
                  insert.bottom = ib)
 
     ## if no label given, create one
@@ -235,6 +233,64 @@ datex.bl <- function(dt,
     ## function call
     do.call(what = Hmisc::latex, args = c(Args, Dots))
 }
+
+datex.bl <- blatex_default
+
+##' LaTeX code for themed baseline tables
+##'
+##' LaTeX code for baseline table created with \code{baseline}
+##' @param bl object created with baseline
+##' @param ... arguments passed
+##' @param .blatex.theme.strict numeric (mostly internal); how upset this
+##'     function will be if the 'theme' attribute is missing from the
+##'     bl-argument before passing the problem along to blatex_default: 0 = not
+##'     all all, 1 = somewhat, cause a warning, 2 = very, cause an error
+##' @export
+blatex <- function(bl, ..., .blatex.theme.strict = 1){
+    properties(.blatex.theme.strict, class = c("numeric", "integer"),
+               length = 1, na.ok = FALSE)
+    one_of(.blatex.theme.strict, set = 0:2)
+    theme <- attr(bl, "theme")
+    pass.dots <- c(list(bl = bl), list(...))
+    if(is.null(theme)){
+        s <- paste0("input 'bl' lacks the 'theme' attribute - ",
+                    "you probably want to use the 'baseline' ",
+                    "function to create bl")
+        if(.blatex.theme.strict == 1) warning(s)
+        if(.blatex.theme.strict == 2) stop(s)
+        do.call(what = "blatex_default", args = pass.dots)
+    } else {
+        n <- theme$desc
+        do.call(what = paste0("blatex", n),
+                args = pass.dots)
+    }
+}
+
+##' @rdname blatex
+##' @details blatex0: alias for blatex_default
+##' @export
+blatex0 <- blatex_default
+
+##' @rdname blatex
+##' @details blatex1: alias for blatex_default
+##' @export
+blatex1 <- blatex_default
+
+##' @rdname blatex
+##' @details blatex2: code for baseline theme 2 (experimental)
+##' @export
+blatex2 <- function(bl, ...){
+    g <- attr(bl, "guide")
+    key <- setNames(g$label, nm = g$term)
+    tmp <- setNames(paste0("XK1", key, "XK2"), nm = key)
+    x1 <- decipher(bl$Variable, tmp, within = TRUE)
+    x2 <- sub("XK1", "\\\\textbf{\\\\emph{", x1)
+    x3 <- sub("XK2", "}}", x2)
+    bl$Variable <- x3
+    do.call(what = "blatex_default",
+            args = c(list(bl = bl), list(...)))
+}
+
 
 align_with_guide <- function(d){
     Guide <- attr(d, "guide")

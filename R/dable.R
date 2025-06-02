@@ -134,6 +134,31 @@ dable <- function(data,
 .types <- c("real", "bnry", "catg", "lcat", "surv", "date")
 .baseline <- c("baseline", "bl")
 
+##' create a baseline table
+##'
+##' This is a wrapper for bl_theme and dable (with type = 'baseline').
+##' @param data data.frame of data
+##' @param theme numeric; theme number passed to \code{bl_theme}
+##' @param ... arguments passed to \code{dable}
+##' @export
+baseline <- function(data, theme = 0, ...){
+    ## Note to self of whoever cares: currently there is a 'theme' for the
+    ## descriptive functions only. If 'bl_theme' expands, then the theme
+    ## argument should probably be a list instead.
+    properties(theme, class = c("numeric", "integer"), length = 1,
+               na.ok = FALSE)
+    theme.list <- list(desc = theme, comp = NULL, test = NULL)
+    p <- do.call(what = "bl_theme", args = theme.list)
+    on.exit(expr = dpset(p)) ## resets the parameters on exit
+    d <- dable(data = data, ...)
+    attr(d, "theme") <- theme.list
+    d
+}
+
+##' @rdname baseline
+##' @export
+bl <- baseline
+
 check_type <- function(type, bl.rm, guide){
     properties(type, class = "character", length = 1, na.ok = FALSE)
     one_of(type, nm = "type", set = c(.types, .baseline))

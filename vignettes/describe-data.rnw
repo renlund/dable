@@ -99,10 +99,18 @@ but rather return an \texttt{NA} if so, and then carry on - returning
 A baseline table can be created using \texttt{dable}
 
 <<"test-dable">>=
-dt <- dable(d, type = "bl", guide = g, gtab = "gender",
+dt <- dable(d, type = "baseline", guide = g, gtab = "gender",
             part = c(T,T,T), time.unit = 365.25)
 @
 
+or, if a specific baseline \emph{theme} is wanted
+
+<<"test-baseline", eval = FALSE>>=
+baseline(d, theme = 0, type = "baseline", guide = g, gtab = "gender",
+         part = c(T,T,T), time.unit = 365.25)
+@
+
+but more on themes later.
 
 Note that \texttt{gtab} is the terminology for a "grouping table" - although
 this can be created here by just refering to the grouping term.
@@ -126,9 +134,8 @@ attributes(dt)
 There is a function to create nice \LaTeX\, tables.
 
 <<"datex", results = 'asis'>>=
-datex(dt)
+datex(dt, caption = "A nice table", label = "tab:nice")
 @
-
 
 
 \clearpage
@@ -154,21 +161,15 @@ dable(test, type = "real", guide = tg, gtab = "gender",
 @
 
 \clearpage
-\section{Changing baseline functions}
+\section{Baseline themes}
 
 This section should describe the predefined options one has for different types
 of baseline structure.
 
 <<"bl-change", include = TRUE, results = 'asis'>>=
-old <- bl_theme(desc = 2)
-dpset("indent", "\\quad\\quad ")
-dt2 <- dable(d, type = "bl", guide = g, gtab = "gender", time.unit = 365.25)
-
-## dable_format(dt2)
-## datex(dt2, format = TRUE)
-datex(dable_format(dt2), format = FALSE, longtable = TRUE)
-
-dpset(old)
+dt2 <- baseline(d, theme = 1, guide = g, gtab = "gender", time.unit = 365.25)
+blatex(dt2, longtable = TRUE, caption = "Baseline specific function",
+       label = "tab:specific")
 @
 
 

@@ -10,7 +10,6 @@ datex(
   count = "rows",
   kill = NULL,
   grey = "term",
-  bl.method = "standard",
   file = "",
   where = "hbt",
   rowname = NULL,
@@ -32,10 +31,6 @@ datex(
 \item{kill}{character vector; columns to remove for presentation}
 
 \item{grey}{character; which rows to make grey-ish in presentation}
-
-\item{bl.method}{if dable is a 'baseline', what method to use for
-presentation? This is a vague feature so far and only a 'standard'
-method is implemented.}
 
 \item{file}{character; argument for Hmisc::latex}
 
