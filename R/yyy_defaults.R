@@ -28,6 +28,7 @@ dable_parameters <- list(
     dable.output = "latex",
     dable.sep = ": " ,
     dable.indent = "    ",
+    dable.percent = "\\%",
     ## default describers --------------------
     dable.real.desc = "mean_sd",
     dable.catg.desc = "catg.count_prop",
@@ -221,6 +222,7 @@ dparam <- function(param, value = NULL){
         dable.sep = dp_char1_(value, p),
         ## dable.indent = dp_char1_(value, p),
         dable.indent = dp_indent(value),
+        dable.percent = dp_char1_(value, p),
         if(is.null(value)) dpget(p) else value
     )
 }
