@@ -2,6 +2,12 @@
 % Please edit documentation in R/dable.R
 \name{dable}
 \alias{dable}
+\alias{dreal}
+\alias{dsurv}
+\alias{ddate}
+\alias{dcatg}
+\alias{dbnry}
+\alias{dlcat}
 \title{Data description}
 \usage{
 dable(
@@ -15,6 +21,18 @@ dable(
   weight = NULL,
   ...
 )
+
+dreal(data, ...)
+
+dsurv(data, ...)
+
+ddate(data, ...)
+
+dcatg(data, ..., bnry = FALSE, lcat = FALSE)
+
+dbnry(data, ...)
+
+dlcat(data, ...)
 }
 \arguments{
 \item{data}{data.frame}
@@ -40,7 +58,26 @@ supported for a non-baseline type.}
 provides these}
 
 \item{...}{arguments passed to functions that describes, compares and tests}
+
+\item{bnry}{logical; for catg-shorthand, also include bnry type?}
+
+\item{lcat}{logical; for catg-shorthand, also include lcat type?}
 }
 \description{
 This function generates a data description.
 }
+\section{Functions}{
+\itemize{
+\item \code{dreal()}: dreal is a shorthand for \code{dable(type = 'real')}
+
+\item \code{dsurv()}: dsurv is a shorthand for \code{dable(type = 'surv')}
+
+\item \code{ddate()}: ddate is a shorthand for \code{dable(type = 'date')}
+
+\item \code{dcatg()}: dcatg is a shorthand for \code{dable(type = 'catg')}
+
+\item \code{dbnry()}: dbnry is a shorthand for \code{dable(type = 'bnry')}
+
+\item \code{dlcat()}: dlcat is a shorthand for \code{dable(type = 'lcat')}
+
+}}

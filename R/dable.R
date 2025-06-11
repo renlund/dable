@@ -134,6 +134,56 @@ dable <- function(data,
 .types <- c("real", "bnry", "catg", "lcat", "surv", "date")
 .baseline <- c("baseline", "bl")
 
+##' @describeIn dable dreal is a shorthand for \code{dable(type = 'real')}
+##' @export
+dreal <- function(data, ...){
+    dable(data, type = "real", ...)
+}
+
+##' @describeIn dable dsurv is a shorthand for \code{dable(type = 'surv')}
+##' @export
+dsurv <- function(data, ...){
+    dable(data, type = "surv", ...)
+}
+
+##' @describeIn dable ddate is a shorthand for \code{dable(type = 'date')}
+##' @export
+ddate <- function(data, ...){
+    dable(data, type = "date", ...)
+}
+
+##' @describeIn dable dcatg is a shorthand for \code{dable(type = 'catg')}
+##' @param bnry logical; for catg-shorthand, also include bnry type?
+##' @param lcat logical; for catg-shorthand, also include lcat type?
+##' @export
+dcatg <- function(data, ..., bnry = FALSE, lcat = FALSE){
+    if(!bnry || !lcat){
+        dots <- list(...)
+        guide <- dots$guide
+        if(is.null(guide)) guide <- dguide(data)
+        if(bnry) guide$type[guide$type == "bnry"] <- "catg"
+        if(lcat) guide$type[guide$type == "lcat"] <- "catg"
+        dots$data = data
+        dots$type = "catg"
+        dots$guide = guide
+        do.call(dable, args = dots)
+    } else dable(data, type = "catg", ...)
+}
+
+##' @describeIn dable dbnry is a shorthand for \code{dable(type = 'bnry')}
+##' @export
+dbnry <- function(data, ...){
+    dable(data, type = "bnry", ...)
+}
+
+##' @describeIn dable dlcat is a shorthand for \code{dable(type = 'lcat')}
+##' @export
+dlcat <- function(data, ...){
+    dable(data, type = "lcat", ...)
+}
+
+
+
 ##' create a baseline table
 ##'
 ##' This is a wrapper for bl_theme and dable (with type = 'baseline').
@@ -142,7 +192,7 @@ dable <- function(data,
 ##' @param ... arguments passed to \code{dable}
 ##' @export
 baseline <- function(data, theme = 0, ...){
-    ## Note to self of whoever cares: currently there is a 'theme' for the
+    ## Note to self or whoever cares: currently there is a 'theme' for the
     ## descriptive functions only. If 'bl_theme' expands, then the theme
     ## argument should probably be a list instead.
     properties(theme, class = c("numeric", "integer"), length = 1,
