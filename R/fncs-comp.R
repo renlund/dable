@@ -26,6 +26,19 @@ real.std <- function(x, g, weight = NULL, ...){
 }
 attr(real.std, "label") <- .stddiff()
 
+##' @rdname comp-real
+##' @description mean_diff: (weighted) difference in mean value
+##' @export
+mean_diff <- function(x, g, weight = NULL, ...){
+    if(!is.factor(g)) g <- factor(g)
+    x_i <- g == levels(g)[1]
+    y_i <- g == levels(g)[2]
+    d.mean(x = x[x_i], weight = weight[x_i]) -
+        d.mean(x = x[y_i], weight = weight[y_i])
+}
+attr(mean_diff, "label") <- .stddiff()
+
+
 
 ## ------------------------------------------------------------------------ catg
 
@@ -79,6 +92,20 @@ catg.std <- function(x, g, weight = NULL, catg.full.length = FALSE, ...){
 }
 attr(catg.std, "label") <- .stddiff()
 
+##' @rdname comp-catg
+##' @description prop_diff: (weighted) difference in proportion
+##' @export
+prop_diff <- function(x, g, weight = NULL, catg.full.length = FALSE, ...){
+    if(!is.factor(g)) g <- factor(g)
+    x_i <- g == levels(g)[1]
+    y_i <- g == levels(g)[2]
+    p1 <- catg.count_prop(x = x[x_i], weight = weight[x_i])[["Proportion"]]
+    p2 <- catg.count_prop(x = x[y_i], weight = weight[y_i])[["Proportion"]]
+    p1 - p2
+}
+attr(prop_diff, "label") <- "Difference in proportion"
+
+
 ## ------------------------------------------------------------------------ bnry
 
 ##' 'bnry' comparers
@@ -103,6 +130,47 @@ bnry.std <- function(x, g, weight = NULL, ...){
     (p1 - p2) / sqrt((p1*(1-p1) + p2*(1-p2)) / 2)
 }
 attr(bnry.std, "label") <- .stddiff()
+
+##' @rdname comp-bnry
+##' @description risk_diff: (weighted) risk difference
+##' @export
+risk_diff <- function(x, g, weight = NULL, ...){
+    if(!is.factor(g)) g <- factor(g)
+    x_i <- g == levels(g)[1]
+    y_i <- g == levels(g)[2]
+    p1 <- bnry.count_prop(x = x[x_i], weight = weight[x_i])[["Proportion"]]
+    p2 <- bnry.count_prop(x = x[y_i], weight = weight[y_i])[["Proportion"]]
+    p1 - p2
+}
+attr(risk_diff, "label") <- "Risk difference"
+
+
+##' @rdname comp-bnry
+##' @description risk_ratio: (weighted) risk ratio
+##' @export
+risk_ratio <- function(x, g, weight = NULL, ...){
+    if(!is.factor(g)) g <- factor(g)
+    x_i <- g == levels(g)[1]
+    y_i <- g == levels(g)[2]
+    p1 <- bnry.count_prop(x = x[x_i], weight = weight[x_i])[["Proportion"]]
+    p2 <- bnry.count_prop(x = x[y_i], weight = weight[y_i])[["Proportion"]]
+    p1 / p2
+}
+attr(risk_ratio, "label") <- "Risk ratio"
+
+##' @rdname comp-bnry
+##' @description odds_ratio: (weighted) odds ratio
+##' @export
+odds_ratio <- function(x, g, weight = NULL, ...){
+    if(!is.factor(g)) g <- factor(g)
+    x_i <- g == levels(g)[1]
+    y_i <- g == levels(g)[2]
+    p1 <- bnry.count_prop(x = x[x_i], weight = weight[x_i])[["Proportion"]]
+    p2 <- bnry.count_prop(x = x[y_i], weight = weight[y_i])[["Proportion"]]
+    (p1 / (1-p1) ) / (p2 / (1-p2))
+}
+attr(odds_ratio, "label") <- "Odds ratio"
+
 
 ## ------------------------------------------------------------------------ date
 
@@ -165,4 +233,25 @@ rate_ratio <- function(time, event, g, weight = NULL, ...){
     e2 <- eventrate(time = time[y_i], event = event[y_i], weight = weight[y_i])
     e1$Rate / e2$Rate
 }
-attr(rate_ratio, "label") <- "Rate Ratio"
+attr(rate_ratio, "label") <- "Rate ratio"
+
+##' @rdname comp-surv
+##' @details hazard_ratio: (weighted) hazard ratio
+##' @export
+hazard_ratio <- function(time, event, g, weight = NULL, ...){
+    if(!is.factor(g)) g <- factor(g)
+    mod <- survival::coxph(survival::Surv(time, event) ~ g, weight = weight)
+    as.numeric(exp(mod$coefficients)[1])
+}
+attr(hazard_ratio, "label") <- "Hazard ratio"
+
+##' @rdname comp-surv
+##' @details hr_ci:  (weighted) hazard ratio and confidence interval
+##' @export
+hr_ci <- function(time, event, g, weight = NULL, ...){
+    if(!is.factor(g)) g <- factor(g)
+    mod <- survival::coxph(survival::Surv(time, event) ~ g, weight = weight)
+    v <- exp(as.numeric(c(mod$coefficients[1], stats::confint(mod))))
+    sprintf("%s (%s-%s)", dform.num.vec(v))
+}
+attr(hr_ci, "label") <- "Hazard ratio"

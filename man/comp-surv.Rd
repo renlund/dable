@@ -4,11 +4,17 @@
 \alias{comp-surv}
 \alias{surv.std}
 \alias{rate_ratio}
+\alias{hazard_ratio}
+\alias{hr_ci}
 \title{'surv' comparers}
 \usage{
 surv.std(time, event, g, weight = NULL, ...)
 
 rate_ratio(time, event, g, weight = NULL, ...)
+
+hazard_ratio(time, event, g, weight = NULL, ...)
+
+hr_ci(time, event, g, weight = NULL, ...)
 }
 \arguments{
 \item{time}{time component of time-to-event variable}
@@ -29,4 +35,8 @@ surv.std: (weighted) standardized difference for
 }
 \details{
 rate_ratio: ratio of the (weighted) rates
+
+hazard_ratio: (weighted) hazard ratio
+
+hr_ci:  (weighted) hazard ratio and confidence interval
 }

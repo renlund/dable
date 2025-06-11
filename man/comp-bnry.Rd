@@ -3,9 +3,18 @@
 \name{comp-bnry}
 \alias{comp-bnry}
 \alias{bnry.std}
+\alias{risk_diff}
+\alias{risk_ratio}
+\alias{odds_ratio}
 \title{'bnry' comparers}
 \usage{
 bnry.std(x, g, weight = NULL, ...)
+
+risk_diff(x, g, weight = NULL, ...)
+
+risk_ratio(x, g, weight = NULL, ...)
+
+odds_ratio(x, g, weight = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -20,4 +29,10 @@ bnry.std(x, g, weight = NULL, ...)
 functions to compare bnry variables
 
 bnry.std: (weighted) standardized difference for 'bnry'
+
+risk_diff: (weighted) risk difference
+
+risk_ratio: (weighted) risk ratio
+
+odds_ratio: (weighted) odds ratio
 }
