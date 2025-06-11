@@ -5,16 +5,20 @@
 ##'
 ##' Determine how to describe a data frame.
 ##' @param data data.frame, the data
-##' @param unit.id character, optionally provide name of id variable
-##' @param elim.set character vector, optionally provide names of variables to ignore
+##' @param unit.id character, (optionally) provide name of (main) id variable
+##' @param oth.id character vector, (optionally) provied names of other id
+##'     variables in the data - these will be set to type 'lcat'
+##' @param elim.set character vector, optionally provide names of variables to
+##'     ignore
 ##' @param vtab data.frame, optionally provide a variable table (vtab)
 ##' @param stab data.frame, optionally provide a survival table (stab)
 ##' @param ... arguments passed to \code{term_type}
 ##' @export
-dguide <- function(data, unit.id = NULL, elim.set = NULL,
+dguide <- function(data, unit.id = NULL, oth.id = NULL, elim.set = NULL,
                    vtab = NULL, stab = NULL, ...){
     properties(data, class = "data.frame")
     unit.id <- dparam("unit.id", unit.id)
+    oth.id <- setdiff(dparam("oth.id", oth.id), unit.id)
     properties(elim.set, class = c("NULL", "character"), na.ok = FALSE)
     properties(vtab, class = c("NULL", "data.frame"))
     properties(stab, class = c("NULL", "data.frame"))
@@ -52,6 +56,7 @@ dguide <- function(data, unit.id = NULL, elim.set = NULL,
     if(!is.null(unit.id)){
         tt$type[tt$term == unit.id] <- "unit.id"
     }
+    if(length(oth.id) > 0) tt$type[tt$term %in% oth.id] <- "lcat"
     al <- align(x = tt$term, template = vtab$term, group = vtab$group, all = TRUE)
     TT <- tt[al$order, ]
     attr(TT, "stab") <- attr(vtab, "stab")

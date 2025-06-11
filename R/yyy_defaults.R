@@ -8,6 +8,7 @@ dable_parameters <- list(
     dable.surv.prefix = TRUE,
     dable.surv.affix = c("time" = "t.", "event" = "ev."),
     dable.unit.id = NULL,
+    dable.oth.id = NULL,
     dable.gtab.defvar.rm = TRUE,
     dable.weight.defvar.rm = TRUE,
     dable.vtab.group.name = "Covariates",
@@ -190,6 +191,7 @@ dparam <- function(param, value = NULL){
         surv.affix = dp_surv.affix(value),
         ## unit.id = dp_unit.id(value),
         unit.id = dp_char1_(value, p, null.ok = TRUE),
+        oth.id = dp_oth.id(value),
         ## gtab.defvar.rm = dp_gtab.defvar.rm(value),
         gtab.defvar.rm = dp_logic1_(value, p),
         ## weight.defvar.rm = dp_weight.defvar.rm(value),
@@ -244,6 +246,12 @@ dp_bnry.list <- function(x = NULL){
                     "not containing any missing")
         stop(s)
     }
+    x
+}
+
+dp_oth.id <- function(x = NULL){
+    if(is.null(x)) x <- dpget("oth.id")
+    if(!is.null(x)) properties(x, class = "character")
     x
 }
 
