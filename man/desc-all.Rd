@@ -2,6 +2,8 @@
 % Please edit documentation in R/fncs-desc.R
 \name{desc-all}
 \alias{desc-all}
+\alias{d.label}
+\alias{d.dots}
 \alias{d.n}
 \alias{d.length}
 \alias{d.sum}
@@ -10,6 +12,10 @@
 \alias{d.mode}
 \title{general describers}
 \usage{
+d.label(x, ...)
+
+d.dots(x, weight = NULL, ...)
+
 d.n(x, weight = NULL, ...)
 
 d.length(x, ...)
@@ -25,14 +31,18 @@ d.mode(x, weight = NULL, ...)
 \arguments{
 \item{x}{input vector}
 
-\item{weight}{case weight}
-
 \item{...}{arguments passed}
+
+\item{weight}{case weight}
 }
 \description{
 functions to describe any variable
 }
 \details{
+d.label: variable label
+
+: d.dots: extract all info from dots
+
 d.n: length of non-missing x or sum of weights (if given)
 
 d.length: length of vector

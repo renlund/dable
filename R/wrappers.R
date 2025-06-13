@@ -1,3 +1,56 @@
+##' Standardized differences
+##'
+##' Calculate the standardized differences between groups defined by gtab.
+##' @param data data.frame
+##' @param gtab grouping table
+##' @param comp argument for 'comp' entry of list given as 'part' argument in
+##'     \code{dable}. This can be given as 'across' (all groups compared to
+##'     first group) or 'adjacent' (all groups compared to prior group). If
+##'     given as TRUE it defaults to 'across'. Note; you can also specify a list
+##'     of pairs for the indexes to be compared; e.g. if \code{gtab} defines 4
+##'     groups \code{comp = list(c(2,1),c(4,3))} will have the second group
+##'     compared to the first, and the fourth group compared to the third.
+##' @param ... arguments passed to \code{dable}
+##' @export
+dstd <- function(data, gtab, comp, ...){
+    settings <- dpget_all()
+    on.exit(dpset(settings))
+    dpset(list(real.desc.bl = "label_type",
+               catg.desc.bl = "label_type",
+               bnry.desc.bl = "label_type",
+               lcat.desc.bl = "label_type",
+               date.desc.bl = "label_type",
+               surv.desc.bl = "label_type",
+               real.comp.bl = "real.std",
+               catg.comp.bl = "catg.std",
+               bnry.comp.bl = "bnry.std",
+               lcat.comp.bl = "catg.std",
+               date.comp.bl = "date.std",
+               surv.comp.bl = "surv.std"))
+    dable(
+        data = data,
+        type = "baseline",
+        gtab = gtab,
+        part = list(
+            desc = TRUE,
+            comp = comp,
+            test = FALSE
+        ),
+        ...
+    )
+}
+
+label_type <- function(x, ...){
+    dots <- list(...)
+    l <- dots$.label
+    t <- dots$.type
+    data.frame(
+        Variable = if(is.null(l)) NA_character_ else l,
+        type = if(is.null(t)) NA_character_ else t
+    )
+}
+attr(label_type, "meta") <- c("Variable", "type")
+
 ##' Missing stats
 ##'
 ##' Count and percentage of missing
@@ -39,24 +92,3 @@ na_summary.surv <- function(time, event, ...){
     na_summary(time)
 }
 attr(na_summary.surv, "label") <- "Missing"
-
-
-if(FALSE){
-    n <- 2*2*67
-    d <- data.frame(id = 1:n,
-                    gr = rep(c("midi", "maxi", "efti"), c(n/4, n/2, n/4)),
-                    foo = rep(1:0, each = n/2),
-                    bar = rep(LETTERS[1:2], n/2),
-                    baz = as.Date("2001-01-01") + sample(100:10000, n),
-                    ev.U = rbinom(n, 1, 0.1),
-                    t.U = rexp(n, 1/50),
-                    ev.XY = rbinom(n, 1, 0.1),
-                    t.XY = rexp(n, 1/50))
-    d$foo[sample(1:n, 10)] <- NA_integer_
-    d$bar[sample(1:n, 1)] <- NA_character_
-    d$baz[sample(1:n, 51)] <- as.Date(NA_character_)
-    d$ev.U[sample(1:n, 2)] <- NA_integer_
-    d$t.U[sample(1:n, 12)] <- NA_real_
-    dmissing(d)
-    dmissing(d, gtab = "gr")
-}

@@ -14,6 +14,29 @@ placeholder2 <- function(...) data.frame(p=NA, p.info="no test")
 NULL
 
 ##' @rdname desc-all
+##' @details d.label: variable label
+##' @export
+d.label <- function(x, ...){
+    dots <- list(...)
+    l <- dots$.label
+    if(is.null(l)) NA_character_ else l
+}
+attr(d.label, "label") <- "Variable"
+attr(d.label, "meta") <- "Variable"
+
+##' @rdname desc-all
+##' @details: d.dots: extract all info from dots
+##' @export
+d.dots <- function(x, weight = NULL, ...){
+    dots <- list(...)
+    klass <- function(x) class(x)[1]
+    data.frame(dot = names(dots),
+               what = unlist(lapply(dots, klass)),
+               value = unlist(dots))
+}
+attr(d.dots, "meta") <- c("dot", "what")
+
+##' @rdname desc-all
 ##' @details d.n: length of non-missing x or sum of weights (if given)
 ##' @export
 d.n <- function(x, weight = NULL, ...){
