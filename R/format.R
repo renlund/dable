@@ -84,32 +84,3 @@ dform.text.vec <- function(x, ...){
     }
     r
 }
-
-
-
-if(FALSE){
-
-    ## test
-    dform.num(10.12345)
-    dform.num(10.02345)
-    dform.num(10L)
-
-    dform.num(1.12345)
-    dform.num(1.02345)
-    dform.num(1.00245)
-    dform.num(1L)
-
-    dform.num(0.0012345)
-    dform.num(0.0010045)
-    dform.num(0L)
-
-    dform.num(0.01235, p = TRUE)
-    dform.num(0.00001235, p = TRUE)
-
-    dform.num(987654321)
-    dform.num(987654321L)
-
-    dform.num(NA_real_)
-    dform.num(NaN)
-
-}

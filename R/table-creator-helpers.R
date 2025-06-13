@@ -89,29 +89,6 @@ NAexpand <- function(x, times){
     r
 }
 
-
-if(FALSE){
-
-    d <- test_data()[, c("country", "region", "gender")]
-    g <- dguide(d)
-    x <- dable(d, "catg", guide=g, gtab = "gender")
-    y <- dable(d, "catg", guide=g, gtab = "gender", part = c(F,F,T),
-               fnc = list(NULL,NULL,"bnry.chisq"))
-    ## y <- dable(d, "catg", guide=g, gtab = "gender", part = c(F,F,T))
-    merge_2parts(x, y)
-    merge_parts(x,y)
-
-    NAexpandDF(y, c(3,5), "term")
-    str(NAexpandDF(y, c(3,5), "term"))
-
-    rle(x$term)
-    rle(y$term)
-
-
-    df <- data.frame(x=1:3,y=LETTERS[3:1])
-    times <- c(2,4,1)
-}
-
 merge_parts <- function(...){
     dots <- list(...)
     r <- Reduce(f = merge_2parts, x = dots)

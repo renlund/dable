@@ -133,13 +133,3 @@ Foo, t.foo, ev.foo
 Bar, t.bar, ev.bar
 ", strip.white = TRUE)
 }
-
-if(FALSE){
-
-    test_vtab()
-    head(test_data())
-    dguide(data = test_data(), unit.id = "id", vtab = test_vtab())
-    dguide(data = test_data(), unit.id = "id", vtab = test_vtab(TRUE))
-    dguide(data = test_data(), unit.id = "id", vtab = test_vtab(), stab = test_stab())
-
-}

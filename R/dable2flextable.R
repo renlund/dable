@@ -197,22 +197,3 @@ insertNA <- function(x, f){
   if(isDF) rownames(r) <- NULL else names(r) <- NULL
   r
 }
-
-if(FALSE){
-
-    d <- test_data()
-    vt <- test_vtab()
-    st <- test_stab()
-    g <- dguide(d, unit.id = "id", vtab = vt, stab = st, catg.tol = 15)
-    dt <- dable(d, guide = g, gtab = "area", time.unit = 365.25,
-                part = list(T,T,T))
-
-    format = TRUE
-    size = "rows"
-    kill = "term"
-    grey = "term"
-    row.group = NULL
-    insert.bottom = TRUE
-
-
-}

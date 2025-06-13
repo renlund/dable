@@ -231,18 +231,3 @@ is.bnry <- function(x, bnry.list){
         any(unlist(lapply(bnry.list, foo)))
     }
 }
-
-
-if(FALSE){
-
-    data <- test_data()
-    vtab <- test_vtab()
-    stab <- test_stab()
-    unit.id <- "id"
-    elim.set <- NULL
-
-    g <- dguide(data, unit.id = "id", vtab=vtab, stab=stab)
-    class(g)
-    print(g)
-
-}
