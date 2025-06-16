@@ -24,8 +24,8 @@ if(FALSE){
     knitr::knit2pdf("dable-and-latex.rnw", clean = TRUE)
     shell.exec("dable-and-latex.pdf")
 }
-dpset_defaults(overwrite = TRUE)
-dpset("indent", "\\quad ")
+dpset_defaults(overwrite = TRUE, style = "latex")
+## dpset("indent", "\\quad ")
 
 @
 

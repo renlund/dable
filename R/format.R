@@ -1,14 +1,19 @@
 
-dform.num <- function(x, digits = NULL, sc = NULL, sc.low = NULL, sc.high = NULL,
+dform.num <- function(x, digits = NULL, scientific = NULL,
+                      ## sc = NULL, sc.low = NULL, sc.high = NULL,
                       p = NULL, p.bound = NULL, NAtext = NULL){
     properties(x, class = c("numeric", "integer"), length = 1, na.ok = TRUE)
     ## if(identical(x, 0L)) return("0")
     if(isTRUE(x == 0)) return("0")
     ## check or get all parameters
     digits  <- dparam("digits", digits)
-    sc      <- dparam("sc", sc)
-    sc.low  <- dparam("sc.low", sc.low)
-    sc.high <- dparam("sc.high", sc.high)
+    scientific <- dparam("scientific", scientific)
+    sc <- scientific$use
+    sc.low <- scientific$low
+    sc.high <- scientific$high
+    ## sc      <- dparam("sc", sc)
+    ## sc.low  <- dparam("sc.low", sc.low)
+    ## sc.high <- dparam("sc.high", sc.high)
     p       <- dparam("p", p)
     p.bound <- dparam("p.bound", p.bound)
     NAtext  <- dparam("NAtext", NAtext)

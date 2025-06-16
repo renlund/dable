@@ -19,17 +19,18 @@ dable_parameters <- list(
     dable.grey.first = FALSE,
     ## formatting
     dable.digits = c("small" = 2, "mid" = 2, "large" = 1),
-    dable.sc = TRUE,
-    dable.sc.low = 1e-8,
-    dable.sc.high = 1e8,
+    dable.scientific = list(use = TRUE, low = 1e-8, high = 1e8),
+    ## dable.sc = TRUE,
+    ## dable.sc.low = 1e-8,
+    ## dable.sc.high = 1e8,
     dable.p = FALSE,
     dable.p.bound = 1e-4,
     dable.NAtext = "",
     dable.NAalias = "Missing",
-    dable.output = "latex",
-    dable.sep = ": " ,
+    dable.sep = ": ",
+    dable.output = "default", ## not used
     dable.indent = "    ",
-    dable.percent = "\\%",
+    dable.percent = "%",     ## not used
     ## default describers --------------------
     dable.real.desc = "mean_sd",
     dable.catg.desc = "catg.count_prop",
@@ -116,13 +117,27 @@ dpset <- function(param, value = NULL){
 ##' @details set default parameter values
 ##' @param overwrite logical; overwrite parameter values already set?
 ##' @export
-dpset_defaults <- function(overwrite = TRUE){
+dpset_defaults <- function(overwrite = TRUE, style = NA_character_){
+    properties(style, class = "character", length = 1, na.ok = TRUE)
     if(overwrite){
         options(dable_parameters)
     } else {
         op <- options()
         toset <- !(names(dable_parameters) %in% names(op))
         if(any(toset)) options(dable_parameters[toset])
+    }
+    if(!is.na(style)){
+        one_of(style, set = c("default", "latex"))
+        if(style == "default"){
+            dpset("indent", "    ")
+            dpset("output", "default")
+            ## dpset("percent", "%")
+        }
+        if(style == "latex"){
+            dpset("indent", "\\quad ")
+            dpset("output", "latex")
+            ## dpset("percent", "\\%")
+        }
     }
     invisible()
 }
@@ -205,12 +220,13 @@ dparam <- function(param, value = NULL){
         ## units.name = dp_units.name(value),
         units.name = dp_char1_(value, p),
         digits = dp_digits(value),
+        scientific = dp_scientific(value),
         ## sc = dp_sc(value),
-        sc = dp_logic1_(value, p),
+        ## sc = dp_logic1_(value, p),
         ## sc.low = dp_sc.low(value),
-        sc.low = dp_positive1_(value, p),
+        ## sc.low = dp_positive1_(value, p),
         ## sc.high = dp_sc.high(value),
-        sc.high = dp_positive1_(value, p),
+        ## sc.high = dp_positive1_(value, p),
         ## p = dp_p(value),
         p = dp_logic1_(value, p),
         ## p.bound = dp_p.bound(value),
@@ -246,6 +262,21 @@ dp_bnry.list <- function(x = NULL){
                     "not containing any missing")
         stop(s)
     }
+    x
+}
+
+dp_scientific <- function(x = NULL){
+    if(is.null(x)) x <- dpget("scientific")
+    properties(x, class = "list", length = 3)
+    req_nm <- c("use", "low", "high")
+    if(!all(req_nm %in% names(x))){
+        s <- paste0("'scientific' must be a list with elements: ",
+                    paste0(req_nm, collapse = ", "))
+        stop(s)
+    }
+    dp_logic1_(x$use, "use")
+    dp_positive1_(x$low, "low")
+    dp_positive1_(x$high, "high")
     x
 }
 

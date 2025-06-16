@@ -173,6 +173,23 @@ blatex(dt2, longtable = TRUE, caption = "Baseline specific function",
 @
 
 
+\clearpage
+\section{Shorthands}
+
+<<"shorthand">>=
+
+dreal(d)
+ddate(d)
+dsurv(d)
+dcatg(d, guide = g)
+dcatg(d, guide = g, bnry = TRUE)
+dcatg(d, guide = g, lcat = TRUE) |> head()
+dbnry(d)
+dlcat(d, guide = g)
+
+@
+
+
 \appendix
 
 \clearpage

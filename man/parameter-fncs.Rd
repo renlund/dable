@@ -11,7 +11,7 @@
 \usage{
 dpset(param, value = NULL)
 
-dpset_defaults(overwrite = TRUE)
+dpset_defaults(overwrite = TRUE, style = NA_character_)
 
 dpget(param, verbose = FALSE, sub = TRUE)
 
