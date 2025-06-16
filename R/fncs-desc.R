@@ -1,7 +1,4 @@
 empty <- function(...) NA
-placeholder <- function(...) "placeholder"
-attr(placeholder, "label") <- "Summary"
-placeholder2 <- function(...) data.frame(p=NA, p.info="no test")
 
 ## --------------------------------------------------------------------- general
 ##' general describers

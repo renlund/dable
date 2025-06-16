@@ -6,15 +6,7 @@
 \alias{value_type}
 \title{description guide}
 \usage{
-dguide(
-  data,
-  unit.id = NULL,
-  oth.id = NULL,
-  elim.set = NULL,
-  vtab = NULL,
-  stab = NULL,
-  ...
-)
+dguide(data, id = NULL, elim.set = NULL, vtab = NULL, stab = NULL, ...)
 
 term_type(
   term,
@@ -30,10 +22,7 @@ value_type(x, bnry.list = list(), real.tol = 0, catg.tol = Inf)
 \arguments{
 \item{data}{data.frame, the data}
 
-\item{unit.id}{character, (optionally) provide name of (main) id variable}
-
-\item{oth.id}{character vector, (optionally) provied names of other id
-variables in the data - these will be set to type 'lcat'}
+\item{id}{character vector; id variables used.}
 
 \item{elim.set}{character vector, optionally provide names of variables to
 ignore}

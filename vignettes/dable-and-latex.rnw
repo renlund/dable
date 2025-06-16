@@ -41,7 +41,7 @@ dpset_defaults(overwrite = TRUE, style = "latex")
 d <- test_data()
 vt <- test_vtab()
 st <- test_stab()
-g <- dguide(d, unit.id = "id", vtab = vt, stab = st, catg.tol = 15)
+g <- dguide(d, id = "id", vtab = vt, stab = st, catg.tol = 15)
 ## key <- with(subset(g, type != "surv"), setNames(label, term))
 key <- with(g, setNames(label, ifelse(type == "surv", label, term)))
 @

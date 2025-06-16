@@ -5,32 +5,44 @@
 ##'
 ##' Determine how to describe a data frame.
 ##' @param data data.frame, the data
-##' @param unit.id character, (optionally) provide name of (main) id variable
-##' @param oth.id character vector, (optionally) provied names of other id
-##'     variables in the data - these will be set to type 'lcat'
+##' @param id character vector; id variables used.
 ##' @param elim.set character vector, optionally provide names of variables to
 ##'     ignore
 ##' @param vtab data.frame, optionally provide a variable table (vtab)
 ##' @param stab data.frame, optionally provide a survival table (stab)
 ##' @param ... arguments passed to \code{term_type}
 ##' @export
-dguide <- function(data, unit.id = NULL, oth.id = NULL, elim.set = NULL,
+dguide <- function(data, id = NULL, elim.set = NULL,
+                   ## unit.id = NULL, oth.id = NULL,
                    vtab = NULL, stab = NULL, ...){
     properties(data, class = "data.frame")
-    unit.id <- dparam("unit.id", unit.id)
-    oth.id <- setdiff(dparam("oth.id", oth.id), unit.id)
+    ## unit.id <- dparam("unit.id", unit.id)
+    ## oth.id <- setdiff(dparam("oth.id", oth.id), unit.id)
+    id <- dparam("id", id)
+    unit.id <- oth.id <- NULL
+    if(!is.null(id)){
+        for(j in seq_along(id)){
+            i <- id[j]
+            if( j == 1 & i %in% names(data) ) unit.id <- i
+            if( j > 1 & i %in% names(data) ) oth.id <- c(oth.id, i)
+            if( !(i %in% names(data)) ) next
+            if(any(is.na(data[[i]]))){
+                s <- paste0("id variable '", i, "' contains missing values")
+                warning(s)
+            }
+        }
+    }
     properties(elim.set, class = c("NULL", "character"), na.ok = FALSE)
     properties(vtab, class = c("NULL", "data.frame"))
     properties(stab, class = c("NULL", "data.frame"))
     terms <- setdiff(names(data), c(elim.set))
-    ## if(is.null(unit.id)) unit.id <- dparam("unit.id")
-    if(!is.null(unit.id)){
-        inclusion(names(data), "names of data", include = unit.id)
-        if(any(is.na(data[[unit.id]]))){
-            s <- paste0("unit id variable '", unit.id,"' contains missing values")
-            warning(s)
-        }
-    }
+    ## if(!is.null(unit.id)){
+    ##     inclusion(names(data), "names of data", include = unit.id)
+    ##     if(any(is.na(data[[unit.id]]))){
+    ##         s <- paste0("unit id variable '", unit.id,"' contains missing values")
+    ##         warning(s)
+    ##     }
+    ## }
     vtab_given <- !is.null(vtab)
     if(is.null(vtab)) vtab <- extract_labels(data[, terms, drop = FALSE])
     vtab <- check_vtab(vtab)

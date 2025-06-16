@@ -7,10 +7,12 @@ dable_parameters <- list(
     dable.catg.tol = Inf,
     dable.surv.prefix = TRUE,
     dable.surv.affix = c("time" = "t.", "event" = "ev."),
-    dable.unit.id = NULL,
-    dable.oth.id = NULL,
+    dable.id = NULL,
+    ## dable.unit.id = NULL,
+    ## dable.oth.id = NULL,
     dable.gtab.defvar.rm = TRUE,
     dable.weight.defvar.rm = TRUE,
+    dable.unit.id.rm = TRUE,
     dable.vtab.group.name = "Covariates",
     dable.stab.group.name = "Time-to-event",
     dable.gtab.group.name = "All",
@@ -42,14 +44,14 @@ dable_parameters <- list(
     dable.real.comp = "real.std",
     dable.catg.comp = "catg.std",
     dable.bnry.comp = NULL,
-    dable.lcat.comp = NULL,
+    dable.lcat.comp = "no.std",
     dable.date.comp = "date.std",
     dable.surv.comp = "surv.std",
     ## default testers
     dable.real.test = "param",
     dable.catg.test = "catg.chisq",
     dable.bnry.test = NULL,
-    dable.lcat.test = NULL,
+    dable.lcat.test = "noTest",
     dable.date.test = "date.nonparam",
     dable.surv.test = "logrank",
     ## default baseline describers -----------
@@ -63,14 +65,14 @@ dable_parameters <- list(
     dable.real.comp.bl = "real.std",
     dable.catg.comp.bl = "catg.std",
     dable.bnry.comp.bl = NULL,
-    dable.lcat.comp.bl = NULL,
+    dable.lcat.comp.bl = "no.std",
     dable.date.comp.bl = "date.std",
     dable.surv.comp.bl = "surv.std",
     ## default baseline tester
     dable.real.test.bl = "param.bl",
     dable.catg.test.bl = "catg.chisq.bl",
     dable.bnry.test.bl = NULL,
-    dable.lcat.test.bl = NULL,
+    dable.lcat.test.bl = "noTest.bl",
     dable.date.test.bl = "date.nonparam.bl",
     dable.surv.test.bl = "logrank.bl"
 )
@@ -201,44 +203,27 @@ dparam <- function(param, value = NULL){
         bnry.list = dp_bnry.list(value),
         real.tol = dp_real.tol(value),
         catg.tol = dp_catg.tol(value),
-        ## surv.prefix = dp_surv.prefix(value),
         surv.prefix = dp_logic1_(value, p),
         surv.affix = dp_surv.affix(value),
-        ## unit.id = dp_unit.id(value),
-        unit.id = dp_char1_(value, p, null.ok = TRUE),
-        oth.id = dp_oth.id(value),
-        ## gtab.defvar.rm = dp_gtab.defvar.rm(value),
+        ## unit.id = dp_char1_(value, p, null.ok = TRUE),
+        ## oth.id = dp_oth.id(value),
+        id = dp_id(value),
         gtab.defvar.rm = dp_logic1_(value, p),
-        ## weight.defvar.rm = dp_weight.defvar.rm(value),
         weight.defvar.rm = dp_logic1_(value, p),
-        ## stab.group.name = dp_stab.group.name(value),
+        unit.id.rm = dp_logic1_(value, p),
         stab.group.name = dp_char1_(value, p),
-        ## vtab.group.name = dp_vtab.group.name(value),
         vtab.group.name = dp_char1_(value, p),
-        ## gtab.group.name = dp_gtab.group.name(value),
         gtab.group.name = dp_char1_(value, p),
-        ## units.name = dp_units.name(value),
         units.name = dp_char1_(value, p),
         digits = dp_digits(value),
         scientific = dp_scientific(value),
-        ## sc = dp_sc(value),
-        ## sc = dp_logic1_(value, p),
-        ## sc.low = dp_sc.low(value),
-        ## sc.low = dp_positive1_(value, p),
-        ## sc.high = dp_sc.high(value),
-        ## sc.high = dp_positive1_(value, p),
-        ## p = dp_p(value),
         p = dp_logic1_(value, p),
-        ## p.bound = dp_p.bound(value),
         p.bound = dp_positive1_(value, p),
-        ## NAtext = dp_NAtext(value),
         NAtext = dp_char1_(value, p),
         NAalias = dp_char1_(value, p),
-        ## grey.first = dp_grey.first(value),
         grey.first = dp_logic1_(value, p),
         output = dp_char1_(value, p),
         dable.sep = dp_char1_(value, p),
-        ## dable.indent = dp_char1_(value, p),
         dable.indent = dp_indent(value),
         dable.percent = dp_char1_(value, p),
         if(is.null(value)) dpget(p) else value
@@ -280,9 +265,15 @@ dp_scientific <- function(x = NULL){
     x
 }
 
-dp_oth.id <- function(x = NULL){
-    if(is.null(x)) x <- dpget("oth.id")
-    if(!is.null(x)) properties(x, class = "character")
+## dp_oth.id <- function(x = NULL){
+##     if(is.null(x)) x <- dpget("oth.id")
+##     if(!is.null(x)) properties(x, class = "character", na.ok = FALSE)
+##     x
+## }
+
+dp_id <- function(x = NULL){
+    if(is.null(x)) x <- dpget("id")
+    if(!is.null(x)) properties(x, class = "character", na.ok = FALSE)
     x
 }
 

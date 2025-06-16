@@ -23,7 +23,7 @@ if(FALSE){
     knitr::knit2pdf("describe-data.rnw", clean = TRUE)
     shell.exec("describe-data.pdf")
 }
-dpset_defaults(overwrite = TRUE)
+dpset_defaults(overwrite = TRUE, style = "latex")
 @
 
 \begin{document}
@@ -74,7 +74,7 @@ main types are \emph{real}, \emph{catg}, \emph{date}, and \emph{surv}.
 But there is also \emph{bnry}, \emph{lcat}, \emph{unit.id}, and \emph{unknown}.
 
 <<"test-guide">>=
-(g <- dguide(d, unit.id = "id", vtab = vt, stab = st))
+(g <- dguide(d, id = "id", vtab = vt, stab = st))
 @
 
 
@@ -147,7 +147,7 @@ descriptive functions.
 <<"dots-test">>=
 
 test <- test_data()[, c("pid", "gender", "importance", "measA")]
-tg <- dguide(test, unit.id = "pid", vtab = test_vtab())
+tg <- dguide(test, id = "pid", vtab = test_vtab())
 
 myFun <- function(x, weight = NULL,  ...){
     dots <- list(...)

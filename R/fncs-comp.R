@@ -38,7 +38,13 @@ mean_diff <- function(x, g, weight = NULL, ...){
 }
 attr(mean_diff, "label") <- .stddiff()
 
-
+##' @rdname comp-real
+##' @description no.std: no standardized difference calculated
+##' @export
+no.std <- function(x, g, weight = NULL, ...){
+    NA_real_
+}
+attr(no.std, "label") <- .stddiff()
 
 ## ------------------------------------------------------------------------ catg
 
