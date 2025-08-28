@@ -3,8 +3,6 @@ dform.num <- function(x, digits = NULL, scientific = NULL,
                       ## sc = NULL, sc.low = NULL, sc.high = NULL,
                       p = NULL, p.bound = NULL, NAtext = NULL){
     properties(x, class = c("numeric", "integer"), length = 1, na.ok = TRUE)
-    ## if(identical(x, 0L)) return("0")
-    if(isTRUE(x == 0)) return("0")
     ## check or get all parameters
     digits  <- dparam("digits", digits)
     scientific <- dparam("scientific", scientific)
@@ -18,6 +16,7 @@ dform.num <- function(x, digits = NULL, scientific = NULL,
     p.bound <- dparam("p.bound", p.bound)
     NAtext  <- dparam("NAtext", NAtext)
     if(is.na(x)) return(NAtext)
+    if(isTRUE(x == 0) && !p) return("0")
     dig.s <- digits["small"]
     dig.m <- digits["mid"]
     dig.l <- digits["large"]
