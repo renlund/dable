@@ -32,8 +32,6 @@ real.bl2 <- function(x, weight = NULL, ...){
     if(isTRUE(has_missing)){
         n <- length(x)
         m <- sum(is.na(x))
-        ## stat <- c(stat, "Missing, n (%)")
-        ## value <- c(value, sprintf("%s (%s%%)", m, dform.num(100*m/n)))
         stat <- c(stat, dpget("NAalias"))
         value <- c(value, sprintf("%s", m))
     }
@@ -50,7 +48,7 @@ catg.bl2 <- function(x, weight = NULL, ...){
     r <- catg.count_prop(x = x, weight = weight, ...)
     L <- levels(x)
     S <- sprintf("%s (%s%%)",
-                 dform.num.vec(r$Count, NAtext = "N/A"),
+                 dform.num.vec(r$Count, NAtext = "N/A", no04int = TRUE),
                  dform.num.vec(100 * r$Proportion, NAtext = "N/A"))
     has_missing <- di.dots("missing", strict = TRUE, ...)
     if(isTRUE(has_missing)){

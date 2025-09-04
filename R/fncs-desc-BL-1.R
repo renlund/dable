@@ -46,9 +46,6 @@ NA_desc_append <- function(s, na = 0){
 }
 NA_info <- function() "[n] is missing count (if applicable)"
 NA_info_append <- function(s, na){
-    ## if(na == 0) s else paste0(s, ". ", NA_info())
-    ## no, need to add this always, else meta variables don't match (causes
-    ## problems in merge2parts)
     paste0(s, ". ", NA_info())
 }
 
@@ -64,10 +61,6 @@ changeNA <- function(x){
 ##' @export
 real.bl0 <- function(x, weight = NULL, ...){
     q <- quartile(x = x, weight = weight)
-    ## data.frame(Variable = di.Variable(x, ...),
-    ##            Summary = sprintf("%s (%s - %s)", dform.num(q$Q2),
-    ##                              dform.num(q$Q1), dform.num(q$Q2)),
-    ##            Summary.info = "Numeric variable: Median (Q1-Q3)")
     n.na <- sum(is.na(x))
     s <- if(is.na(q$Q2)){
              NAsign
@@ -75,8 +68,6 @@ real.bl0 <- function(x, weight = NULL, ...){
              sprintf("%s (%s - %s)", dform.num(q$Q2),
                      dform.num(q$Q1), dform.num(q$Q2))
          }
-    ## s <- sprintf("%s (%s - %s)", dform.num(q$Q2),
-    ##              dform.num(q$Q1), dform.num(q$Q2))
     si <- "Numeric variable: Median (Q1-Q3)"
     data.frame(Variable = di.Variable(x, ...),
                Summary = NA_desc_append(s, n.na),
@@ -90,16 +81,12 @@ attr(real.bl0, "meta") <- c("Variable", "Summary.info")
 ##' @export
 real.bl1 <- function(x, weight = NULL, ...){
     r <- mean_sd(x = x, weight = weight, ...)
-    ## data.frame(Variable = di.Variable(x, ...),
-    ##            Summary = sprintf("%s (%s)", dform.num(r$Mean), dform.num(r$SD)),
-    ##            Summary.info = "Numeric variable: Mean(SD)")
     n.na <- sum(is.na(x))
     s <- if(is.na(r$Mean)){
              NAsign
          } else {
              sprintf("%s (%s)", dform.num(r$Mean), dform.num(r$SD))
          }
-    ## s <- sprintf("%s (%s)", dform.num(r$Mean), dform.num(r$SD))
     si <- "Numeric variable: Mean (SD)"
     data.frame(Variable = di.Variable(x, ...),
                Summary = NA_desc_append(s, n.na),
@@ -113,22 +100,14 @@ attr(real.bl1, "meta") <- c("Summary.info", "Variable")
 ##' @export
 bnry.bl0 <- function(x, weight = NULL, ...){
     r <- bnry.count_prop(x = x, weight = weight, ...)
-    ## data.frame(Variable = di.Variable(x, ...),
-    ##            Summary = sprintf("%s (%s%%)",
-    ##                              dform.num(r$Count),
-    ##                              dform.num(100 * r$Proportion)),
-    ##            Summary.info = "Categorical variable: Count (Percent)")
     n.na <- sum(is.na(x))
     s <- if(is.na(r$Proportion)){
              NAsign
          } else {
              sprintf("%s (%s%%)",
-                     dform.num(r$Count),
+                     dform.num(r$Count, no04int = TRUE),
                      dform.num(100 * r$Proportion))
          }
-    ## s <- sprintf("%s (%s%%)",
-    ##              dform.num(r$Count),
-    ##              dform.num(100 * r$Proportion))
     si <- "Categorical variable: Count (Percent)"
     data.frame(Variable = di.Variable(x, ...),
                Summary = NA_desc_append(s, n.na),
@@ -143,22 +122,14 @@ bnry.bl1 <- bnry.bl0
 ##' @export
 catg.bl0 <- function(x, weight = NULL, ...){
     r <- catg.count_prop(x = x, weight = weight, ...)
-    ## data.frame(Variable = di.Variable(x, ...),
-    ##            Summary = sprintf("%s (%s%%)",
-    ##                              dform.num.vec(r$Count),
-    ##                              dform.num.vec(100 * r$Proportion)),
-    ##            Summary.info = "Categorical variable: Count (Percent)")
     n.na <- sum(is.na(x))
     s <- if(all(is.na(r$Proportion))){
              rep(NAsign, nrow(r))
          } else {
              sprintf("%s (%s%%)",
-                     dform.num.vec(r$Count),
+                     dform.num.vec(r$Count, no04int = TRUE),
                      dform.num.vec(100 * r$Proportion))
          }
-    ## s <- sprintf("%s (%s%%)",
-    ##              dform.num.vec(r$Count),
-    ##              dform.num.vec(100 * r$Proportion))
     si <- "Categorical variable: Count (Percent)"
     data.frame(Variable = di.Variable(x, ...),
                Summary = NA_desc_append(s, n.na),
@@ -172,12 +143,7 @@ catg.bl1 <- catg.bl0
 ##' @export
 lcat.bl0 <- function(x, ...){
     r <- n.unique(x)
-    ## data.frame(Variable = di.Variable(x, ...),
-    ##            Summary = sprintf("{%s}", r),
-    ##            Summary.info = "Categorical variable: {unique values}")
     n.na <- sum(is.na(x))
-    ## s <- sprintf("{%s}", r)
-    ## si <- "Categorical variable: {unique values}"
     s <- if(is.na(r) || is.null(r) || length(r) == 0) "" else sprintf("=%s=", r)
     si <- "Categorical variable: =unique values="
     data.frame(Variable = di.Variable(x, ...),
@@ -192,9 +158,6 @@ lcat.bl1 <- lcat.bl0
 ##' @export
 date.bl0 <- function(x, ...){
     r <- min_max(x)
-    ## data.frame(Variable = di.Variable(x, ...),
-    ##            Summary = sprintf("%s/%s", r$Min, r$Max),
-    ##            Summary.info = "Date variables: min/max")
     n.na <- sum(is.na(x))
     s <- sprintf("%s/%s", changeNA(r$Min), changeNA(r$Max))
     si <- "Date variables: min/max"
@@ -211,11 +174,6 @@ date.bl1 <- date.bl0
 surv.bl0 <- function(time, event, weight = NULL, time.unit = NULL, ...){
     r <- eventrate(time = time, event = event, weight = weight,
                    time.unit = time.unit, ...)
-    ## data.frame(Variable = di.Variable(event, ...),
-    ##            Summary = sprintf("%s; %s",
-    ##                              dform.num(r$Events),
-    ##                              dform.num(r$Rate)),
-    ##            Summary.info = "Time-to-event variable: events; rate")
     n.na <- sum(is.na(time) | is.na(event))
     s <- sprintf("%s; %s",
                  changeNA(dform.num(r$Events)),

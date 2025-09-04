@@ -1,17 +1,17 @@
 
 dform.num <- function(x, digits = NULL, scientific = NULL,
-                      ## sc = NULL, sc.low = NULL, sc.high = NULL,
-                      p = NULL, p.bound = NULL, NAtext = NULL){
+                      p = NULL, p.bound = NULL, NAtext = NULL,
+                      no04int = NULL){
     properties(x, class = c("numeric", "integer"), length = 1, na.ok = TRUE)
+    if(is.null(no04int)) no04int <- FALSE
+    properties(no04int, class = "logical", length = 1, na.ok = FALSE)
+    if(no04int & as.integer(x) == x) return(sprintf("%.0f", x))
     ## check or get all parameters
     digits  <- dparam("digits", digits)
     scientific <- dparam("scientific", scientific)
     sc <- scientific$use
     sc.low <- scientific$low
     sc.high <- scientific$high
-    ## sc      <- dparam("sc", sc)
-    ## sc.low  <- dparam("sc.low", sc.low)
-    ## sc.high <- dparam("sc.high", sc.high)
     p       <- dparam("p", p)
     p.bound <- dparam("p.bound", p.bound)
     NAtext  <- dparam("NAtext", NAtext)
