@@ -284,11 +284,43 @@ NULL
 ##' @rdname desc-surv
 ##' @details eventrate: (weighted) time, events and rate thereof
 ##' @param time.unit numeric; if provided 'time' will be divided by this number
+##' @param km.tp numeric; if provided the KM estimated rate at this time point
+##'     will be calculated
 ##' @export
-eventrate <- function(time, event, weight = NULL, time.unit = NULL, ...){
+eventrate <- function(time, event, weight = NULL, time.unit = NULL,
+                      km.tp = NULL, ...){
     if(!is.null(time.unit)) time <- time / time.unit
     r <- data.frame(Time = d.sum(time, weight = weight),
                     Events = d.sum(event, weight = weight))
-    r$Rate <- with(r, expr = Events / Time)
+    if(is.null(km.tp)){
+        r$Rate <- with(r, expr = Events / Time)
+    } else {
+        r$KM <- KMrate(time, event, weight, km.tp)
+    }
     r
+}
+
+KMrate <- function(time, event, weight = NULL, km.tp){
+    sf <- survival::survfit.formula(survival::Surv(time = time, event = event) ~ 1,
+                                    weights = weight)
+    d <- with(sf, data.frame(time = time, rate = 1-surv))
+    maxt <- max(d$time)
+    if(maxt < km.tp){
+        w <- paste0("KM rate at ", km.tp, " requested, but time ends at ",
+                    maxt, ".")
+        warning(w)
+        NA_real_
+    } else {
+        with(subset(d, time <= km.tp), max(rate))
+    }
+}
+
+if(FALSE){
+
+    n = 100
+    time = runif(n, 0.1, 2)
+    event = rbinom(n, 1, 0.3)
+    weight = NULL
+    km.tp = 1
+
 }

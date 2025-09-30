@@ -5,7 +5,7 @@
 \alias{eventrate}
 \title{'surv' describers}
 \usage{
-eventrate(time, event, weight = NULL, time.unit = NULL, ...)
+eventrate(time, event, weight = NULL, time.unit = NULL, km.tp = NULL, ...)
 }
 \arguments{
 \item{time}{time component of time-to-event variable}
@@ -15,6 +15,9 @@ eventrate(time, event, weight = NULL, time.unit = NULL, ...)
 \item{weight}{case weight}
 
 \item{time.unit}{numeric; if provided 'time' will be divided by this number}
+
+\item{km.tp}{numeric; if provided the KM estimated rate at this time point
+will be calculated}
 
 \item{...}{arguments passed}
 }
