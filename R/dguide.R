@@ -16,15 +16,16 @@ dguide <- function(data, id = NULL, elim.set = NULL,
                    ## unit.id = NULL, oth.id = NULL,
                    vtab = NULL, stab = NULL, ...){
     properties(data, class = "data.frame")
-    ## unit.id <- dparam("unit.id", unit.id)
-    ## oth.id <- setdiff(dparam("oth.id", oth.id), unit.id)
     id <- dparam("id", id)
-    unit.id <- oth.id <- NULL
+    unit.id <- id.set <- NULL
     if(!is.null(id)){
         for(j in seq_along(id)){
             i <- id[j]
-            if( j == 1 & i %in% names(data) ) unit.id <- i
-            if( j > 1 & i %in% names(data) ) oth.id <- c(oth.id, i)
+            if( j == 1 & i %in% names(data) ){
+                unit.id <- i
+                id.set <- c(id.set, unit.id)
+            }
+            if( j > 1 & i %in% names(data) ) id.set <- c(id.set, i)
             if( !(i %in% names(data)) ) next
             if(any(is.na(data[[i]]))){
                 s <- paste0("id variable '", i, "' contains missing values")
@@ -36,13 +37,6 @@ dguide <- function(data, id = NULL, elim.set = NULL,
     properties(vtab, class = c("NULL", "data.frame"))
     properties(stab, class = c("NULL", "data.frame"))
     terms <- setdiff(names(data), c(elim.set))
-    ## if(!is.null(unit.id)){
-    ##     inclusion(names(data), "names of data", include = unit.id)
-    ##     if(any(is.na(data[[unit.id]]))){
-    ##         s <- paste0("unit id variable '", unit.id,"' contains missing values")
-    ##         warning(s)
-    ##     }
-    ## }
     vtab_given <- !is.null(vtab)
     if(is.null(vtab)) vtab <- extract_labels(data[, terms, drop = FALSE])
     vtab <- check_vtab(vtab)
@@ -53,7 +47,6 @@ dguide <- function(data, id = NULL, elim.set = NULL,
     }
     if(!is.null(stab)) vtab <- combine_vs_tab(vtab, stab)
     tt0 <- term_type(term = terms, data = data, stab = stab, ...)
-    ## tt0 <- term_type(term = terms, data = data, stab = stab)
     lev <- attr(tt0, "levels")
     terms_all <- terms
     terms <- setdiff(terms, c(stab$event, stab$time))
@@ -65,10 +58,10 @@ dguide <- function(data, id = NULL, elim.set = NULL,
     tt <- merge(x = tt0,
                 y = vtab[, c("term", "label", "group")],
                 by = "term", all.x = TRUE, sort = FALSE)
-    if(!is.null(unit.id)){
+    if(length(id.set) > 0) tt$type[tt$term %in% id.set] <- "lcat"
+    if(!is.null(unit.id) & dpget("unit.id.rm")){
         tt$type[tt$term == unit.id] <- "unit.id"
     }
-    if(length(oth.id) > 0) tt$type[tt$term %in% oth.id] <- "lcat"
     al <- align(x = tt$term, template = vtab$term, group = vtab$group, all = TRUE)
     TT <- tt[al$order, ]
     attr(TT, "stab") <- attr(vtab, "stab")
