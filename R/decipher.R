@@ -5,7 +5,9 @@
 ##' @param key Named character vector; where (typically) the names corresponds
 ##'     to values appearing in x, and the values are those we want as
 ##'     replacements. However, if \code{flexible = TRUE}, then a check is
-##'     performed to see if it makes more sense to invert the key.
+##'     performed to see if it makes more sense to invert the key. It is also
+##'     possible to supply a data.frame with columns 'term' and 'label', if so,
+##'     a key is created from this information.
 ##' @param flexible Logical; if TRUE the key can be inverted
 ##' @param within Logical; if TRUE occurences of the keyed values within a
 ##'     string can be replaced. Such occurences must be encapsulated by
@@ -29,6 +31,11 @@
 ##' @export
 decipher <- function (x, key, flexible = TRUE, within = FALSE) {
     properties(x, class = c("character", "factor"))
+    if(inherits(key, "data.frame")){
+        inclusion(names(key), nm = "names of 'key' argument",
+                  include = c("term", "label"))
+        key <- setNames(key$label, nm = key$term)
+    }
     properties(key, class = "character", na.ok = FALSE)
     properties(names(key), nm = "names of key", class = "character",
                length = length(key), na.ok = FALSE)
