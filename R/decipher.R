@@ -6,8 +6,8 @@
 ##'     to values appearing in x, and the values are those we want as
 ##'     replacements. However, if \code{flexible = TRUE}, then a check is
 ##'     performed to see if it makes more sense to invert the key. It is also
-##'     possible to supply a data.frame with columns 'term' and 'label', if so,
-##'     a key is created from this information.
+##'     possible to supply a data.frame with columns 'term' and 'label', if so a
+##'     key is created from this information.
 ##' @param flexible Logical; if TRUE the key can be inverted
 ##' @param within Logical; if TRUE occurences of the keyed values within a
 ##'     string can be replaced. Such occurences must be encapsulated by
