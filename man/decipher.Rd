@@ -12,7 +12,9 @@ decipher(x, key, flexible = TRUE, within = FALSE)
 \item{key}{Named character vector; where (typically) the names corresponds
 to values appearing in x, and the values are those we want as
 replacements. However, if \code{flexible = TRUE}, then a check is
-performed to see if it makes more sense to invert the key.}
+performed to see if it makes more sense to invert the key. It is also
+possible to supply a data.frame with columns 'term' and 'label', if so a
+key is created from this information.}
 
 \item{flexible}{Logical; if TRUE the key can be inverted}
 
