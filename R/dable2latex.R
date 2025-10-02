@@ -8,6 +8,7 @@
 ##'     'units' or 'weight'
 ##' @param kill character vector; columns to remove for presentation
 ##' @param grey character; which rows to make grey-ish in presentation
+##' @param t2l logical (terms-to-label); replace terms with labels, if applicable
 ##' @param file character; argument for Hmisc::latex
 ##' @param where character; argument for Hmisc::latex
 ##' @param rowname character; column name to use as rowname in Hmisc::latex
@@ -25,6 +26,7 @@ datex <- function(dt,
                   count = "rows",
                   kill = NULL,
                   grey = "term",
+                  t2l = TRUE,
                   file = "",
                   where = "hbt",
                   rowname = NULL,
@@ -38,6 +40,7 @@ datex <- function(dt,
     properties(file, nm = "file", class = "character", length = 1, na.ok = FALSE)
     properties(where, nm = "where", class = "character", length = 1, na.ok = FALSE)
     properties(count, nm = "count", class = "character", length = 1, na.ok = FALSE)
+    properties(t2l, nm = "t2l", class = "logical", length = 1, na.ok = FALSE)
     one_of(count, nm = "count", set = c("rows", "units", "weight"))
     properties(rowname, nm = "rowname", class = c("NULL", "character"),
                length = 0:1, na.ok = FALSE)
@@ -84,7 +87,9 @@ datex <- function(dt,
         }
     } else {
         rowname <- "term"
-        Rowname <- dt[[rowname]]
+        Rowname <- if(t2l){
+                       decipher(dt[[rowname]], Guide, flexible = FALSE)
+                   } else dt[[rowname]]
     }
     rg_ind <- if(!is.null(rgroup)){
                   FALSE
@@ -104,6 +109,9 @@ datex <- function(dt,
     Hh <- part2head(Part, names(DT), BL, Ntxt)
     names(DT) <- Hh$h
     cg <- rle(Hh$H)
+    if("term" %in% names(DT) & t2l){
+        DT$term <- decipher(DT$term, Guide, flexible = FALSE)
+    }
     Args <- list(object = DT,
                  file = file,
                  where = where,

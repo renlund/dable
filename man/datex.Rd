@@ -10,6 +10,7 @@ datex(
   count = "rows",
   kill = NULL,
   grey = "term",
+  t2l = TRUE,
   file = "",
   where = "hbt",
   rowname = NULL,
@@ -31,6 +32,8 @@ datex(
 \item{kill}{character vector; columns to remove for presentation}
 
 \item{grey}{character; which rows to make grey-ish in presentation}
+
+\item{t2l}{logical (terms-to-label); replace terms with labels, if applicable}
 
 \item{file}{character; argument for Hmisc::latex}
 
