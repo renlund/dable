@@ -34,6 +34,7 @@ bl_theme <- function(desc = "default", comp = NULL, test = NULL){
 ##' @param time time component of time-to-event variable
 ##' @param event event component of time-to-event variable
 ##' @param time.unit unit of time to present in
+##' @param date.format the format of dates
 ##' @param ... arguments passed along
 ##' @name baseline-standard
 NULL
@@ -156,10 +157,14 @@ lcat.bl1 <- lcat.bl0
 ##' @rdname baseline-standard
 ##' @details date.bl0/1: min/max
 ##' @export
-date.bl0 <- function(x, ...){
+date.bl0 <- function(x, date.format = dpget("date.format"), ...){
+    properties(date.format, class = c("character"), length = 1,
+               na.ok = FALSE)
     r <- min_max(x)
     n.na <- sum(is.na(x))
-    s <- sprintf("%s/%s", changeNA(r$Min), changeNA(r$Max))
+    s <- sprintf("%s/%s",
+                 changeNA(format(r$Min, format = date.format)),
+                 changeNA(format(r$Max, format = date.format)))
     si <- "Date variables: min/max"
     data.frame(Variable = di.Variable(x, ...),
                Summary = NA_desc_append(s, n.na),

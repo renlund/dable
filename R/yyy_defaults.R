@@ -22,9 +22,6 @@ dable_parameters <- list(
     ## formatting
     dable.digits = c("small" = 2, "mid" = 2, "large" = 1),
     dable.scientific = list(use = TRUE, low = 1e-8, high = 1e8),
-    ## dable.sc = TRUE,
-    ## dable.sc.low = 1e-8,
-    ## dable.sc.high = 1e8,
     dable.p = FALSE,
     dable.p.bound = 1e-4,
     dable.NAtext = "",
@@ -33,12 +30,13 @@ dable_parameters <- list(
     dable.output = "default", ## not used
     dable.indent = "    ",
     dable.percent = "%",     ## not used
+    dable.date.format = "%y%m%d",
     ## default describers --------------------
     dable.real.desc = "mean_sd",
     dable.catg.desc = "catg.count_prop",
     dable.bnry.desc = "bnry.count_prop",
     dable.lcat.desc = "n.unique",
-    dable.date.desc = "min_max",
+    dable.date.desc = "date.min_max",
     dable.surv.desc = "eventrate",
     ## default comparers
     dable.real.comp = "real.std",
@@ -205,8 +203,6 @@ dparam <- function(param, value = NULL){
         catg.tol = dp_catg.tol(value),
         surv.prefix = dp_logic1_(value, p),
         surv.affix = dp_surv.affix(value),
-        ## unit.id = dp_char1_(value, p, null.ok = TRUE),
-        ## oth.id = dp_oth.id(value),
         id = dp_id(value),
         gtab.defvar.rm = dp_logic1_(value, p),
         weight.defvar.rm = dp_logic1_(value, p),
@@ -226,6 +222,7 @@ dparam <- function(param, value = NULL){
         dable.sep = dp_char1_(value, p),
         dable.indent = dp_indent(value),
         dable.percent = dp_char1_(value, p),
+        dable.date.format = dp_char1_(value, p),
         if(is.null(value)) dpget(p) else value
     )
 }
@@ -264,12 +261,6 @@ dp_scientific <- function(x = NULL){
     dp_positive1_(x$high, "high")
     x
 }
-
-## dp_oth.id <- function(x = NULL){
-##     if(is.null(x)) x <- dpget("oth.id")
-##     if(!is.null(x)) properties(x, class = "character", na.ok = FALSE)
-##     x
-## }
 
 dp_id <- function(x = NULL){
     if(is.null(x)) x <- dpget("id")

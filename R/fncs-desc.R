@@ -242,7 +242,7 @@ catg.count_prop <- function(x, weight = NULL, ...){
                Count = as.numeric(count),
                Proportion = if(W != 0) count / W else NA_real_)
 }
-attr(catg.count_prop, "meta") <- "Level" ## XK ?
+attr(catg.count_prop, "meta") <- "Level"
 
 
 
@@ -265,9 +265,18 @@ NULL
 ##' functions to describe date variables
 ##' @param x input vector
 ##' @param weight case weight
+##' @param date.format  the format of dates
 ##' @param ... arguments passed
 ##' @name desc-date
 NULL
+
+##' @rdname desc-date
+##' @details date.min_max: minimum and maximum for dates
+##' @export
+date.min_max <- function(x, date.format = dpget("date.format"), ...){
+    data.frame(min = format(d.min(x), format = date.format),
+               max = format(d.max(x), format = date.format))
+}
 
 ## ------------------------------------------------------------------------ surv
 

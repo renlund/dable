@@ -21,7 +21,7 @@ catg.bl0(x, weight = NULL, ...)
 
 lcat.bl0(x, ...)
 
-date.bl0(x, ...)
+date.bl0(x, date.format = dpget("date.format"), ...)
 
 surv.bl0(time, event, weight = NULL, time.unit = NULL, ...)
 }
@@ -31,6 +31,8 @@ surv.bl0(time, event, weight = NULL, time.unit = NULL, ...)
 \item{weight}{case weight}
 
 \item{...}{arguments passed along}
+
+\item{date.format}{the format of dates}
 
 \item{time}{time component of time-to-event variable}
 

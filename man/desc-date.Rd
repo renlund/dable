@@ -2,14 +2,23 @@
 % Please edit documentation in R/fncs-desc.R
 \name{desc-date}
 \alias{desc-date}
+\alias{date.min_max}
 \title{'date' describers}
+\usage{
+date.min_max(x, date.format = dpget("date.format"), ...)
+}
 \arguments{
 \item{x}{input vector}
 
-\item{weight}{case weight}
+\item{date.format}{the format of dates}
 
 \item{...}{arguments passed}
+
+\item{weight}{case weight}
 }
 \description{
 functions to describe date variables
+}
+\details{
+date.min_max: minimum and maximum for dates
 }
