@@ -6,6 +6,8 @@
 ##' @param time time component of time-to-event variable
 ##' @param event event component of time-to-event variable
 ##' @param time.unit unit of time to present in
+##' @param date.format the format for dates, default "%Y-%m-%d" (not
+##'     automatically equal to package default)
 ##' @param ... arguments passed along
 ##' @name baseline-standard-2
 NULL
@@ -82,9 +84,11 @@ attr(lcat.bl2, "meta") <- c("Variable")
 ##' @rdname baseline-standard-2
 ##' @details date.bl2: min, max
 ##' @export
-date.bl2 <- function(x, ...){
+date.bl2 <- function(x, date.format = "%Y-%m-%d", ...){
     stat <- c("Min", "Max")
-    value <- as.character(c(d.min(x), d.max(x)))
+    ## value <- as.character(c(d.min(x), d.max(x)))
+    mm <- date.min_max(x, date.format)
+    value <- c(mm$min, mm$max)
     has_missing <- di.dots("missing", strict = TRUE, ...)
     if(isTRUE(has_missing)){
         stat <- c(stat, dpget("NAalias"))

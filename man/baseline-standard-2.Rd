@@ -15,7 +15,7 @@ catg.bl2(x, weight = NULL, ...)
 
 lcat.bl2(x, ...)
 
-date.bl2(x, ...)
+date.bl2(x, date.format = "\%Y-\%m-\%d", ...)
 
 surv.bl2(time, event, weight = NULL, time.unit = NULL, ...)
 }
@@ -25,6 +25,9 @@ surv.bl2(time, event, weight = NULL, time.unit = NULL, ...)
 \item{weight}{case weight}
 
 \item{...}{arguments passed along}
+
+\item{date.format}{the format for dates, default "\%Y-\%m-\%d" (not
+automatically equal to package default)}
 
 \item{time}{time component of time-to-event variable}
 
