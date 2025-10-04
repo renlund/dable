@@ -1,3 +1,79 @@
+##' dable parameters and how to set and get them
+##'
+##' @details These are functions to set and retrieve dable parameters. The
+##'     parameters in the package are:
+##'
+##' * *bnry.list* the list of values defining the bnry type
+##'
+##' * *real.tol* the threshold for number of unique numeric values to be
+##' considered to be type catg
+##'
+##' * *catg.tol* the threshold for number of unique categorical values to be
+##' considered to be type lcat
+##'
+##' * *surv.prefix* are surv variables identifiable through a prefix? (else suffix)
+##'
+##' * *surv.affix* what is the affix? default: c("time" = "t.", "event" = "ev.")
+##'
+##' * *id* character vector of id variable names, default: NULL
+##'
+##' * *gtab.defvar.rm* if gtab is specified by a term, should that term be hidden
+##' in output?
+##'
+##' * *weight.defvar.rm* if weight is specified by a term (must be, currently),
+##' should that term be hidden in output?
+##'
+##' * *unit.id.rm* should the unit (first element of 'id') id be hidden in output?
+##'
+##' * *vtab.group.name* default grouping name (for all but surv type) if not given
+##'
+##' * *stab.group.name* default grouping name for surv type if not given
+##'
+##' * *gtab.group.name* default gtab 'all' name if not given
+##'
+##' * *units.name* how to refer to the units in text, default: subjects
+##'
+##' * *grey.first* if using alternating grey in output table, begin with a grey line?
+##'
+##' * *digits* number of digits presented after formatting? Vector of length
+##' three to give number of digits for small (absolute value smaller than 1),
+##' medium (absolute value between 1 and 10) and large (absolute value larger
+##' than 10) numbers. Default: c("small" = 2, "mid" = 2, "large" = 1)
+##'
+##' * *scientific* if to use scientific number representation, and what the cut
+##' offs should be, default: list(use = TRUE, low = 1e-8, high = 1e8)
+##'
+##' * *p* for formatting, are numbers p-value? default: FALSE (but this is
+##' generally automatically identified by formatting functions)
+##'
+##' * *p.bound* cut off for p-value presentation
+##'
+##' * *NAtext* how to show NA in tables
+##'
+##' * *NAalias* how to refer to missing
+##'
+##' * *sep* how to separate the concatenation of variable name and its level
+##' (when applicable)
+##'
+##' * *output* (NOT IN USE) the type of output
+##'
+##' * *indent* what string to use as indentation, default "    ", but
+##' recommended to set to "\\quad" if LaTeX output is wanted
+##'
+##' * *percent* (NOT IN USE) symbol to use for percent
+##'
+##' * *date.format* the format used for dates, default "%y%m%d"
+##'
+##' * *type.part* where type is any type (real,catg,...) and part is the table
+##' part (desc, comp, test); these set the default such function for simple
+##' descriptive tables
+##'
+##' * *type.part.bl* where type is any type (real,catg,...) and part is the table
+##' part (desc, comp, test); these set the default such function for baseline tables
+##'
+##' @name dable-parameters
+NULL
+
 dable_parameters <- list(
     dable.bnry.list = list(c(0, 1),
                             c(FALSE, TRUE),
@@ -86,14 +162,9 @@ pName <- function(x){
     ifelse(grepl("^dable\\.", x), yes = sub("^dable\\.", "", x), no = x)
 }
 
-##' dable parameter functions
-##'
-##' functions to set and retrieve dable parameters
-##' @name parameter-fncs
-NULL
 
-##' @rdname parameter-fncs
-##' @details set a dable package parameter
+##' @rdname dable-parameters
+##' @details dpset: set a dable package parameter
 ##' @param param character; name of parameter OR a named list of parameter values
 ##' @param value the value to be set
 ##' @export
@@ -113,8 +184,8 @@ dpset <- function(param, value = NULL){
     invisible()
 }
 
-##' @rdname parameter-fncs
-##' @details set default parameter values
+##' @rdname dable-parameters
+##' @details dpset_defaults: set default parameter values
 ##' @param overwrite logical; overwrite parameter values already set?
 ##' @export
 dpset_defaults <- function(overwrite = TRUE, style = NA_character_){
@@ -146,8 +217,8 @@ dpset_defaults <- function(overwrite = TRUE, style = NA_character_){
 subtypes.key <- stats::setNames(object = c("catg", "catg"),
                                 nm = c("bnry", "lcat"))
 
-##' @rdname parameter-fncs
-##' @details get package parameter
+##' @rdname dable-parameters
+##' @details dpget: get package parameter
 ##' @param verbose logical; get (possibly) helpful messages?
 ##' @param sub logical; search for possible replacement values?
 ##' @importFrom stats setNames
@@ -174,16 +245,16 @@ dpget <- function(param, verbose = FALSE, sub = TRUE){
 }
 ## dable.default <- dpget ##
 
-##' @rdname parameter-fncs
-##' @details get all package parameters
+##' @rdname dable-parameters
+##' @details dpget_all: get all package parameters
 ##' @export
 dpget_all <- function(){
     z <- names(options())
     options()[grep(pattern = "^dable\\.", x = z, value = TRUE)]
 }
 
-##' @rdname parameter-fncs
-##' @details add a value to the 'bnry.list'
+##' @rdname dable-parameters
+##' @details add2bnry.list: add a value to the 'bnry.list'
 ##' @param bl list of binary values
 ##' @export
 add2bnry.list <- function(bl){

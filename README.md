@@ -1,3 +1,3 @@
 # dable
 
-dable is a package for *descriptive tables*
+dable is a package for creating *descriptive tables*.
