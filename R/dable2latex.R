@@ -504,11 +504,10 @@ dable_prune <- function(x, rm = NULL, info = FALSE,
     if(is.character(rm)){
         rm <- which(names(x) %in% rm)
     }
-    if(!all(d[rm] == "meta")){
-        ## XK perhaps check that only 'meta' parts are pruned and warn if not??
-        s <- paste0("Pruning non-meta stuff from dable object.")
-        message(s)
-    }
+    ## if(!all(d[rm] == "meta")){
+    ##     s <- paste0("Pruning non-meta stuff from dable object.")
+    ##     message(s)
+    ## }
     if(info){
         infot <- unlist(lapply(x[,rm], identity))
         if(info.unique){
@@ -655,8 +654,8 @@ part2head <- function(part, cnm, bl, ntxt){
     H[i_d] <- tmp[i_d]
     h[c(i_c, i_t)] <- tmp[c(i_c, i_t)]
     if(bl){
-        H[i_c] <- "Comparison" ## default value?
-        H[i_t] <- "Test" ## default value?
+        H[i_c] <- dpget("comp.header")
+        H[i_t] <- dpget("test.header")
         if(all(H[i_d] %in% names(ntxt))) h[i_d] <- ntxt[H[i_d]]
     } else {
         H[i_c] <- cnm[i_c]

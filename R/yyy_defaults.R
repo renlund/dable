@@ -31,6 +31,10 @@
 ##'
 ##' * *gtab.group.name* default gtab 'all' name if not given
 ##'
+##' * *comp.header* header for comparison column i baseline tables
+##'
+##' * *test.header* header for test column i baseline tables
+##'
 ##' * *units.name* how to refer to the units in text, default: subjects
 ##'
 ##' * *grey.first* if using alternating grey in output table, begin with a grey line?
@@ -92,6 +96,8 @@ dable_parameters <- list(
     dable.vtab.group.name = "Covariates",
     dable.stab.group.name = "Time-to-event",
     dable.gtab.group.name = "All",
+    dable.comp.header = "Compare",
+    dable.test.header = "Test",
     ## printingish
     dable.units.name = "subjects",
     dable.grey.first = FALSE,
@@ -281,6 +287,8 @@ dparam <- function(param, value = NULL){
         stab.group.name = dp_char1_(value, p),
         vtab.group.name = dp_char1_(value, p),
         gtab.group.name = dp_char1_(value, p),
+        comp.header = dp_char1_(value, p),
+        test.header = dp_char1_(value, p),
         units.name = dp_char1_(value, p),
         digits = dp_digits(value),
         scientific = dp_scientific(value),

@@ -55,6 +55,8 @@ should that term be hidden in output?
 \item \emph{vtab.group.name} default grouping name (for all but surv type) if not given
 \item \emph{stab.group.name} default grouping name for surv type if not given
 \item \emph{gtab.group.name} default gtab 'all' name if not given
+\item \emph{comp.header} header for comparison column i baseline tables
+\item \emph{test.header} header for test column i baseline tables
 \item \emph{units.name} how to refer to the units in text, default: subjects
 \item \emph{grey.first} if using alternating grey in output table, begin with a grey line?
 \item \emph{digits} number of digits presented after formatting? Vector of length
