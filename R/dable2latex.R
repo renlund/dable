@@ -204,7 +204,7 @@ blatex_default <- function(bl,
     ## the rowname argument is only necessary when rgroups are used, but easier
     ## to always use them in this function. They have to be unique, so add some
     ## hidden noise if not:
-    Rowname <- unique_latex_rownames(Hmisc::latexTranslate(bl[["Variable"]]))
+    Rowname <- unique_latex_rownames(bl[["Variable"]])
     bl <- dable_prune(bl, rm = "Variable")
 
     ## establish what text to put below table, if any
