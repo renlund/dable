@@ -1,15 +1,4 @@
----
-title: "dable and flextable"
-output:
-  rmarkdown::html_document:
-    toc: true
-vignette: >
-  %\VignetteIndexEntry{dable-flextable}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
-
-```{r "SETUP", include = FALSE}
+## ----"SETUP", include = FALSE-------------------------------------------------
 knitr::opts_chunk$set(collapse = TRUE,
                       comment = "#>")
 library(dable)
@@ -18,31 +7,20 @@ if(FALSE){
     .cmp <- function() rmarkdown::render(input = "vignettes/dable-and-flextable.Rmd")
     .look <- function() shell.exec("dable-and-flextable.html")
 }
-```
 
-This document tests the `flexdable` function in `dable`.
-
-Standard setup:
-
-```{r}
+## -----------------------------------------------------------------------------
 d <- test_data()
 vt <- test_vtab()
 st <- test_stab()
 g <- dguide(d, id = "id", vtab = vt, stab = st, catg.tol = 15)
-```
 
-**Test 1:**
-
-```{r}
+## -----------------------------------------------------------------------------
 dt <- baseline(d, guide = g, gtab = "area", time.unit = 365.25,
                part = list(T,T,T))
 flexdable(dt)
-```
 
-**Test 2:**
-
-```{r}
+## -----------------------------------------------------------------------------
 dt <- baseline(d, theme = 2, guide = g, gtab = "area", time.unit = 365.25,
                part = list(T,T,T))
 flexdable(dt)
-```
+

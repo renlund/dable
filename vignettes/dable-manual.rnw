@@ -1,0 +1,992 @@
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{dmanual}
+%\VignetteEncoding{UTF-8}
+\documentclass{article}
+\addtolength{\hoffset}{-1.2cm}
+\addtolength{\textwidth}{2.4cm}
+\usepackage{longtable}
+% \usepackage[table]{xcolor}
+\addtolength{\voffset}{-1cm}
+\addtolength{\textheight}{2cm}
+
+\title{dable manual}
+\author{Henrik Renlund}
+
+<<"setup", cache = FALSE, echo = FALSE, include = FALSE>>=
+library(knitr)
+library(dable)
+## devtools::load_all()
+opts_chunk$set(include = TRUE,
+               echo = TRUE,
+               cache = FALSE)
+opts_knit$set(eval.after = c('fig.cap', 'fig.scap'))
+if(FALSE){
+    setwd('c:/Users/henre358/My Drive/R/P_package/dable/vignettes')
+    knitr::knit2pdf("dable-manual.rnw", clean = TRUE)
+    shell.exec("dable-manual.pdf")
+}
+dpset_defaults(overwrite = TRUE, style = "latex") ## also in chunk below
+@
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+\listoftables
+\listoffigures
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+A \emph{dable}, i.e.\ a \emph{descriptive table}, has up to 3 (optional) parts
+consisting of
+
+\begin{itemize}
+\item descriptions (\texttt{desc}),
+\end{itemize}
+
+\noindent and if a stratification (grouping) is given, also
+
+\begin{itemize}
+\item comparisons (\texttt{comp}), as well as
+\item tests (\texttt{test}).
+\end{itemize}
+
+\noindent The table-creating functions will respond to a \texttt{part}
+argument which specifies which parts are wanted, with only the descriptive part
+being returned by default.
+
+Each variable is given a type (Section \ref{sec:types}), and each type is
+associated with its own set of functions to create the parts (Section
+\ref{sec:oth-fnc}). One must always choose one of these (or accept the default)
+to e.g.\ create the description part, but it is also possible to provide user
+defined functions (Section \ref{sec:custom}).
+
+It is also possible to provide a \emph{variable table} (\texttt{vtab}, Section
+\ref{sec:vstab}) that provides a label and a group for each variable. The
+grouping can be used to group the rows of the output tables (if generated in
+e.g.\ \LaTeX).
+
+The package initially tried to strictly separate table creation into
+
+\begin{itemize}
+\item[(1)] generate the statistics/numbers that go into the table
+\item[(2)] format for a desired output generating program/language
+\end{itemize}
+
+This aim has not quite been achieved. It works pretty well for default versions
+of \emph{simple descriptive tables} (Section \ref{sec:simple}), but is harder to
+do for \emph{baseline tables} (Section \ref{sec:baseline}). The compromise
+reached is that one can set package parameters pointing to the desired
+output. As an example, this document is generated in \LaTeX\, so I will begin by
+restoring all defaults\footnote{Currently, this actually does very little - it's
+main purpose is to set the \texttt{indent} parameter to
+$\backslash$\texttt{quad}. The most obvious problem in this context is the fact
+that '\%' has a special meaning, but that is easy to substitute just before
+translating to \LaTeX\, code.} with that output program in mind.
+
+<<"set-latex-defaults">>=
+dpset_defaults(overwrite = TRUE, style = "latex")
+@
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Types} \label{sec:types}
+
+To determine how to deal with a variable we classify it as
+
+\begin{itemize}
+\item numeric (\texttt{real}),
+\item categorical (\texttt{catg}),
+\item date (\texttt{date}), or
+\item time-to-event (\texttt{surv}).
+\end{itemize}
+
+Of course, a time-to-event variable will actually consist of a pair of
+variables - more on that later. There are also subcategories of \texttt{catg}:
+
+\begin{itemize}
+\item \emph{binary} variables (\texttt{bnry}) are dichotomous variables where it
+  should be completely obvious what the two levels are if you are only given
+  one. The idea is that for these variables, it typically suffices to describe
+  (e.g. by a count and/or percentage) one of the levels.
+\item \emph{lavish categorical} variables (\texttt{lcat}) are those where there
+  are too many unique values to routinely include value-level information in a
+  table (e.g. an id-variable of some sort).
+\end{itemize}
+
+
+There is a non-surprising general idea of a mapping from the class (in R), of a
+variable, to the dable \emph{type}, given by Table \ref{tab:map}.
+
+\begin{table}[!h]
+  \caption{The basic mapping idea.}
+  \label{tab:map}
+  \begin{center}
+    \begin{tabular}{rcl}
+  R class & $\longrightarrow$ & dable type \\ \cline{1-1} \cline{3-3}
+\texttt{numeric}, \texttt{integer}  &  & \texttt{real} \\
+\texttt{factor}, \texttt{character}, \texttt{logical} &  & \texttt{catg}
+(or \texttt{bnry}/\texttt{lcat})  \\
+\texttt{Date}                       &  & \texttt{date}
+    \end{tabular}
+  \end{center}
+\end{table}
+
+But the types can be changed, manually or through parameters, so that
+e.g. integer variables with a small number of unique values can be describes as
+if it was categorical. See Figure \ref{fig:map} for a the full set of possible
+automatic mappings.
+
+<<"map", include = TRUE, echo = FALSE, fig.scap = scap, fig.cap = cap>>=
+old <- par()$mar
+par(mar = c(.1,.1,.1,.1))
+
+NM <- c(
+    "integer\nnumeric",           #1
+    "factor\ncharacter\nlogical", #2
+    "Date",                       #3
+    "surv",                       #4
+    "real",                       #5
+    "bnry",                       #6
+    "catg",                       #7
+    "lcat",                       #8
+    "date"                       #9
+)
+## transitions:
+M <- matrix(data = 0, nrow = 9, ncol = 9)
+M[4,1] <- "names of terms"
+M[5,1] <- ""
+M[6,1] <- ""
+M[7,1] <- "few unique values"
+M[6,2] <- "2 values*"
+M[7,2] <- ""
+M[8,2] <- "numerous unique values"
+M[9,3] <- ""
+## coordinates of boxes:
+x1 <- .1
+x2 <- .9
+p <- matrix(data = 0, nrow = 9, ncol = 2)
+a <- -.05; b <- 1.33
+p[1,] <- c(x1, a + b * .6)
+p[4,] <- c(x2, a + b * .75)
+p[5,] <- c(x2, a + b * .6)
+p[2,] <- c(x1, a + b * .35)
+p[6,] <- c(x2, a + b * .45)
+p[7,] <- c(x2, a + b * .35)
+p[8,] <- c(x2, a + b * .25)
+p[3,] <- c(x1, a + b * .1)
+p[9,] <- c(x2, a + b * .1)
+## relative position of arrows on connecting lines:
+ap <- matrix(data = NA, nrow = 9, ncol = 9)
+ap[4,1] <- .5
+ap[5,1] <- .3
+ap[6,1] <- .69
+ap[7,1] <- .3
+ap[6,2] <- .69
+ap[7,2] <- .3
+ap[8,2] <- .4
+ap[9,3] <- .3
+## curvature of connecting lines:
+cu <- matrix(data = 0, nrow = 9, ncol = 9)
+cu[4,1] <- -.1
+cu[6,1] <- .1
+cu[7,1] <- .1
+cu[6,2] <- -.1
+cu[8,2] <- .1
+diagram::plotmat(
+             M,
+             pos = p,
+             name = NM,
+             curve = cu,
+             arr.type = "simple",
+             arr.pos = ap,
+             box.type = "rect",
+             box.size = rep(c(0.1, 0.06), c(3,6)),
+             box.prop = .7,
+             latex = TRUE
+         )
+
+par(mar = old)
+rm(list=ls())
+scap <- paste0("Possible mappings.")
+cap <- paste0(scap,
+              " For both numeric/integer and factor/character/logical, if ",
+              "there are exactly 2 unique values corresponding to one of the ",
+              "elements  of \\texttt{bnry.list}, they get type \\texttt{bnry}. ",
+              " If number of nunique values of a numeric/integer variable ",
+              "is \\texttt{real.tol} or less, the type is \\texttt{catg}. ",
+              " If number of unique values of a factor/character variable ",
+              "is strictly greater than  \\texttt{catg.tol}, ",
+              "the type is \\texttt{lcat}. The \\texttt{surv} type is ",
+              "determined through given names or pattern matching. ")
+@
+
+
+The parameters one can set that will alter the general mapping are given by:
+
+\begin{itemize}
+\item \texttt{real.tol} is an integer $n$ and, if set, re-types a \texttt{real}
+  variable to a \texttt{catg} variable \emph{if} the number of unique values is
+  $\leq n$. Why? \texttt{real} types typically describe variables measured on
+  a continuous scale and if the number of unique values is low, it is probably a
+  coding for something else \emph{or} something you want described as a
+  \texttt{catg}.
+\item \texttt{catg.tol} is an integer $n$ and, if set, re-types a \texttt{catg}
+  variable to a \texttt{lcat} variable \emph{if} the number of unique values is
+  $> n$. Why? Some categorical data just have too many levels to include in a
+  descriptive table, the \texttt{lcat} type is meant to provide alternative
+  descriptions for these.
+\item \texttt{bnry.list} is a list of length 2 vectors specifying, respectively,
+  what the set of unique values can be in order for a variable to end up with
+  the \texttt{bnry} type. Why? The \texttt{bnry} variables will generally only
+  show descriptiv measures for the reference level, thus it must be clear from
+  that level alone what the non-showing level is.
+\end{itemize}
+
+\newpage
+We can inspect the default values thus
+
+<<"default-bnry.list">>=
+dpget("real.tol")
+dpget("catg.tol")
+dpget("bnry.list")
+@
+
+The time-to-event variable pairs need to be specified with a \emph{survival
+table} (\texttt{stab}), an example of which is given in the package
+
+<<"stab-example">>=
+test_stab()
+@
+
+But - if one utilizes a naming scheme where the time- and status
+component of a time-to-event variable differes only by a consistent use of a
+prefix or suffix, these variables can be identified automatically!
+
+The default is to use a prefix \texttt{t.} and \texttt{ev.} for the time- and
+event/status component, respectively.
+
+<<"default-affix">>=
+dpget("surv.prefix") ## is prefix used? (else suffix)
+dpget("surv.affix") ## what is the affix used?
+@
+
+\newpage
+%% =============================================================================
+\subsection{The guide}
+
+The packages provides a test data set
+
+<<"test-data">>=
+d <- test_data()
+str(d)
+@
+
+\newpage
+We can use this data set to illustrate the \emph{data guide} (\texttt{dguide}).
+
+<<"guide-default">>=
+(g <- dguide(d))
+@
+
+Note that the guide provides an automatically generated survival table based on
+the naming of variables. Also, a default grouping of variables is always created
+with the value
+
+<<"vtab.group.name">>=
+dpget("vtab.group.name")
+@
+
+for all but the time-to-event variables which are grouped as
+
+<<"stab.group.name">>=
+dpget("stab.group.name")
+@
+
+\newpage
+\noindent One can manually update the guide
+
+<<"guide-manual-change", eval = FALSE>>=
+g$type[g$term == "pid"] <- "lcat"
+@
+
+\noindent or provide some parameters to influence the types
+
+<<"guide-parameter-change">>=
+subset(dguide(d, catg.tol = 10), subset = term == "pid") ## type now lcat
+@
+
+Arguments to \texttt{dguide}:
+
+\begin{itemize}
+\item \texttt{data} the data (duh!)
+\item \texttt{id} a character vector of the terms that are id variables; these
+  will be typed as \texttt{lcat}. (Also, the first entry will be singled out as
+  the "unit id" and hidden from tables unless you set the dable option
+  \texttt{unit.id.rm} to \texttt{FALSE}.)
+\item \texttt{elim.set} a character vector of variables to ignore
+\item \texttt{vtab} a "variable table", i.e.\ a \texttt{data.frame} with columns
+  \texttt{term}, \texttt{label}, an optionally \texttt{group}. This table informs
+  the \texttt{label} and \texttt{group} column of the guide.
+\item \texttt{stab} a "survival table", i.e.\ a \texttt{data.frame} with columns
+  \texttt{label}, \texttt{time}, \texttt{event}, an optionally \texttt{group}.
+\item \texttt{\ldots} arguments passed to \texttt{term\_type}.
+\end{itemize}
+
+
+%% =============================================================================
+\subsection{Variable and survival tables} \label{sec:vstab}
+
+There are examples of \texttt{vtab} and \texttt{stab} in the package
+
+<<"vtab-stab">>=
+(vt <- test_vtab())
+(st <- test_stab())
+@
+
+The survival table has no grouping, so we can provide one
+
+<<"add-grouping-to-stab">>=
+st$group <- "Outcomes"
+@
+
+Now we can see what the guide looks like, if we add some additional arguments:
+
+<<"guide-with-parameters">>=
+(g <- dguide(d, id = c("id", "pid"), vtab = vt, stab = st))
+@
+
+Note that the variables not specified by the variable table gets the default
+grouping and are placed at the end.
+
+To see the usefulness of setting up a "variable table", notice that with these
+preparations the following code generates Table \ref{tab:default-bsl}:
+
+<<"baseline-table-a-first-look", results = 'asis', message = FALSE, warning = FALSE>>=
+b <- baseline(d, guide = g, gtab = "gender", part = c(T,T,T))
+blatex(b, where = "!ht", caption = "Default baseline table",
+       label = "tab:default-bsl", size = "small")
+@
+
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Simple descriptive tables} \label{sec:simple}
+
+A \emph{simple descriptive table} describes only 1 type. Tables describing
+\emph{all} variables will be refered to as \emph{baseline tables} - so we will
+cut the "simple" and just refer to the tables in this section as
+\emph{descriptive}. The workhorse for all tables is the \texttt{dable}
+function. To create the default descriptive table for the real type we use
+
+<<"real-with-dable">>=
+dable(d, type = "real", guide = g)
+@
+
+\noindent where the output is ordered as the guide since we supply the guide as
+an argument.
+
+There is a shorthand for each type, and some .
+
+<<"default-type-tables">>=
+dreal(d, guide = g)
+dcatg(d, guide = g)
+dbnry(d, guide = g)
+dlcat(d, guide = g)
+ddate(d, guide = g)
+dsurv(d, guide = g)
+@
+
+Some of these accept type specific extra arguments, which can be of interest
+
+<<"default-type-tables-extra-arg">>=
+ddate(d, guide = g, date.format = "%Y-%m-%d")
+dsurv(d, guide = g, time.unit = 365.25)
+@
+
+
+%% =============================================================================
+\subsection{Table stratification}\label{sec:table-strat}
+
+Tables can be stratified using a \emph{grouping table} (\texttt{gtab}). We are
+slightly overloading the "group" terminology here; the groups use to stratify a
+table have nothing to do with \texttt{group} column of the guide - those can be
+used to group rows of the output table created in e.g.\ \LaTeX, whereas the
+\texttt{gtab} group columns of the descriptive table.
+
+The simplest way to create a stratification is to point to a grouping variable
+
+<<"stratification">>=
+(dt <- dreal(d, guide = g, gtab = "gender"))
+@
+
+Note that column names become duplicated, but there is "meta data" in the
+attributes that keeps track of which columns belong to which grouping.
+
+<<"attr-part">>=
+attr(dt, "part")
+@
+
+In, fact there is even more meta data behind the scene; if we pass this object
+to \texttt{datex}, it generates the \LaTeX\, code for a table, using some of
+this additional information as can be seen in Table \ref{tab:datex}.
+
+<<"datex", results = 'asis'>>=
+datex(dt, label = "tab:datex",
+      caption = "Default \\LaTeX\\, output for descriptive table.")
+@
+
+The package assumes utilization of meta data is wanted. If not, one typically
+have to turn these features off, see Table \ref{tab:datex-less}.
+
+<<"datex-with-less", results = 'asis'>>=
+datex(dt, row.group = FALSE, lab = FALSE, label = "tab:datex-less",
+      caption = "Descriptive table using less meta data.")
+@
+
+\newpage
+But we are digressing. Another way to create a grouping is to use
+\texttt{gtab\_maker}, or create one manually - it is simply a data frame with
+logical columns of length equal to the data set.
+
+<<"gtab_maker">>=
+gt <- gtab_maker("area", data = d, all = TRUE)
+head(gt)
+@
+
+Lets use a less frequent type (\texttt{lcat}) to illustrate the next point;
+although the presentation defaults to the order of the \texttt{gtab},
+
+<<"gtab-part">>=
+(dt <- dlcat(d, guide = g, gtab = gt))
+attr(dt, "part") ## ordered as gtab
+@
+
+\noindent it is possible to change it within the \texttt{part} argument.
+
+<<"gtab-part-manipulate">>=
+dt <- dlcat(d, guide = g, gtab = gt, part = list("desc" = c(3,1,2)))
+attr(dt, "part") ## order now permutated
+@
+
+It is also possible to specify \texttt{desc} as one of "all" (default), "first"
+or "last" ("none" is also accepted).
+
+<<"desc-last">>=
+dt <- dlcat(d, guide = g, gtab = gt, part = "last")
+attr(dt, "part") ## now only last group included
+@
+
+
+%% -----------------------------------------------------------------------------
+\subsubsection{Other descriptive functions} \label{sec:oth-fnc}
+
+If you are not happy with the default description, there are other describer
+functions to choose from, use \texttt{?desc-real} to see all build-in describers
+for the \texttt{real} type, and similar help pages exists for other types and
+the other parts (\texttt{comp}/\texttt{test}). In section \ref{sec:define} you
+can see how to define your own functions. The name of the new function must be
+supplied to the \texttt{fnc} argument. As an example, \texttt{min\_max} is a
+built-in function that one can choose
+
+<<"change-describer">>=
+dreal(d, fnc = list(desc = "min_max"))
+@
+
+%% -----------------------------------------------------------------------------
+\subsubsection{Change default functions}
+
+The default values can be viewed with \texttt{dpget}, e.g.\ the default
+describer, compararer and tester for \texttt{real}.
+
+<<"see-default">>=
+dpget("real.desc")
+dpget("real.comp")
+dpget("real.test")
+@
+
+New values can be set with \texttt{dpset}.
+
+<<"change-default", eval = FALSE>>=
+dpset("real.desc", "name_of_new_function") ## no eval
+@
+
+You can view \emph{all} package parameters with \texttt{dpget\_all()}.
+
+%% =============================================================================
+\subsection{An emphasis on weight}
+
+Most built-in describers and comparers has a \texttt{weight} argument (when it
+makes sense) - at the the of writing this is not implemented for the
+testers. This parameter is explicit in the higher order \texttt{dable} function
+so always exists (even if null), as can be seen in Secion \ref{sec:dots}.
+
+Currently, weights can only be specified as a variable in data.
+
+<<"weight", results = 'hide'>>=
+dreal(d, guide = g, weight = "importance")
+@
+
+%% =============================================================================
+\subsection{Table comparisons}
+
+The comparison part of a decriptive table is accessed by the \texttt{part}
+argument. This can be given either a logical vector of length up to 3 - if
+shorter, it fills in the missing values with \texttt{FALSE}. The position of the
+elements is associated with the parts: first \emph{descriptions}, second
+\emph{comparisons} and third \emph{tests}.
+
+<<"desc-and-comp", results = 'asis', warning = FALSE>>=
+dt <- dreal(d, guide = g, gtab = "gender", part = c(TRUE, TRUE))
+datex(dt, label = "tab:desc-n-comp", row.group = FALSE,
+      caption = "Descriptive table with comparison.")
+@
+
+But, as we've seen in Section \ref{sec:table-strat}, one can manipulate the
+order of the descriptive presentation, and one can change the "order" of the
+comparison as well. To do so, one provides a list to \texttt{part} instead. The
+first list entry corresponds to descriptions and is \texttt{TRUE/FALSE} or a
+vector of the wanted ordering. The second list entry corresponds to comparison
+and can be
+
+\begin{itemize}
+\item \texttt{TRUE/FALSE}
+\item A list of length 2 vectors for the comparison pairs
+\item A single character value "across" (Table \ref{tab:across}) or "adjacent"
+  (Table \ref{tab:adjacent}), "none" is also accepted.
+\end{itemize}
+
+So, to change to order of the comparison in Table \ref{tab:desc-n-comp} you use
+
+<<"desc-and-comp-2", results = 'asis', warning = FALSE>>=
+dt <- dreal(d, guide = g, gtab = "gender",
+            part = list(TRUE, list(c(2,1))))
+datex(dt, label = "tab:desc-n-comp-2", row.group = FALSE,
+      caption = "Descriptive table with comparison order changed.")
+@
+
+\noindent to get Table \ref{tab:desc-n-comp-2}.
+
+\newpage
+
+To make comparisons "across":
+
+<<"comp-across", results = 'asis'>>=
+dt <- dbnry(d, guide = g, gtab = "region",
+            part = list(FALSE, "across"))
+datex(dt, label = "tab:across", row.group = FALSE,
+      caption = "Comparison \\emph{across} the groups.")
+@
+
+
+To make comparisons "adjacent":
+
+<<"comp-adjacent", results = 'asis'>>=
+dt <- dbnry(d, guide = g, gtab = "region",
+            part = list(FALSE, "adjacent"))
+datex(dt, label = "tab:adjacent", row.group = FALSE,
+      caption = "Comparison between \\emph{adjacent} groups.")
+@
+
+\newpage
+To make your own comparison:
+
+<<"comp-list", results = 'asis'>>=
+dt <- dbnry(d, guide = g, gtab = "region",
+            part = list(FALSE, list(c(1,3), c(5,2))))
+datex(dt, label = "tab:comp-list", row.group = FALSE,
+      caption = "Comparison between chosen groups.")
+@
+
+
+%% =============================================================================
+\subsection{Table tests}
+
+The testing part of the \texttt{part} argument cam be given as
+\texttt{TRUE/FALSE}, with \texttt{TRUE} meaning to test all groups
+
+<<"desc-test", results = 'asis', warning = FALSE, error = FALSE, message = FALSE>>=
+dt <- dreal(d, guide = g, gtab = "country", part = c(TRUE,FALSE,TRUE))
+datex(dt, label = "tab:desc-test", row.group = FALSE,
+      caption = "Descriptive table with test.")
+@
+
+One can also specify wich groups to include in the test
+
+<<"desc-test-2", results = 'asis', warning = FALSE, error = FALSE, message = FALSE>>=
+dt <- dreal(d, guide = g, gtab = "country", part = list(TRUE,FALSE,c(2,3)))
+datex(dt, label = "tab:desc-test-2", row.group = FALSE,
+      caption = "Descriptive table with selected testing.")
+@
+
+
+\newpage
+%% =============================================================================
+\subsection{Custom made functions} \label{sec:define}
+
+In general, all custom made functions must take a \texttt{...} argument - since
+specific function arguments will be passed on through higher order functions,
+these additional arguments will be supplied to all describer, comparers, and
+testers. Therefore, they must tolerate being overfed arguments.
+
+%% -----------------------------------------------------------------------------
+\subsubsection{Custom made describers} \label{sec:custom}
+
+The recommended way is to define a function that returns a \texttt{data.frame},
+even if a single value is wanted. This function can be pointed to in the
+\texttt{fnc} argument.
+
+Describers need only take an \texttt{x} argument (as well as \texttt{...})
+
+<<"my-describer">>=
+IQR <- function(x, ...){
+    x <- quantile(x, probs = c(.25, .75), na.rm = TRUE)
+    data.frame(IQR = x[2] - x[1])
+}
+dreal(d, fnc = list(desc = "IQR")) |> head(n = 3)
+@
+
+You can point to non-\texttt{data.frame}-returning functions as well (as long as
+they accept "\texttt{...}"), but they will not get great column names
+
+<<"point-to-mean">>=
+dreal(d, fnc = list(desc = "mean"), na.rm = TRUE) |> head(n = 3)
+@
+
+unless you give them a label
+
+<<"point-to-myMean">>=
+myMean <- function(x, ...) mean(x, na.rm = TRUE, ...)
+attr(myMean, "label") <- "The Mean Value"
+dreal(d, fnc = list(desc = "myMean")) |> head(n = 3)
+@
+
+%% -----------------------------------------------------------------------------
+\subsubsection{The 'meta' attribute}
+
+Some things a describer returns might be of a meta data character, e.g.\ the
+levels of a categorial variable - these are wasteful to repeat in each
+strata. To that end, there is a 'meta' attribute that can be set (on the
+function) to tell the program which columns not to repeat across a
+stratification.
+
+<<"my-meta">>=
+myBnry <- function(x, ...){
+    if(!is.factor(x)) x <- factor(x)
+    data.frame(Level = levels(x),
+               Count = as.integer(table(x)))
+}
+attr(myBnry, "meta") <- "Level"
+dbnry(d, gtab = "gender", fnc = list(desc = "myBnry"))
+@
+
+
+
+%% -----------------------------------------------------------------------------
+\subsubsection{Custom made describers for \texttt{surv}}
+
+Decribers for the \texttt{surv} type must take a \texttt{time} and
+\texttt{event} argument. Note that all functions \emph{can} take extra
+arguments, and that these can be passed from the higher order functions.
+
+<<"surv-desc">>=
+Foo <- function(time, event, my.unit.of.time = 'time units', ... ){
+    data.frame(Info = sprintf(paste0("%s events in %.2f ", my.unit.of.time),
+                              sum(event), sum(time)))
+}
+dsurv(d, fnc = list(desc = "Foo"))
+dsurv(d, fnc = list(desc = "Foo"), my.unit.of.time = "days")
+@
+
+%% -----------------------------------------------------------------------------
+\subsubsection{Custom made comparers/testers}
+
+Comparers, and testers, must take an \texttt{x} and \texttt{g}
+argument. Conceptually, comparers always deal with 2 groups, whereas a tester
+can deal with any number of groups.
+
+<<"my-comp", warning = FALSE>>=
+Delta <- function(x, g, ...){
+    if(!is.factor(g)) g <- factor(g)
+    x_i <- g == levels(g)[1]
+    y_i <- g == levels(g)[2]
+    data.frame(MinDelta = min(x[x_i], na.rm = TRUE) - min(x[y_i], na.rm = TRUE),
+               MaxDelta = max(x[x_i], na.rm = TRUE) - max(x[y_i], na.rm = TRUE))
+}
+dreal(d, gtab = "gender", part = c(F,T), fnc = list(desc=NULL, comp = "Delta"))
+@
+
+This function could also be supplied as a tester (although it is not testing
+anything); here is an example where we keep the default comparer:
+
+<<"my-test", warning = FALSE>>=
+(dt <- dreal(d, gtab = "gender", part = c(F,T,T),
+            fnc = list(desc=NULL, comp = NULL, test = "Delta")))
+@
+
+Recall that what is set as tester or comparer is remembered by the \texttt{part}
+attribute.
+
+<<"part-keeps-track">>=
+attr(dt, "part")
+@
+
+
+%% -----------------------------------------------------------------------------
+\subsubsection{Custom made comparers/testers for \texttt{surv}}
+
+Comparers, and testers, for \texttt{surv} must take a \texttt{time},
+\texttt{event}, and \texttt{g} argument.
+
+<<"HR">>=
+HR <- function(time, event, g, weight = NULL, ...){
+    if(!is.factor(g)) g <- factor(g)
+    mod <- survival::coxph(survival::Surv(time, event) ~ g, weight = weight)
+    data.frame(HR = as.numeric(exp(mod$coefficients)[1]))
+}
+dsurv(d, gtab = "gender", part = c(F,T), fnc = list(desc=NULL, comp = "HR"))
+@
+
+
+%% =============================================================================
+\subsection{The information functions are privy to} \label{sec:dots}
+
+Internally, what is passed to each function is not only what the user supplies
+in the "\texttt{...}" of the higher order functions, but also some additional
+stuff; e.g.\ the name of the current variable (\texttt{.term}), the label
+(\texttt{.label}), if the variable has any missing values (\texttt{.missing}),
+etc.
+
+<<"the-dots">>=
+theDots <- function(x, ...){
+    dots <- list(...)
+    foo <- function(z) if(is.null(z)) "NULL" else z
+    data.frame(name = names(dots),
+               value = unlist(lapply(dots, foo)))
+}
+dlcat(d, guide = g, fnc = list(desc = "theDots"),
+      pass_this_along = "this was passed by the user")
+@
+
+This allows for silly functions
+
+<<"silly">>=
+silly <- function(x, ...){
+    dots <- list(...)
+    r <- paste0("'I'm %s (a %s type) but I prefer my to use my label: %s'")
+    data.frame(Presentation = sprintf(r, dots$.term, dots$.type, dots$.label))
+}
+dlcat(d, guide = g, fnc = list(desc = "silly"))
+@
+
+%% =============================================================================
+\subsection{Some notes on formatting} \label{sec:format}
+
+To appear.
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Baseline tables} \label{sec:baseline}
+
+Baseline tables describe several types in one table - the name is chosen from
+the clinical world where a study population's various traits are typically
+described by the characteristics collected at the start of the study, at
+baseline.
+
+Combining various types adds a layer of complexity for the functions that
+generate the parts of the table. For one, they have to to return the same number
+of columns (per part). This typically means mixing numbers and text, and so
+formatting of numbers has to be done already at the table-generating phase - in
+contrast, the default simple descriptive tables could be populated with all
+numbers without the need for formatting.
+
+Another problem is how to know what the presented numbers are. In a simple
+descriptive table, we name the columns to indicate what is in them; e.g. "Mean"
+and "SD" when we present the mean values and standard deviations for the
+variables. But in a baseline table, we mix the types - so the columns typically
+are not enough to explain this.
+
+A third problem in the context of this package, is that it becomes much more
+involved to pass user defined functions to baseline tables (so much so that it
+is currently not possible) - we need a at least a function per type.
+
+The current approach is that there is a set of default functions for baseline
+tables that is distinct from the set of default funcions for simple descriptive
+tables. And thus, to choose other functions for baseline tables means to set
+them as package parameters. To "manually" implement a completely new set of
+baseline functions is somewhat cumbersome. However, the aim is to put together
+a number of baseline \emph{themes} that the user easily can choose between
+without having to reset any default values - and if a new theme is needed, it
+would be best to implement it \emph{within} the package.
+
+Before going further into the details, lets look at the two (actually three, but
+really just two) themes that exist currently.
+
+
+\newpage
+%% =============================================================================
+\subsection{Baseline theme 0 (default)}
+
+The distinct feature of the default theme is that it tries to be compact.
+
+The default baseline table was shown in Table \ref{tab:default-bsl}, but we'll
+do a version of it again. We reuse the "variable table" stored in \texttt{vt}
+and we will also trim down the data so that the table becomes a bit smaller, see
+Table \ref{tab:bsl-0}.
+
+<<"baseline-theme-0", results = 'asis', message = FALSE, warning = FALSE>>=
+
+sel <- subset(g, !group %in% c("Measures etc.", "Outcomes", "Covariates"))$term
+d2 <- d[, sel]
+g2 <- dguide(d2, id = c("id", "pid"), vtab = vt,
+             elim.set = c("end", "region", "area"))
+b <- baseline(d2, theme = 0, guide = g2, gtab = "gender", part = c(T,T,T))
+blatex(b, caption = "Baseline table theme 0 (default)",
+       label = "tab:bsl-0", size = "small")
+@
+
+Notice that each type has a unique form of the numbers presented in the
+descriptive part of the table. This allows for the explanation of those numbers
+to be in the "foot" of the table. The comparison part only contain 1 kind of
+numbers (the standardized differences - but this is actually not clear). The
+test part contains different kinds of test, all of which are explained through
+footnotes.
+
+ALso, notice that baseline tables have their own \LaTeX-code-generating function
+\texttt{blatex}.
+
+\newpage
+%% -----------------------------------------------------------------------------
+\subsubsection{Baseline theme 1, a slight variation on 0}
+
+The only difference between theme 0 and 1 is that the \texttt{real} type is
+described as "Median (Q1-Q3)" in 0 and "Mean (SD)" in 1, see Table
+\ref{tab:bsl-1}.
+
+<<"baseline-theme-1", results = 'asis', message = FALSE, warning = FALSE>>=
+b <- baseline(d2, theme = 1, guide = g2, gtab = "gender", part = c(T,T,T))
+blatex(b, caption = "Baseline table theme 1.",
+       label = "tab:bsl-1", size = "small")
+@
+
+
+
+\clearpage
+%% =============================================================================
+\subsection{Baseline theme 2}
+
+The baseline theme 2 takes more space, but is perhaps simpler to parse.
+
+<<"baseline-theme-2", results = 'asis', message = FALSE, warning = FALSE>>=
+b <- baseline(d2, theme = 2, guide = g2, gtab = "gender", part = c(T,T,T))
+blatex(b, caption = "Baseline table theme 2.",
+       label = "tab:bsl-2", size = "small")
+@
+
+
+\clearpage
+%% =============================================================================
+\subsection{Adjusting the baseline table}
+
+This section is just a reminder of some of the features that were presented for
+simple descriptive tables. E.g.\ suppose you want a default baseline table by
+\texttt{gender} but also a column showing the data for everyone, as well as a
+test - but, of course, the test should only contrast the gender levels. Then you
+can use \texttt{gtab\_maker} and supply the correct input for the \texttt{part}
+argument.
+
+<<"adjusted-baseline-0", results = 'asis', message = FALSE>>=
+gt <- gtab_maker("gender", data = d2, all = TRUE, all.first = TRUE)
+b <- baseline(d2, theme = 0, guide = g2, gtab = gt,
+                   part = list(T, F, c(2,3)))
+blatex(b, label = "tab:adj-bsl", caption = "Adjusted baseline table")
+@
+
+
+%% =============================================================================
+\subsection{Behind the scenes of baseline tables}
+
+To appear: Describe the tidy nature of current baselines and the functions that
+turn them into presentation ready tables (\texttt{dable\_prune},
+\texttt{dable\_fnote}, etc.).
+
+
+\appendix
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Loose ends}
+
+\begin{itemize}
+\item Most testing functions do not use weighting - should a warning be issued
+  from the built-in testers when being passed a non-null weight?
+\item Baseline theme 0: the 'Comparison' is never identified as having
+  standardized differences. Should the name of 'Comparison' and 'Test' perhaps
+  be carried in the object until presentation?
+\item Subsetting the guide destroys the attributes (stab, levels, missing).
+\end{itemize}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Testing}
+This section is for testing all the defaults only, mainly to see that the code
+goes through.
+
+%% =============================================================================
+\subsection{Default describers}
+
+<<"test-default-describers">>=
+dable(d, type = "real", guide = g)
+dable(d, type = "catg", guide = g)
+dable(d, type = "bnry", guide = g)
+dable(d, type = "date", guide = g)
+dable(d, type = "surv", guide = g)
+dable(d, type = "lcat", guide = g)
+@
+
+\clearpage
+%% =============================================================================
+\subsection{Default comparers}
+
+<<"test-default-comparers">>=
+dable(d, type = "real", guide = g, gtab = "gender", part = c(F,T))
+dable(d, type = "catg", guide = g, gtab = "gender", part = c(F,T))
+dable(d, type = "bnry", guide = g, gtab = "gender", part = c(F,T))
+dable(d, type = "date", guide = g, gtab = "gender", part = c(F,T))
+dable(d, type = "surv", guide = g, gtab = "gender", part = c(F,T))
+dable(d, type = "lcat", guide = g, gtab = "gender", part = c(F,T))
+@
+
+\clearpage
+%% =============================================================================
+\subsection{Default testers}
+
+<<"test-default-testers">>=
+dable(d, type = "real", guide = g, gtab = "gender", part = c(F,F,T))
+dable(d, type = "catg", guide = g, gtab = "gender", part = c(F,F,T))
+dable(d, type = "bnry", guide = g, gtab = "gender", part = c(F,F,T))
+dable(d, type = "date", guide = g, gtab = "gender", part = c(F,F,T))
+dable(d, type = "surv", guide = g, gtab = "gender", part = c(F,F,T))
+dable(d, type = "lcat", guide = g, gtab = "gender", part = c(F,F,T))
+@
+
+\clearpage
+%% =============================================================================
+\subsection{Default baseline}
+
+<<"test-default-baseline">>=
+baseline(d, guide = g, gtab = "gender", part = c(F,F,F))
+baseline(d, guide = g, gtab = "gender", part = c(T,F,F))
+baseline(d, guide = g, gtab = "gender", part = c(F,T,F))
+baseline(d, guide = g, gtab = "gender", part = c(F,F,T))
+baseline(d, guide = g, gtab = "gender", part = c(T,T,F))
+baseline(d, guide = g, gtab = "gender", part = c(T,F,T))
+baseline(d, guide = g, gtab = "gender", part = c(F,T,T))
+baseline(d, guide = g, gtab = "gender", part = c(T,T,T))
+@
+
+
+\end{document}
