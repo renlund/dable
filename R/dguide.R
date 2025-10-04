@@ -13,7 +13,6 @@
 ##' @param ... arguments passed to \code{term_type}
 ##' @export
 dguide <- function(data, id = NULL, elim.set = NULL,
-                   ## unit.id = NULL, oth.id = NULL,
                    vtab = NULL, stab = NULL, ...){
     properties(data, class = "data.frame")
     id <- dparam("id", id)
@@ -40,6 +39,10 @@ dguide <- function(data, id = NULL, elim.set = NULL,
     vtab_given <- !is.null(vtab)
     if(is.null(vtab)) vtab <- extract_labels(data[, terms, drop = FALSE])
     vtab <- check_vtab(vtab)
+    if(!is.null(stab)){
+        stab <- subset(stab, time %in% names(data) & event %in% names(data))
+        if(nrow(stab) == 0) stab <- NULL
+    }
     if(is.null(stab)){
         stab <- extract_stab_from_names(names(data))
     } else {
