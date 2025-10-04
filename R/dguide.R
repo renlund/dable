@@ -88,6 +88,19 @@ print.dguide <- function(x, ...){
     invisible(NULL)
 }
 
+##' subset a dguide object
+##'
+##' @param x dguide object
+##' @param ...  passed to subset.data.frame
+##' @export
+subset.dguide <- function(x, ...){
+    A <- attributes(x)
+    keep <- setdiff(names(A), c("names", "row.names"))
+    A2 <- A[keep]
+    r <- subset.data.frame(x, ...)
+    for(a in names(A2)) attr(r, which = a) <- A[[a]]
+    r
+}
 
 extract_labels <- function(x){
     terms <- names(x)
