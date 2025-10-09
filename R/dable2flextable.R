@@ -1,13 +1,13 @@
-##' turn dable into a flextable
+##' functions for flextable output
 ##'
-##' A flextable can be used to create several types of output
+##' @name dable2flextable
 ##' @param dt object from dable
-##' @param dt object created by dable
 ##' @param format logical; format the variables in dt?
-##' @param size character; what entity is presentet in row header 'rows',
+##' @param count character; what entity is presentet in row header 'rows',
 ##'     'units' or 'weight'
 ##' @param kill character vector; columns to remove for presentation
 ##' @param grey character; which rows to make grey-ish in presentation
+##' @param t2l logical (terms-to-label); replace terms with labels, if applicable
 ##' @param row.group logical or NULL; use the grouping in guide? If NULL this
 ##'     will be algorithmically decided
 ##' @param fontsize numerical vector of length 3 for fontsize of header, body
@@ -16,11 +16,160 @@
 ##'     table. If TRUE, attr2text will be used to create this text
 ##' @importFrom flextable flextable set_table_properties merge_h
 ##'     add_footer_lines footnote as_paragraph bg add_header_row
-##'     fp_border_default bold italic fontsize
+##'     fp_border_default bold italic fontsize delete_rows border_remove
+##'     hline_bottom hline align
+NULL
+
+
+
+if(FALSE){
+
+
+    d <- test_data()
+    g <- dguide(d, id = "id", vtab = test_vtab(), stab = test_stab(), catg.tol = 15)
+
+    format = TRUE
+    count = "rows"
+    kill = NULL
+    grey = "term"
+    t2l = TRUE
+    row.group = NULL
+    insert.bottom = TRUE
+    fontsize = c(11, 11, 9)
+
+    ## dt <- dreal(d)
+    ## dt <- dreal(d, guide = g)
+    dt <- dreal(d, guide = g, gtab = "gender")
+
+
+    ## import
+
+}
+
+##' @rdname dable2flextable
+##' @details dextable: turn simple descriptive tables into flextables
 ##' @export
-flexdable <- function(dt,
+dextable <- function(dt, format = TRUE, count = "rows", kill = NULL,
+                     t2l = TRUE, grey = "term", row.group = NULL,
+                     insert.bottom = TRUE, fontsize = c(11, 11, 9)){
+    properties(format, class = "logical", length = 1, na.ok = FALSE)
+    properties(count, class = "character", length = 1, na.ok = FALSE)
+    one_of(count, set = c("rows", "units", "weight"))
+    if(!is.null(kill)) properties(kill, class = "character", na.ok = FALSE)
+    if(!is.null(grey)) properties(grey, class = "character", length = 1, na.ok = FALSE)
+    properties(t2l, class = "logical", length = 1, na.ok = FALSE)
+    if(!is.null(row.group)) properties(row.group, class = "logical", length = 1, na.ok = FALSE)
+    properties(fontsize, class = c("numeric", "integer"), length = 3, na.ok = FALSE)
+
+    A <- align_with_guide(d = dt)
+    dt <- dt[A$order,]
+    if(format) dt <- dable_format(dt, output = "neutral")
+    if(is.null(row.group)) row.group <- length(unique(A$group.rle$values)) > 1
+
+    BL <- attr(dt, "type") == "baseline"
+    if(BL) stop("use other function")
+
+    ib <- x_true_then_y_else_x(x = insert.bottom, y = attr2text(dt))
+
+    use_grey <- FALSE
+    gindex <- rep(FALSE, nrow(dt))
+    if(!is.null(grey)){
+        use_grey <- TRUE
+        gindex <- get_grey(grey, dt, latex = FALSE)
+    }
+
+    if(t2l & "term" %in% names(dt)){
+        dt$term <- decipher(dt$term, attr(dt, "guide"))
+    }
+
+    dt2 <- dt
+    rg_index <- NULL
+    if(row.group){
+        Agr <- A$sorted$group
+        ## insert extra rows where grouping names can fit
+        dt2 <- insertNA(dt, Agr)
+        gindex <- insertNA(gindex, Agr)
+        gindex[is.na(gindex)] <- FALSE
+        ## find index of added rows and put group names there
+        An <- A$group.rle$lengths
+        Av <- A$group.rle$values
+        n <- length(An)
+        rg_index <- c(0,cumsum(An[-n])) + 1:n
+        m <- ncol(dt2)
+        for(i in seq_along(rg_index)) dt2[rg_index[i], 1:m] <- rep(Av[i], m)
+        ## note: we write the grouping name to all columns of the row - that way
+        ## we can later use 'flextable::merge_h' to collapse the row to a single
+        ## cell
+    }
+
+
+    DT <- dt2
+    for(k in unique(kill)) DT <- dable_prune(DT, rm = k)
+
+    nm_DT <- names(DT)
+    nm_DT[nm_DT == "term"] <- " "
+    n_col <- ncol(DT)
+
+    Hh <- part2head(part = attr(DT, "part"),
+                    cnm = nm_DT, ## names(DT),
+                    bl = TRUE,
+                    ntxt = attr2n(attributes(DT), count))
+
+    ## need to rename DT: flextable will NOT allow duplicate column names
+    names(DT) <- LETTERS[1:n_col]
+
+    ## initiate flextable
+    ft <- flextable::flextable(DT)
+    ft <- flextable::set_table_properties(ft, opts_pdf = list(tabcolsep = 3),
+                                          layout = "autofit")
+    ft <- flextable::add_header_row(ft, values = Hh$h)
+    ft <- flextable::add_header_row(ft, values = Hh$H)
+    ft <- flextable::add_header_row(ft, top = FALSE, values = nm_DT)
+    ft <- flextable::delete_rows(ft, i = 3, part = "head")
+    ft <- flextable::merge_h(ft, i = 1:2, part = "head")
+
+    RL <- rle(Hh$H)
+    n <- length(RL$lengths)
+    ii <- cumsum(RL$lengths) + 1
+    if(n>1){
+        for(i in 2:n){
+            ft <- flextable::align(ft, i = 1:2, j = ii[i-1]:(ii[i]-1),
+                                   part = "head", align = "center")
+        }
+    }
+
+    ## make row group rows into a single cell
+    if(row.group){
+        for(i in rg_index){
+            ft <- flextable::merge_h(ft, i = i)
+            ft <- flextable::bold(ft, i = rg_index, j = 1)
+        }
+    }
+
+    ## add text below
+    ft <- flextable::add_footer_lines(ft, values = paste0(ib, ". "))
+    ft <- flextable::bg(ft, i = which(gindex), bg = "#EFEFEF")
+    ft <- flextable::bold(ft, i = 1, part = "header")
+    ft <- flextable::fontsize(ft, size = fontsize[1], part = "header")
+    ft <- flextable::fontsize(ft, size = fontsize[2], part = "body")
+    ft <- flextable::fontsize(ft, size = fontsize[3], part = "footer")
+    ft <- flextable::fontsize(ft, i = 2, size = min(fontsize), part = "head")
+    ft <- flextable::italic(ft, i = setdiff(1:nrow(DT), rg_index), j = 1)
+    ft <- flextable::border_remove(ft)
+    ft <- flextable::hline_bottom(ft)
+    ft <- flextable::hline(ft, i = 2, j = 2:n_col, part = "head")
+    ft <- flextable::hline(ft, i = 3, j = 1:n_col, part = "head")
+    ft
+
+}
+
+
+##' @rdname dable2flextable
+##' @details blextable: turn baseline tables into flextables
+##' @export
+blextable <- function(dt,
                       format = TRUE,
-                      size = "rows",
+                      count = "rows",
                       kill = "term",
                       grey = "term",
                       row.group = NULL,
@@ -32,8 +181,8 @@ flexdable <- function(dt,
 
     ## check arguments:
     logi1(format)
-    char1(size)
-    one_of(size, nm = "size", set = c("rows", "units", "weight"))
+    char1(count)
+    one_of(count, nm = "count", set = c("rows", "units", "weight"))
     logi1(row.group, null.ok = TRUE)
     properties(grey, class = c("character", "logical"), length = 1,
                na.ok = FALSE, null.ok = TRUE)
@@ -45,8 +194,7 @@ flexdable <- function(dt,
     dt <- dt[A$order,]
 
     ## format:
-    dpset("output", value = "not latex")
-    if(format) dt <- dable_format(dt)
+    if(format) dt <- dable_format(dt, output = "flextable")
 
     ## if NULL set row.group to TRUE if more than 1 group
     if(is.null(row.group)) row.group <- length(unique(A$group.rle$values)) > 1
@@ -100,7 +248,7 @@ flexdable <- function(dt,
     Hh <- part2head(part = attr(DT, "part"),
                     cnm = names(DT),
                     bl = TRUE,
-                    ntxt = attr2n(attributes(dt), size))
+                    ntxt = attr2n(attributes(dt), count))
     Hh$H[Hh$H==""] <- " " ## else flextable col_keys fails
     names(DT) <- Hh$H
 
