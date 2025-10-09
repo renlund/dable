@@ -70,6 +70,8 @@
 ##'
 ##' * *date.format* the format used for dates, default "%y%m%d"
 ##'
+##' * *substitute* data.frame of substitutions for formatting. (XK add details)
+##'
 ##' * *type.part* where type is any type (real,catg,...) and part is the table
 ##' part (desc, comp, test); these set the default such function for simple
 ##' descriptive tables
@@ -113,6 +115,20 @@ dable_parameters <- list(
     dable.indent = "\t ",
     dable.percent = "%",     ## NOT IN USE (as of 2025-10)
     dable.date.format = "%y%m%d",
+    dable.substitute = data.frame(
+        out = c("latex",
+                "latex",
+                "console"),
+        pat = c("(.*)([^\\\\])(%)(.*)",
+                "\t",
+                "\t"),
+        rep = c("\\1\\2\\\\%\\4",
+                "\\quad ",
+                "   "),
+        fix = c(FALSE,
+                TRUE,
+                TRUE)
+    ),
     ## default describers --------------------
     dable.real.desc = "mean_sd",
     dable.catg.desc = "catg.count_prop",
@@ -260,6 +276,23 @@ dpget_all <- function(){
 add2bnry.list <- function(bl){
     add <- dp_bnry.list(bl)
     dpset(param = "bnry.list", value = c(dpget("bnry.list"), add))
+}
+
+##' @rdname dable-parameters
+##' @details add2substitute: add to the substitute data.frame
+##' @param out character; subtitution for which output?
+##' @param pat character; later passed to gsub arg 'pattern'
+##' @param rep character; later passed to gsub arg 'replacement'
+##' @param fix logical; later passed to gsub arg 'fixed'
+##' @export
+add2substitute <- function(out, pat, rep, fix){
+    properties(out, class = "character", na.ok = FALSE)
+    properties(pat, class = "character", na.ok = FALSE)
+    properties(rep, class = "character", na.ok = FALSE)
+    properties(fix, class = "logical", na.ok = FALSE)
+    r <- dpget("substitute")
+    R <- rbind(r, data.frame(out=out, pat=pat, rep=rep, fix=fix))
+    dpset("substitute", R)
 }
 
 ## get parameter value and (in some cases) perform a sanity test

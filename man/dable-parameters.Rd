@@ -7,6 +7,7 @@
 \alias{dpget}
 \alias{dpget_all}
 \alias{add2bnry.list}
+\alias{add2substitute}
 \title{dable parameters and how to set and get them}
 \usage{
 dpset(param, value = NULL)
@@ -18,6 +19,8 @@ dpget(param, verbose = FALSE, sub = TRUE)
 dpget_all()
 
 add2bnry.list(bl)
+
+add2substitute(out, pat, rep, fix)
 }
 \arguments{
 \item{param}{character; name of parameter OR a named list of parameter values}
@@ -31,6 +34,14 @@ add2bnry.list(bl)
 \item{sub}{logical; search for possible replacement values?}
 
 \item{bl}{list of binary values}
+
+\item{out}{character; subtitution for which output?}
+
+\item{pat}{character; later passed to gsub arg 'pattern'}
+
+\item{rep}{character; later passed to gsub arg 'replacement'}
+
+\item{fix}{logical; later passed to gsub arg 'fixed'}
 }
 \description{
 dable parameters and how to set and get them
@@ -79,6 +90,7 @@ alternative. The formatting functions in this package will substitute "\\t"
 with "\\quad". Thus, one does not in general need to alter this parameter.
 \item \emph{percent} (NOT IN USE) symbol to use for percent.
 \item \emph{date.format} the format used for dates, default "\%y\%m\%d"
+\item \emph{substitute} data.frame of substitutions for formatting. (XK add details)
 \item \emph{type.part} where type is any type (real,catg,...) and part is the table
 part (desc, comp, test); these set the default such function for simple
 descriptive tables
@@ -95,4 +107,6 @@ dpget: get package parameter
 dpget_all: get all package parameters
 
 add2bnry.list: add a value to the 'bnry.list'
+
+add2substitute: add to the substitute data.frame
 }

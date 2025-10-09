@@ -3,6 +3,7 @@
 S3method(print,dguide)
 S3method(subset,dguide)
 export(add2bnry.list)
+export(add2substitute)
 export(align)
 export(attr2text)
 export(baseline)
