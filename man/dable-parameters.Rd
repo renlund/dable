@@ -72,10 +72,12 @@ generally automatically identified by formatting functions)
 \item \emph{NAalias} how to refer to missing
 \item \emph{sep} how to separate the concatenation of variable name and its level
 (when applicable)
-\item \emph{output} (NOT IN USE) the type of output
-\item \emph{indent} what string to use as indentation, default "    ", but
-recommended to set to "\\quad" if LaTeX output is wanted
-\item \emph{percent} (NOT IN USE) symbol to use for percent
+\item \emph{output} the type of output; mainly used for formatting
+\item \emph{indent} what string to use as indentation, default "\\t ". Note: flextable
+output will automatically substitute "\\t" for a format specific
+alternative. The formatting functions in this package will substitute "\\t"
+with "\\quad". Thus, one does not in general need to alter this parameter.
+\item \emph{percent} (NOT IN USE) symbol to use for percent.
 \item \emph{date.format} the format used for dates, default "\%y\%m\%d"
 \item \emph{type.part} where type is any type (real,catg,...) and part is the table
 part (desc, comp, test); these set the default such function for simple

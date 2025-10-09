@@ -4,10 +4,12 @@
 \alias{dable_format}
 \title{formatting}
 \usage{
-dable_format(dt)
+dable_format(dt, output = dpget("output"))
 }
 \arguments{
 \item{dt}{a dable or such}
+
+\item{output}{output format}
 }
 \description{
 formatting of dables and data.frames

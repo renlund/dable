@@ -50,7 +50,7 @@ datex <- function(dt,
                outgroup = dpget("vtab.group.name"))
     dt <- dt[a$order,]
     grey <- get_grey(grey, dt)
-    if(format) dt <- dable_format(dt)
+    if(format) dt <- dable_format(dt, output = "latex")
     Ntxt <- attr2n(attributes(dt), count)
     BL <- attr(dt, "type") == "baseline"
     if(BL){
@@ -183,7 +183,7 @@ blatex_default <- function(bl,
     bl <- bl[A$order,]
 
     ## format:
-    if(format) bl <- dable_format(bl)
+    if(format) bl <- dable_format(bl, output = "latex")
 
     ## if NULL set row.group to TRUE if more than 1 group
     if(is.null(row.group)) row.group <- length(unique(A$group.rle$values)) > 1
@@ -455,8 +455,9 @@ get_grey <- function(grey = NULL, x = NULL, latex = TRUE){
 ##'
 ##' formatting of dables and data.frames
 ##' @param dt a dable or such
+##' @param output output format
 ##' @export
-dable_format <- function(dt){
+dable_format <- function(dt, output = dpget("output")){
     da <- attr(dt, "part")
     DT <- as.data.frame(dt)
     ## attr(DT, "dattr") <- NULL
@@ -473,11 +474,12 @@ dable_format <- function(dt){
         indx <- setdiff(indx, ps)
     }
     Arg <- list('X' = DT[, indx, drop = FALSE],
-                  'FUN' = dform.num.vec)
+                'FUN' = dform.num.vec)
     DT[indx] <- do.call(what = lapply, args = Arg)
     ## now everything else can be formatted as text
     Arg <- list('X' = DT,
-                'FUN' = dform.text.vec)
+                'FUN' = dform.text.vec,
+                'output' = output)
     DT[] <- do.call(what = lapply, args = Arg)
     attributes(DT) <- attributes(dt)
     DT

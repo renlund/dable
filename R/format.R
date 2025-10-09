@@ -65,7 +65,7 @@ dform.num.vec <- function(x, ...){
 
 dprintf <- function(x, d, type) sprintf(paste0("%.", d, type), x)
 
-dform.text <- function(x, output = NULL){
+dform.text <- function(x, output = dpget("output")){
     if("Date" %in% class(x)) x <- as.character(x)
     properties(x, class = c("character", "factor"), length = 1, na.ok = TRUE)
     ## shorten too long strings with ... ?
@@ -74,6 +74,12 @@ dform.text <- function(x, output = NULL){
     if(ut == "latex"){
         x <- gsub(pattern = "(.*)([^\\\\])(%)(.*)",
                   replacement = "\\1\\2\\\\%\\4", x = x)
+        x <- gsub(pattern = "\t",
+                  replacement = "\\quad ", x = x, fixed = TRUE)
+    }
+    if(ut == "console"){
+        x <- gsub(pattern = "\t",
+                  replacement = "   ", x = x, fixed = TRUE)
     }
     x
 }

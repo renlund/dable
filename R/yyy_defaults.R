@@ -59,12 +59,14 @@
 ##' * *sep* how to separate the concatenation of variable name and its level
 ##' (when applicable)
 ##'
-##' * *output* (NOT IN USE) the type of output
+##' * *output* the type of output; mainly used for formatting
 ##'
-##' * *indent* what string to use as indentation, default "    ", but
-##' recommended to set to "\\quad" if LaTeX output is wanted
+##' * *indent* what string to use as indentation, default "\\t ". Note: flextable
+##' output will automatically substitute "\\t" for a format specific
+##' alternative. The formatting functions in this package will substitute "\\t"
+##' with "\\quad". Thus, one does not in general need to alter this parameter.
 ##'
-##' * *percent* (NOT IN USE) symbol to use for percent
+##' * *percent* (NOT IN USE) symbol to use for percent.
 ##'
 ##' * *date.format* the format used for dates, default "%y%m%d"
 ##'
@@ -88,8 +90,6 @@ dable_parameters <- list(
     dable.surv.prefix = TRUE,
     dable.surv.affix = c("time" = "t.", "event" = "ev."),
     dable.id = NULL,
-    ## dable.unit.id = NULL,
-    ## dable.oth.id = NULL,
     dable.gtab.defvar.rm = TRUE,
     dable.weight.defvar.rm = TRUE,
     dable.unit.id.rm = TRUE,
@@ -109,9 +109,9 @@ dable_parameters <- list(
     dable.NAtext = "",
     dable.NAalias = "Missing",
     dable.sep = ": ",
-    dable.output = "default", ## not used
-    dable.indent = "    ",
-    dable.percent = "%",     ## not used
+    dable.output = "latex",
+    dable.indent = "\t ",
+    dable.percent = "%",     ## NOT IN USE (as of 2025-10)
     dable.date.format = "%y%m%d",
     ## default describers --------------------
     dable.real.desc = "mean_sd",
@@ -204,16 +204,10 @@ dpset_defaults <- function(overwrite = TRUE, style = NA_character_){
         if(any(toset)) options(dable_parameters[toset])
     }
     if(!is.na(style)){
-        one_of(style, set = c("default", "latex"))
-        if(style == "default"){
-            dpset("indent", "    ")
-            dpset("output", "default")
-            ## dpset("percent", "%")
-        }
-        if(style == "latex"){
-            dpset("indent", "\\quad ")
-            dpset("output", "latex")
-            ## dpset("percent", "\\%")
+        one_of(style, set = c("latex", "flextable", "console"))
+        dpset("output", style)
+        if(style %in% "console"){
+            dpset("indent", value = "    ")
         }
     }
     invisible()
@@ -298,10 +292,10 @@ dparam <- function(param, value = NULL){
         NAalias = dp_char1_(value, p),
         grey.first = dp_logic1_(value, p),
         output = dp_char1_(value, p),
-        dable.sep = dp_char1_(value, p),
-        dable.indent = dp_indent(value),
-        dable.percent = dp_char1_(value, p),
-        dable.date.format = dp_char1_(value, p),
+        sep = dp_char1_(value, p),
+        indent = dp_indent(value),
+        percent = dp_char1_(value, p),
+        date.format = dp_char1_(value, p),
         if(is.null(value)) dpget(p) else value
     )
 }
@@ -405,6 +399,7 @@ dp_digits <- function(x = NULL){
 }
 
 dp_indent <- function(x){
+    if(is.null(x)) x <- dpget("indent")
     dp_char1_(x = x, nm = "indent")
     if(x == ""){
         s <- paste0("indent should not be a zero length string")
