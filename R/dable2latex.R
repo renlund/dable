@@ -346,14 +346,14 @@ dable_attr <- function(dt){
             if(!is.null(w))   "weight" else NULL,
             if(!is.null(u))   "units"  else NULL
         ),
-        total = dform.num.vec(c(n, w, u)),
+        total = dafonumb(c(n, w, u)),
         stringsAsFactors = FALSE
     )
     if(!is.null(a$gtab_rows)){
         gw <- a$gtab_weight
         tmp <- rbind(rows = a$gtab_rows,
                      ## what if weight is NULL here ?
-                     weight = if(!is.null(gw)) dform.num.vec(gw) else NULL,
+                     weight = if(!is.null(gw)) dafonumb(gw) else NULL,
                      units = a$gtab_units)
         Q <- as.data.frame(tmp)
         Q$measure <- rownames(tmp)
@@ -468,17 +468,17 @@ dable_format <- function(dt, output = dpget("output")){
     ps <- intersect(pi, indx)
     if(length(ps) > 0){
         Arg <- list("X" = DT[, ps, drop = FALSE],
-                    "FUN" = dform.num.vec,
+                    "FUN" = dafonumb,
                     "p" = TRUE)
         DT[ps] <- do.call(what = lapply, args = Arg)
         indx <- setdiff(indx, ps)
     }
     Arg <- list('X' = DT[, indx, drop = FALSE],
-                'FUN' = dform.num.vec)
+                'FUN' = dafonumb)
     DT[indx] <- do.call(what = lapply, args = Arg)
     ## now everything else can be formatted as text
     Arg <- list('X' = DT,
-                'FUN' = dform.text.vec,
+                'FUN' = dafotext,
                 'output' = output)
     DT[] <- do.call(what = lapply, args = Arg)
     attributes(DT) <- attributes(dt)
@@ -568,11 +568,12 @@ dable_fnote <- function(dt, info, fn.var,
     foo(fn.var)
     if(format){
         if(class(dt[[fn.var]]) %in% c("numeric", "integer")){
-            dt[[fn.var]] <- do.call(dform.num.vec,
+            dt[[fn.var]] <- do.call(dafonumb,
                                     list(dt[[fn.var]]))
         } else {
-            dt[[fn.var]] <- do.call(dform.text.vec,
-                                    list(dt[[fn.var]]))
+            dt[[fn.var]] <- do.call(dafotext,
+                                    list(x = dt[[fn.var]],
+                                         output = "latex")) ## XK test this
         }
     }
     infot   <- unique(as.character(stats::na.omit(unlist(dt[[info]]))))

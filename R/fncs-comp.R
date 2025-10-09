@@ -258,6 +258,6 @@ hr_ci <- function(time, event, g, weight = NULL, ...){
     if(!is.factor(g)) g <- factor(g)
     mod <- survival::coxph(survival::Surv(time, event) ~ g, weight = weight)
     v <- exp(as.numeric(c(mod$coefficients[1], stats::confint(mod))))
-    sprintf("%s (%s-%s)", dform.num.vec(v))
+    sprintf("%s (%s-%s)", dafonumb(v))
 }
 attr(hr_ci, "label") <- "Hazard ratio"

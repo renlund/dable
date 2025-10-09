@@ -21,15 +21,15 @@ real.bl2 <- function(x, weight = NULL, ...){
               "Min, Max")
     Q <- quartile(x, weight)
     value <- c(sprintf("%s (%s)",
-                       dform.num(d.mean(x, weight), NAtext = "N/A"),
-                       dform.num(d.sd(x, weight), NAtext = "N/A")),
+                       dafonumb1(d.mean(x, weight), NAtext = "N/A"),
+                       dafonumb1(d.sd(x, weight), NAtext = "N/A")),
                sprintf("%s (%s, %s)",
-                       dform.num(Q$Q2, NAtext = "N/A"),
-                       dform.num(Q$Q1, NAtext = "N/A"),
-                       dform.num(Q$Q3, NAtext = "N/A")),
+                       dafonumb1(Q$Q2, NAtext = "N/A"),
+                       dafonumb1(Q$Q1, NAtext = "N/A"),
+                       dafonumb1(Q$Q3, NAtext = "N/A")),
                sprintf("%s, %s",
-                       dform.num(d.min(x), NAtext = "N/A"),
-                       dform.num(d.max(x), NAtext = "N/A")))
+                       dafonumb1(d.min(x), NAtext = "N/A"),
+                       dafonumb1(d.max(x), NAtext = "N/A")))
     has_missing <- di.dots("missing", strict = TRUE, ...)
     if(isTRUE(has_missing)){
         n <- length(x)
@@ -50,8 +50,8 @@ catg.bl2 <- function(x, weight = NULL, ...){
     r <- catg.count_prop(x = x, weight = weight, ...)
     L <- levels(x)
     S <- sprintf("%s (%s%%)",
-                 dform.num.vec(r$Count, NAtext = "N/A", no04int = TRUE),
-                 dform.num.vec(100 * r$Proportion, NAtext = "N/A"))
+                 dafonumb(r$Count, NAtext = "N/A", no04int = TRUE),
+                 dafonumb(100 * r$Proportion, NAtext = "N/A"))
     has_missing <- di.dots("missing", strict = TRUE, ...)
     if(isTRUE(has_missing)){
         L <- c(L, dpget("NAalias"))
@@ -107,7 +107,7 @@ surv.bl2 <- function(time, event, weight = NULL, time.unit = NULL, ...){
     r <- eventrate(time = time, event = event, weight = weight,
                    time.unit = time.unit, ...)
     stat <- c("Events", "Rate")
-    value <- c(dform.num(r$Events), dform.num(r$Rate))
+    value <- c(dafonumb1(r$Events), dafonumb1(r$Rate))
     lab <- di.dots("label", ...)
     data.frame(Variable = var_lev_combine(lab, stat, sep = "; "),
                Summary = value)

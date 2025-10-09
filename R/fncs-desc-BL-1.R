@@ -66,8 +66,8 @@ real.bl0 <- function(x, weight = NULL, ...){
     s <- if(is.na(q$Q2)){
              NAsign
          } else {
-             sprintf("%s (%s - %s)", dform.num(q$Q2),
-                     dform.num(q$Q1), dform.num(q$Q2))
+             sprintf("%s (%s - %s)", dafonumb1(q$Q2),
+                     dafonumb1(q$Q1), dafonumb1(q$Q2))
          }
     si <- "Numeric variable: Median (Q1-Q3)"
     data.frame(Variable = di.Variable(x, ...),
@@ -86,7 +86,7 @@ real.bl1 <- function(x, weight = NULL, ...){
     s <- if(is.na(r$Mean)){
              NAsign
          } else {
-             sprintf("%s (%s)", dform.num(r$Mean), dform.num(r$SD))
+             sprintf("%s (%s)", dafonumb1(r$Mean), dafonumb1(r$SD))
          }
     si <- "Numeric variable: Mean (SD)"
     data.frame(Variable = di.Variable(x, ...),
@@ -106,8 +106,8 @@ bnry.bl0 <- function(x, weight = NULL, ...){
              NAsign
          } else {
              sprintf("%s (%s%%)",
-                     dform.num(r$Count, no04int = TRUE),
-                     dform.num(100 * r$Proportion))
+                     dafonumb1(r$Count, no04int = TRUE),
+                     dafonumb1(100 * r$Proportion))
          }
     si <- "Categorical variable: Count (Percent)"
     data.frame(Variable = di.Variable(x, ...),
@@ -128,8 +128,8 @@ catg.bl0 <- function(x, weight = NULL, ...){
              rep(NAsign, nrow(r))
          } else {
              sprintf("%s (%s%%)",
-                     dform.num.vec(r$Count, no04int = TRUE),
-                     dform.num.vec(100 * r$Proportion))
+                     dafonumb(r$Count, no04int = TRUE),
+                     dafonumb(100 * r$Proportion))
          }
     si <- "Categorical variable: Count (Percent)"
     data.frame(Variable = di.Variable(x, ...),
@@ -181,8 +181,8 @@ surv.bl0 <- function(time, event, weight = NULL, time.unit = NULL, ...){
                    time.unit = time.unit, ...)
     n.na <- sum(is.na(time) | is.na(event))
     s <- sprintf("%s; %s",
-                 changeNA(dform.num(r$Events)),
-                 changeNA(dform.num(r$Rate)))
+                 changeNA(dafonumb1(r$Events)),
+                 changeNA(dafonumb1(r$Rate)))
     si <- "Time-to-event variable: events; rate"
     data.frame(Variable = di.Variable(event, ...),
                Summary = NA_desc_append(s, n.na),
