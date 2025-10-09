@@ -15,7 +15,7 @@
 <<"setup", cache = FALSE, echo = FALSE, include = FALSE>>=
 library(knitr)
 library(dable)
-## devtools::load_all()
+## devtools::load_all() ## when testing
 opts_chunk$set(include = TRUE,
                echo = TRUE,
                cache = FALSE)
@@ -25,7 +25,7 @@ if(FALSE){
     knitr::knit2pdf("dable-manual.rnw", clean = TRUE)
     shell.exec("dable-manual.pdf")
 }
-dpset_defaults(overwrite = TRUE, style = "latex") ## also in chunk below
+## dpset_defaults(overwrite = TRUE, style = "latex") ## also in chunk below
 @
 
 \begin{document}
@@ -33,8 +33,8 @@ dpset_defaults(overwrite = TRUE, style = "latex") ## also in chunk below
 \maketitle
 \tableofcontents
 \newpage
-\listoftables
 \listoffigures
+\listoftables
 \newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -76,19 +76,20 @@ The package initially tried to strictly separate table creation into
 \item[(2)] format for a desired output generating program/language
 \end{itemize}
 
-This aim has not quite been achieved. It works pretty well for default versions
-of \emph{simple descriptive tables} (Section \ref{sec:simple}), but is harder to
-do for \emph{baseline tables} (Section \ref{sec:baseline}). The compromise
-reached is that one can set package parameters pointing to the desired
-output. As an example, this document is generated in \LaTeX\, so I will begin by
-restoring all defaults\footnote{Currently, this actually does very little - it's
-main purpose is to set the \texttt{indent} parameter to
-$\backslash$\texttt{quad}. The most obvious problem in this context is the fact
-that '\%' has a special meaning, but that is easy to substitute just before
-translating to \LaTeX\, code.} with that output program in mind.
+This aim has not quite been achieved, but almost. It works pretty well for
+default versions of \emph{simple descriptive tables} (Section \ref{sec:simple}),
+but is harder to do for \emph{baseline tables} (Section \ref{sec:baseline}). The
+compromise reached is that one can set package parameters pointing to the
+desired output. As an example, this document is generated in \LaTeX\, so we
+could begin by restoring all defaults with that output\footnote{Currently, this
+actually does very little - it's main purpose is to set the \texttt{output}
+parameter to "latex". The most obvious problem in this context is the fact that
+'\%' has a special meaning, but that is easy to substitute just before
+translating to \LaTeX\, code.} in mind - although this is superfluous since this
+currently is the default.
 
 <<"set-latex-defaults">>=
-dpset_defaults(overwrite = TRUE, style = "latex")
+dpset_defaults(overwrite = TRUE, style = "latex") ## already the default
 @
 
 
@@ -311,16 +312,12 @@ dpget("stab.group.name")
 \noindent One can manually update the guide
 
 <<"guide-manual-change", eval = FALSE>>=
-g$type[g$term == "pid"] <- "lcat"
+g$type[g$term == "id"] <- "lcat"
 @
 
-\noindent or provide some parameters to influence the types
+\noindent or provide some parameters to influence the types.
 
-<<"guide-parameter-change">>=
-subset(dguide(d, catg.tol = 10), subset = term == "pid") ## type now lcat
-@
-
-Arguments to \texttt{dguide}:
+The arguments for \texttt{dguide}:
 
 \begin{itemize}
 \item \texttt{data} the data (duh!)
@@ -354,7 +351,7 @@ The survival table has no grouping, so we can provide one
 st$group <- "Outcomes"
 @
 
-Now we can see what the guide looks like, if we add some additional arguments:
+We can see what the guide looks like, if we add some additional arguments:
 
 <<"guide-with-parameters">>=
 (g <- dguide(d, id = c("id", "pid"), vtab = vt, stab = st))
@@ -406,6 +403,13 @@ Some of these accept type specific extra arguments, which can be of interest
 <<"default-type-tables-extra-arg">>=
 ddate(d, guide = g, date.format = "%Y-%m-%d")
 dsurv(d, guide = g, time.unit = 365.25)
+@
+
+Also, \texttt{dcatg} has the option to include the subtypes \texttt{bnry} and
+\texttt{lcat}, respectively.
+
+<<"default-type-tables-dcatg">>=
+dcatg(d, guide = g, bnry = TRUE, lcat = FALSE)
 @
 
 
@@ -792,23 +796,23 @@ To appear.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Baseline tables} \label{sec:baseline}
 
-Baseline tables describe several types in one table - the name is chosen from
-the clinical world where a study population's various traits are typically
-described by the characteristics collected at the start of the study, at
-baseline.
+\emph{Baseline tables} describe several types in one table - the name is chosen
+from the world of clinical trials where the various traits of the study
+population are often described by the characteristics collected at the start of
+the study, at baseline.
 
 Combining various types adds a layer of complexity for the functions that
 generate the parts of the table. For one, they have to to return the same number
 of columns (per part). This typically means mixing numbers and text, and so
-formatting of numbers has to be done already at the table-generating phase - in
+formatting of numbers has to be done already at the table-generating phase. In
 contrast, the default simple descriptive tables could be populated with all
 numbers without the need for formatting.
 
 Another problem is how to know what the presented numbers are. In a simple
 descriptive table, we name the columns to indicate what is in them; e.g. "Mean"
 and "SD" when we present the mean values and standard deviations for the
-variables. But in a baseline table, we mix the types - so the columns typically
-are not enough to explain this.
+variables. But in a baseline table, we mix the types - so the column names are
+not sufficient for that end.
 
 A third problem in the context of this package, is that it becomes much more
 involved to pass user defined functions to baseline tables (so much so that it
@@ -816,12 +820,11 @@ is currently not possible) - we need a at least a function per type.
 
 The current approach is that there is a set of default functions for baseline
 tables that is distinct from the set of default funcions for simple descriptive
-tables. And thus, to choose other functions for baseline tables means to set
-them as package parameters. To "manually" implement a completely new set of
-baseline functions is somewhat cumbersome. However, the aim is to put together
-a number of baseline \emph{themes} that the user easily can choose between
-without having to reset any default values - and if a new theme is needed, it
-would be best to implement it \emph{within} the package.
+tables. To "manually" implement a completely new set of baseline functions is
+somewhat cumbersome. However, the aim is to put together a number of baseline
+\emph{themes} that the user easily can choose between without having to reset
+any default values - and if a new theme is needed, it would be best to implement
+it \emph{within} the package.
 
 Before going further into the details, lets look at the two (actually three, but
 really just two) themes that exist currently.
@@ -856,12 +859,12 @@ numbers (the standardized differences - but this is actually not clear). The
 test part contains different kinds of test, all of which are explained through
 footnotes.
 
-ALso, notice that baseline tables have their own \LaTeX-code-generating function
+Also, notice that baseline tables have their own \LaTeX-code-generating function
 \texttt{blatex}.
 
 \newpage
 %% -----------------------------------------------------------------------------
-\subsubsection{Baseline theme 1, a slight variation on 0}
+\subsubsection{Baseline theme 1 $\approx$ 0}
 
 The only difference between theme 0 and 1 is that the \texttt{real} type is
 described as "Median (Q1-Q3)" in 0 and "Mean (SD)" in 1, see Table
@@ -906,14 +909,84 @@ b <- baseline(d2, theme = 0, guide = g2, gtab = gt,
 blatex(b, label = "tab:adj-bsl", caption = "Adjusted baseline table")
 @
 
-
+\newpage
 %% =============================================================================
 \subsection{Behind the scenes of baseline tables}
 
-To appear: Describe the tidy nature of current baselines and the functions that
-turn them into presentation ready tables (\texttt{dable\_prune},
-\texttt{dable\_fnote}, etc.).
+%% To appear: Describe the tidy nature of current baselines and the functions that
+%% turn them into presentation ready tables (\texttt{dable\_prune},
+%% \texttt{dable\_fnote}, etc.).
 
+We will use \texttt{dcatg} in a nonsense example to illustrate a few tools.
+
+<<"prune-1">>=
+foo <- function(x, ...){
+    dots <- list(...)
+    z <- length(unique(x[!is.na(x)]))
+    data.frame(mode = d.mode(x),
+               someInfo = paste("Info ", LETTERS[z]))
+}
+(dt <- dcatg(d, guide = g, fnc = list(desc = "foo")))
+attr(dt, "part")
+@
+
+We need to know that there is a function that collects some of the meta data.
+
+<<"attr2text-1">>=
+attr2text(dt)
+@
+
+Also, we can store things in an 'info' attribute in the, which can be part of
+the information collected by \texttt{attr2text}.
+
+<<"attr2text-2">>=
+attr(dt, "info") <- "Something important."
+attr2text(dt)
+@
+
+To proceed with our example, suppose we are not interested in displaying the
+'someInfo' column. In order to not destroy the meta data, columns should be
+removed with \texttt{dable\_prune}.
+
+<<"prune-3">>=
+(dt2 <- dable_prune(dt, rm = "someInfo"))
+attr(dt2, "part") ## sane meta data
+attr(dt2, "info") ## unchanged
+@
+
+But if the stuff in 'someInfo' is pertinent to the data, there are a couple of
+options. One, we can store the information in the 'info' attribute
+
+<<"prune-4">>=
+dt2 <- dable_prune(dt, rm = "someInfo", info = TRUE)
+attr(dt2, "info")
+@
+
+<<"prune-display", results = 'asis'>>=
+datex(dt2, label = "tab:info-added", row.group = FALSE,
+      caption = "Table with info added in the foot.")
+@
+
+\noindent By default, only unique information is kept, i.e.\ duplicates are
+removed.
+
+Another option for \LaTeX\, output is to put the information in a footnote
+
+<<"fnote", results = 'asis'>>=
+dt2 <- dable_fnote(dt, info = "someInfo", fn.var = "mode")
+datex(dt2, label = "tab:fnote-added", row.group = FALSE,
+      caption = "Table with info added as footnotes.")
+@
+
+The true nature of the baseline tables are that they are very \emph{tidy}.
+
+<<"tidy-baseline", message = FALSE>>=
+b <- baseline(d, theme = 0, guide = g, gtab = "gender", part = c(T,T,T))
+str(subset(b))
+@
+
+\noindent For the summary and p-values there are separate columns containing the
+information on the contents thereof. These are added as info in the foot, and as footnotes.
 
 \appendix
 \clearpage
@@ -926,14 +999,12 @@ turn them into presentation ready tables (\texttt{dable\_prune},
 \item Baseline theme 0: the 'Comparison' is never identified as having
   standardized differences. Should the name of 'Comparison' and 'Test' perhaps
   be carried in the object until presentation?
-\item Subsetting the guide destroys the attributes (stab, levels, missing).
 \end{itemize}
 
 \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Testing}
-This section is for testing all the defaults only, mainly to see that the code
-goes through.
+This section is for testing all the defaults, to see that the code goes through.
 
 %% =============================================================================
 \subsection{Default describers}

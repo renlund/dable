@@ -1,7 +1,7 @@
 ## ----"setup", cache = FALSE, echo = FALSE, include = FALSE--------------------
 library(knitr)
 library(dable)
-## devtools::load_all()
+## devtools::load_all() ## when testing
 opts_chunk$set(include = TRUE,
                echo = TRUE,
                cache = FALSE)
@@ -11,10 +11,10 @@ if(FALSE){
     knitr::knit2pdf("dable-manual.rnw", clean = TRUE)
     shell.exec("dable-manual.pdf")
 }
-dpset_defaults(overwrite = TRUE, style = "latex") ## also in chunk below
+## dpset_defaults(overwrite = TRUE, style = "latex") ## also in chunk below
 
 ## ----"set-latex-defaults"-----------------------------------------------------
-dpset_defaults(overwrite = TRUE, style = "latex")
+dpset_defaults(overwrite = TRUE, style = "latex") ## already the default
 
 ## ----"map", include = TRUE, echo = FALSE, fig.scap = scap, fig.cap = cap------
 old <- par()$mar
@@ -125,10 +125,7 @@ dpget("vtab.group.name")
 dpget("stab.group.name")
 
 ## ----"guide-manual-change", eval = FALSE--------------------------------------
-# g$type[g$term == "pid"] <- "lcat"
-
-## ----"guide-parameter-change"-------------------------------------------------
-subset(dguide(d, catg.tol = 10), subset = term == "pid") ## type now lcat
+# g$type[g$term == "id"] <- "lcat"
 
 ## ----"vtab-stab"--------------------------------------------------------------
 (vt <- test_vtab())
@@ -159,6 +156,9 @@ dsurv(d, guide = g)
 ## ----"default-type-tables-extra-arg"------------------------------------------
 ddate(d, guide = g, date.format = "%Y-%m-%d")
 dsurv(d, guide = g, time.unit = 365.25)
+
+## ----"default-type-tables-dcatg"----------------------------------------------
+dcatg(d, guide = g, bnry = TRUE, lcat = FALSE)
 
 ## ----"stratification"---------------------------------------------------------
 (dt <- dreal(d, guide = g, gtab = "gender"))
@@ -343,6 +343,45 @@ gt <- gtab_maker("gender", data = d2, all = TRUE, all.first = TRUE)
 b <- baseline(d2, theme = 0, guide = g2, gtab = gt,
                    part = list(T, F, c(2,3)))
 blatex(b, label = "tab:adj-bsl", caption = "Adjusted baseline table")
+
+## ----"prune-1"----------------------------------------------------------------
+foo <- function(x, ...){
+    dots <- list(...)
+    z <- length(unique(x[!is.na(x)]))
+    data.frame(mode = d.mode(x),
+               someInfo = paste("Info ", LETTERS[z]))
+}
+(dt <- dcatg(d, guide = g, fnc = list(desc = "foo")))
+attr(dt, "part")
+
+## ----"attr2text-1"------------------------------------------------------------
+attr2text(dt)
+
+## ----"attr2text-2"------------------------------------------------------------
+attr(dt, "info") <- "Something important."
+attr2text(dt)
+
+## ----"prune-3"----------------------------------------------------------------
+(dt2 <- dable_prune(dt, rm = "someInfo"))
+attr(dt2, "part") ## sane meta data
+attr(dt2, "info") ## unchanged
+
+## ----"prune-4"----------------------------------------------------------------
+dt2 <- dable_prune(dt, rm = "someInfo", info = TRUE)
+attr(dt2, "info")
+
+## ----"prune-display", results = 'asis'----------------------------------------
+datex(dt2, label = "tab:info-added", row.group = FALSE,
+      caption = "Table with info added in the foot.")
+
+## ----"fnote", results = 'asis'------------------------------------------------
+dt2 <- dable_fnote(dt, info = "someInfo", fn.var = "mode")
+datex(dt2, label = "tab:fnote-added", row.group = FALSE,
+      caption = "Table with info added as footnotes.")
+
+## ----"tidy-baseline", message = FALSE-----------------------------------------
+b <- baseline(d, theme = 0, guide = g, gtab = "gender", part = c(T,T,T))
+str(subset(b))
 
 ## ----"test-default-describers"------------------------------------------------
 dable(d, type = "real", guide = g)
