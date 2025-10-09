@@ -21,7 +21,7 @@ opts_chunk$set(include = TRUE,
                cache = FALSE)
 opts_knit$set(eval.after = c('fig.cap', 'fig.scap'))
 if(FALSE){
-    setwd('c:/Users/henre358/My Drive/R/P_package/dable/vignettes')
+    setwd('vignettes')
     knitr::knit2pdf("dable-manual.rnw", clean = TRUE)
     shell.exec("dable-manual.pdf")
 }
@@ -790,7 +790,37 @@ dlcat(d, guide = g, fnc = list(desc = "silly"))
 %% =============================================================================
 \subsection{Some notes on formatting} \label{sec:format}
 
-To appear.
+The details on formatting can be found in the help page
+\texttt{dable-formatting}. For now, we will leave the issue of numeric
+formatting - even though the details are somewhat idiosyncratic - as an exercise
+for the reader to learn on her own.
+
+Instead we will illustrate a point about the \texttt{output} parameter of the
+package. To set up this example we will use the built-in \texttt{catg.bl0}
+function (i.e. the default function for the \texttt{catg} type in baseline theme
+0).
+
+<<"format-setup", message = FALSE>>=
+foo <- rep(LETTERS[1:3], c(5,2,9))
+foo[c(2,6)] <- NA
+test <- catg.bl0(foo, .label = "Foo")
+@
+
+This function creates a 'Variable' column listing the variable label and the
+levels. But the label is not repeated on each line, but instead indented with a
+\verb|\t|. This works well for flextable output where it is substituted
+sensibly, but for \LaTeX\, output it needs replacing.
+
+<<"formatting">>=
+test[,1:2]
+dable_format(test[,1:2], output = "flextable") ## no change
+dable_format(test[,1:2], output = "latex")     ## latexification
+dable_format(test[,1:2], output = "console")
+@
+
+When formatting is done with higher order table producing functions
+(e.g. \texttt{blatex}), the correct formatting can be done automatically.
+
 
 \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -2,8 +2,8 @@
 knitr::opts_chunk$set(collapse = TRUE,
                       comment = "#>")
 library(flextable)
-## library(dable)
-devtools::load_all()
+library(dable)
+## devtools::load_all()
 dpset_defaults(overwrite = TRUE)
 if(FALSE){
     .cmp <- function() rmarkdown::render(input = "vignettes/dable-and-flextable.Rmd")

@@ -7,7 +7,7 @@ opts_chunk$set(include = TRUE,
                cache = FALSE)
 opts_knit$set(eval.after = c('fig.cap', 'fig.scap'))
 if(FALSE){
-    setwd('c:/Users/henre358/My Drive/R/P_package/dable/vignettes')
+    setwd('vignettes')
     knitr::knit2pdf("dable-manual.rnw", clean = TRUE)
     shell.exec("dable-manual.pdf")
 }
@@ -317,6 +317,17 @@ silly <- function(x, ...){
     data.frame(Presentation = sprintf(r, dots$.term, dots$.type, dots$.label))
 }
 dlcat(d, guide = g, fnc = list(desc = "silly"))
+
+## ----"format-setup", message = FALSE------------------------------------------
+foo <- rep(LETTERS[1:3], c(5,2,9))
+foo[c(2,6)] <- NA
+test <- catg.bl0(foo, .label = "Foo")
+
+## ----"formatting"-------------------------------------------------------------
+test[,1:2]
+dable_format(test[,1:2], output = "flextable") ## no change
+dable_format(test[,1:2], output = "latex")     ## latexification
+dable_format(test[,1:2], output = "console")
 
 ## ----"baseline-theme-0", results = 'asis', message = FALSE, warning = FALSE----
 
