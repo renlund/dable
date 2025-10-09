@@ -14,5 +14,6 @@ peek(x, right = FALSE, ...)
 \item{...}{passed to print}
 }
 \description{
-a printing method for interactive use
+a printing method for interactive use only - do not use in scripts as it is
+likely to be unstable
 }
