@@ -12,7 +12,9 @@ vignette: >
 ```{r "SETUP", include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE,
                       comment = "#>")
-library(dable)
+library(flextable)
+## library(dable)
+devtools::load_all()
 dpset_defaults(overwrite = TRUE)
 if(FALSE){
     .cmp <- function() rmarkdown::render(input = "vignettes/dable-and-flextable.Rmd")
@@ -20,29 +22,63 @@ if(FALSE){
 }
 ```
 
-This document tests the `flexdable` function in `dable`.
+# About
 
-Standard setup:
+This is a document to test the `dable2flextable` functions in the `dable`
+package. To learn about the `dable` package, see the *dable manual* vignette.
+
+
+Setup for testing:
 
 ```{r}
 d <- test_data()
-vt <- test_vtab()
-st <- test_stab()
-g <- dguide(d, id = "id", vtab = vt, stab = st, catg.tol = 15)
+g <- dguide(d, id = "id", vtab = test_vtab(), stab = test_stab(), catg.tol = 15)
 ```
 
-**Test 1:**
+# Showcase
 
-```{r}
-dt <- baseline(d, guide = g, gtab = "area", time.unit = 365.25,
+This section showcases some standard usage.
+
+## Baseline theme 0
+
+```{r, message = FALSE}
+dt <- baseline(d, theme = 0, guide = g, gtab = "area", time.unit = 365.25,
                part = list(T,T,T))
-flexdable(dt)
+blextable(dt)
 ```
+## Baseline theme 2
 
-**Test 2:**
-
-```{r}
+```{r, message = FALSE}
 dt <- baseline(d, theme = 2, guide = g, gtab = "area", time.unit = 365.25,
                part = list(T,T,T))
-flexdable(dt)
+blextable(dt)
 ```
+
+
+# Tests
+
+This section tests the `dable2flextable` functions in `dable`; it contains lots
+of permutations of the arguments to see if it all goes through.
+
+## Simple descriptive tables
+
+```{r, message = FALSE}
+dreal(d) |> dextable()
+dreal(d, guide = g) |> dextable()
+dreal(d, guide = g) |> dextable(row.group = FALSE)
+dreal(d, guide = g) |> dextable(t2l = FALSE, row.group = FALSE)
+dreal(d, guide = g, gtab = "gender", part = c(T,T,T)) |> dextable()
+dreal(d, guide = g, gtab = "gender", part = c(T,T,F)) |> dextable()
+dreal(d, guide = g, gtab = "gender", part = c(T,F,T)) |> dextable()
+dreal(d, guide = g, gtab = "gender", part = c(F,T,F)) |> dextable()
+dreal(d, guide = g, gtab = "gender", part = c(T,F,F)) |> dextable()
+dreal(d, guide = g, gtab = "gender", part = c(F,T,F)) |> dextable()
+dreal(d, guide = g, gtab = "gender", part = c(F,F,T)) |> dextable()
+dreal(d, guide = g, gtab = "gender", part = c(F,F,F))
+dreal(d, guide = g, gtab = "gender") |> dextable(row.group = FALSE)
+dreal(d, guide = g, gtab = "gender") |> dextable(t2l = FALSE, row.group = FALSE)
+```
+
+## Baseline tables
+
+To appear.
