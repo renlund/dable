@@ -1,4 +1,5 @@
 .stddiff <- function() "Std. diff."
+.diff <- function() "Difference"
 
 ## ------------------------------------------------------------------------ real
 
@@ -27,16 +28,16 @@ real.std <- function(x, g, weight = NULL, ...){
 attr(real.std, "label") <- .stddiff()
 
 ##' @rdname comp-real
-##' @description mean_diff: (weighted) difference in mean value
+##' @description real.diff: (weighted) difference in mean value
 ##' @export
-mean_diff <- function(x, g, weight = NULL, ...){
+real.diff <- function(x, g, weight = NULL, ...){
     if(!is.factor(g)) g <- factor(g)
     x_i <- g == levels(g)[1]
     y_i <- g == levels(g)[2]
     d.mean(x = x[x_i], weight = weight[x_i]) -
         d.mean(x = x[y_i], weight = weight[y_i])
 }
-attr(mean_diff, "label") <- .stddiff()
+attr(real.diff, "label") <- .diff()
 
 ##' @rdname comp-real
 ##' @description no.std: no standardized difference calculated
@@ -99,9 +100,9 @@ catg.std <- function(x, g, weight = NULL, catg.full.length = FALSE, ...){
 attr(catg.std, "label") <- .stddiff()
 
 ##' @rdname comp-catg
-##' @description prop_diff: (weighted) difference in proportion
+##' @description catg.diff: (weighted) difference in proportion
 ##' @export
-prop_diff <- function(x, g, weight = NULL, catg.full.length = FALSE, ...){
+catg.diff <- function(x, g, weight = NULL, catg.full.length = FALSE, ...){
     if(!is.factor(g)) g <- factor(g)
     x_i <- g == levels(g)[1]
     y_i <- g == levels(g)[2]
@@ -109,7 +110,7 @@ prop_diff <- function(x, g, weight = NULL, catg.full.length = FALSE, ...){
     p2 <- catg.count_prop(x = x[y_i], weight = weight[y_i])[["Proportion"]]
     p1 - p2
 }
-attr(prop_diff, "label") <- "Difference in proportion"
+attr(catg.diff, "label") <- .diff()
 
 
 ## ------------------------------------------------------------------------ bnry
@@ -138,9 +139,9 @@ bnry.std <- function(x, g, weight = NULL, ...){
 attr(bnry.std, "label") <- .stddiff()
 
 ##' @rdname comp-bnry
-##' @description risk_diff: (weighted) risk difference
+##' @description bnry.diff: (weighted) risk difference
 ##' @export
-risk_diff <- function(x, g, weight = NULL, ...){
+bnry.diff <- function(x, g, weight = NULL, ...){
     if(!is.factor(g)) g <- factor(g)
     x_i <- g == levels(g)[1]
     y_i <- g == levels(g)[2]
@@ -148,7 +149,7 @@ risk_diff <- function(x, g, weight = NULL, ...){
     p2 <- bnry.count_prop(x = x[y_i], weight = weight[y_i])[["Proportion"]]
     p1 - p2
 }
-attr(risk_diff, "label") <- "Risk difference"
+attr(bnry.diff, "label") <- .diff()
 
 
 ##' @rdname comp-bnry
@@ -199,6 +200,15 @@ date.std <- function(x, g, weight = NULL, ...){
 }
 attr(date.std, "label") <- .stddiff()
 
+##' @rdname comp-date
+##' @description date.diff: (weighted) difference for 'date' ( = real.diff
+##'     applied to x interpreted as an integer)
+##' @export
+date.diff <- function(x, g, weight = NULL, ...){
+    real.diff(x = as.integer(x), g = g, weight = weight)
+}
+attr(date.diff, "label") <- .diff()
+
 ## ------------------------------------------------------------------------ surv
 
 ##' 'surv' comparers
@@ -227,6 +237,21 @@ surv.std <- function(time, event, g, weight = NULL, ...){
     (n1 / t1 - n2 / t2) / sqrt((n1 / t1 + n2 / t2) / 2)
 }
 attr(surv.std, "label") <- .stddiff()
+
+##' @rdname comp-surv
+##' @description surv.diff: (weighted) rate difference for 'surv'
+##' @export
+surv.diff <- function(time, event, g, weight = NULL, ...){
+    if(!is.factor(g)) g <- factor(g)
+    x_i <- g == levels(g)[1]
+    y_i <- g == levels(g)[2]
+    n1 <- d.sum(x = event[x_i], weight = weight[x_i])
+    n2 <- d.sum(x = event[y_i], weight = weight[y_i])
+    t1 <- d.sum(x = time[x_i], weight = weight[x_i])
+    t2 <- d.sum(x = time[y_i], weight = weight[y_i])
+    (n1 / t1 - n2 / t2)
+}
+attr(surv.diff, "label") <- .diff()
 
 ##' @rdname comp-surv
 ##' @details rate_ratio: ratio of the (weighted) rates
