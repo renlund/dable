@@ -185,7 +185,7 @@ attr(nonparam.bl, "meta") <- c("p.info")
 ##' @name test-catg
 NULL
 
-META_chisq <- function(x, g, bl = TRUE, ..., catg.full.length = FALSE){
+META_chisq <- function(x, g, bl = TRUE, ...){
     g <- factor(g)
     n_lev <- length(levels(g))
     p <- NA_real_
@@ -195,11 +195,6 @@ META_chisq <- function(x, g, bl = TRUE, ..., catg.full.length = FALSE){
         p <- tryElseNA(stats::chisq.test(x,g)$p.value, ...,
                        caller = "META_chisq")
         p.info <- "Chi-square"
-    }
-    if(catg.full.length){
-        k <- length(levels(as.factor(x)))
-        p <- c(p, rep(NA, max(k-1,0)))
-        if(bl) p.info <- c(p.info, rep(NA, max(k-1,0)))
     }
     if(bl){
         data.frame(p = p, p.info = p.info)
@@ -215,7 +210,7 @@ META_chisq <- function(x, g, bl = TRUE, ..., catg.full.length = FALSE){
 ##' @export
 catg.chisq <- function(x, g, ...){
     unusedWeightWarning(..., caller = "catg.chisq")
-    META_chisq(x = x, g = g, bl = FALSE, ..., catg.full.length = FALSE)
+    META_chisq(x = x, g = g, bl = FALSE, ...)
 }
 
 ##' @rdname test-catg
@@ -223,7 +218,7 @@ catg.chisq <- function(x, g, ...){
 ##' @export
 catg.chisq.bl <- function(x, g, ...){
     unusedWeightWarning(..., caller = "catg.chisq.bl")
-    META_chisq(x = x, g = g, bl = TRUE, ..., catg.full.length = FALSE)
+    META_chisq(x = x, g = g, bl = TRUE, ...)
 }
 attr(catg.chisq.bl, "meta") <- c("p.info")
 

@@ -3,15 +3,24 @@
 \name{comp-real}
 \alias{comp-real}
 \alias{real.std}
-\alias{mean_diff}
+\alias{real.std.bl}
+\alias{real.diff}
+\alias{real.diff.bl}
 \alias{no.std}
+\alias{no.std.bl}
 \title{'real' comparers}
 \usage{
 real.std(x, g, weight = NULL, ...)
 
-mean_diff(x, g, weight = NULL, ...)
+real.std.bl(x, g, weight = NULL, ...)
+
+real.diff(x, g, weight = NULL, ...)
+
+real.diff.bl(x, g, weight = NULL, ...)
 
 no.std(x, g, weight = NULL, ...)
+
+no.std.bl(x, g, weight = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -25,9 +34,16 @@ no.std(x, g, weight = NULL, ...)
 \description{
 functions to compare real variables
 
-real.std: (weighted) standardized difference for 'real'
+real.std: (weighted) 'real' standardized difference
 
-mean_diff: (weighted) difference in mean value
+real.std.bl: (weighted) 'real' standardized difference (for
+baseline tables)
+
+real.diff: (weighted) difference in mean value
+
+real.diff.bl: (weighted) difference in mean value (for baseline tables)
 
 no.std: no standardized difference calculated
+
+no.std.bl: no standardized difference calculated (for baseline tables)
 }

@@ -3,12 +3,18 @@
 \name{comp-catg}
 \alias{comp-catg}
 \alias{catg.std}
-\alias{prop_diff}
+\alias{catg.std.bl}
+\alias{catg.diff}
+\alias{catg.diff.bl}
 \title{'catg' comparers}
 \usage{
-catg.std(x, g, weight = NULL, catg.full.length = FALSE, ...)
+catg.std(x, g, weight = NULL, ...)
 
-prop_diff(x, g, weight = NULL, catg.full.length = FALSE, ...)
+catg.std.bl(x, g, weight = NULL, ...)
+
+catg.diff(x, g, weight = NULL, ...)
+
+catg.diff.bl(x, g, weight = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -17,15 +23,16 @@ prop_diff(x, g, weight = NULL, catg.full.length = FALSE, ...)
 
 \item{weight}{case weight}
 
-\item{catg.full.length}{logical; return dimension equal to the input (is
-this EVER wanted?)}
-
 \item{...}{arguments passed}
 }
 \description{
 functions to compare catg variables
 
-catg.std: (weighted) standardized difference for 'catg'
+catg.std: (weighted) 'catg' standardized difference
 
-prop_diff: (weighted) difference in proportion
+catg.std.bl: (weighted) 'catg' standardized difference (for baseline)
+
+catg.diff: (weighted) difference in proportion
+
+catg.diff: (weighted) difference in proportion for baseline table
 }
