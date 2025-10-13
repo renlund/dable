@@ -833,28 +833,57 @@ the study, at baseline.
 
 Combining various types adds a layer of complexity for the functions that
 generate the parts of the table. For one, they have to to return the same number
-of columns (per part). This typically means mixing numbers and text, and so
-formatting of numbers has to be done already at the table-generating phase. In
-contrast, the default simple descriptive tables could be populated with all
-numbers without the need for formatting.
+of columns (per part). One may want (continuous) measurement data to be
+described by the quartiles (3 numbers) and categorical data to be the count and
+percentage of each level (2 numbers). The solution in this package\footnote{At
+least for baseline theme 0-2. The idea shamelessly stolen from the
+\texttt{ucr.base.tab} function in the \texttt{ucR} package.} is to collapse all
+the numbers into a string, e.g. to describe measurements as "median (Q1-Q3)" and
+categorical as "N (p\%)", which also means that formatting of numbers have to be
+done already at the table-generating phase. In contrast, the default simple
+descriptive tables could be populated with all numbers without the need for
+formatting.
 
 Another problem is how to know what the presented numbers are. In a simple
 descriptive table, we name the columns to indicate what is in them; e.g. "Mean"
 and "SD" when we present the mean values and standard deviations for the
 variables. But in a baseline table, we mix the types - so the column names are
-not sufficient for that end.
+not sufficient for that end. One solution employed in this packages is to have
+the functions return both the wanted summary string as well as the information
+on what the summary string contains, so e.g. the baseline default for the
+\texttt{real} type returns columns
+
+\begin{itemize}
+\item \texttt{Summary}: The actually summary string of the form "Median (Q1-Q3)"
+\item \texttt{Summary.info}: The text string "Numeric variable: Median (Q1-Q3)"
+\end{itemize}
+
+\noindent The information from \texttt{Summary.info} is presented in the foot of
+the table, which works since each types summary measure has a unique
+presentation.
+
+In a similar fashion, the default baseline tester return columns
+
+\begin{itemize}
+\item \texttt{p}: An actual p-value
+\item \texttt{p.info}: A text string with information on the test that generated
+  the p-value.
+\end{itemize}
+
+\noindent The information from \texttt{p.info} is attached as footnotes on the
+\texttt{p} column.
 
 A third problem in the context of this package, is that it becomes much more
 involved to pass user defined functions to baseline tables (so much so that it
 is currently not possible) - we need a at least a function per type.
 
 The current approach is that there is a set of default functions for baseline
-tables that is distinct from the set of default funcions for simple descriptive
-tables. To "manually" implement a completely new set of baseline functions is
-somewhat cumbersome. However, the aim is to put together a number of baseline
-\emph{themes} that the user easily can choose between without having to reset
-any default values - and if a new theme is needed, it would be best to implement
-it \emph{within} the package.
+tables that is partially distinct from the set of default funcions for simple
+descriptive tables. To "manually" implement a completely new set of baseline
+functions is somewhat cumbersome. However, the aim is to put together a number
+of baseline \emph{themes} that the user easily can choose between without having
+to reset any default values - and if a new theme is needed, it would be best to
+implement it \emph{within} the package.
 
 Before going further into the details, lets look at the two (actually three, but
 really just two) themes that exist currently.
@@ -920,6 +949,9 @@ blatex(b, caption = "Baseline table theme 2.",
        label = "tab:bsl-2", size = "small")
 @
 
+Here, the information on the summary measure is explicitly written out in the
+first column.
+
 
 \clearpage
 %% =============================================================================
@@ -942,10 +974,6 @@ blatex(b, label = "tab:adj-bsl", caption = "Adjusted baseline table")
 \newpage
 %% =============================================================================
 \subsection{Behind the scenes of baseline tables}
-
-%% To appear: Describe the tidy nature of current baselines and the functions that
-%% turn them into presentation ready tables (\texttt{dable\_prune},
-%% \texttt{dable\_fnote}, etc.).
 
 We will use \texttt{dcatg} in a nonsense example to illustrate a few tools.
 
@@ -1008,11 +1036,12 @@ datex(dt2, label = "tab:fnote-added", row.group = FALSE,
       caption = "Table with info added as footnotes.")
 @
 
-The true nature of the baseline tables are that they are very \emph{tidy}.
+\newpage
+The true nature of the baseline tables are that they are very \emph{tidy}:
 
 <<"tidy-baseline", message = FALSE>>=
 b <- baseline(d, theme = 0, guide = g, gtab = "gender", part = c(T,T,T))
-str(subset(b))
+str(subset(b)) ## subset used here only to strip all the attributes
 @
 
 \noindent For the summary and p-values there are separate columns containing the
@@ -1024,8 +1053,6 @@ information on the contents thereof. These are added as info in the foot, and as
 \section{Loose ends}
 
 \begin{itemize}
-\item Most testing functions do not use weighting - should a warning be issued
-  from the built-in testers when being passed a non-null weight?
 \item Baseline theme 0: the 'Comparison' is never identified as having
   standardized differences. Should the name of 'Comparison' and 'Test' perhaps
   be carried in the object until presentation?
