@@ -158,12 +158,12 @@ dable_parameters <- list(
     dable.date.desc.bl = "date.bl0",
     dable.surv.desc.bl = "surv.bl0",
     ## default baseline comparers
-    dable.real.comp.bl = "real.std",
-    dable.catg.comp.bl = "catg.std",
+    dable.real.comp.bl = "real.std.bl",
+    dable.catg.comp.bl = "catg.std.bl",
     dable.bnry.comp.bl = NULL,
-    dable.lcat.comp.bl = "no.std",
-    dable.date.comp.bl = "date.std",
-    dable.surv.comp.bl = "surv.std",
+    dable.lcat.comp.bl = "empty.std.bl",
+    dable.date.comp.bl = "date.std.bl",
+    dable.surv.comp.bl = "surv.std.bl",
     ## default baseline tester
     dable.real.test.bl = "param.bl",
     dable.catg.test.bl = "catg.chisq.bl",
