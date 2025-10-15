@@ -1,26 +1,42 @@
 ##' set baseline functions
 ##'
 ##' Quickly set baseline functions to some predefined set of functions.
-##' @param desc the 'theme' for descriptives
-##' @param comp the 'theme' for comparisons (not yet implemented)
+##' @param desc the 'theme' for descriptives (0,1,2)
+##' @param comp the 'theme' for comparisons (std, diff)
 ##' @param test the 'theme' for testers (not yet implemented)
 ##' @export
-bl_theme <- function(desc = "default", comp = NULL, test = NULL){
+bl_theme <- function(desc = 0, comp = "std", test = NULL){
     param <- dpget_all()
-    properties(desc, class = c("character", "numeric"), length = 1, na.ok = FALSE)
-    if(!is.null(comp) || !is.null(test)){
-        s <- paste0("options for 'comp' and 'test' not yet implemented")
+    if(!is.null(desc)){
+        properties(desc, class = c("character", "numeric"),
+                   length = 1, na.ok = FALSE)
+        one_of(as.character(desc), nm = "'desc'",
+               set = c("0", "default", "1", "2"))
+    }
+    if(!is.null(comp)){
+        properties(comp, class = c("character"), length = 1, na.ok = FALSE)
+        one_of(comp, nm = "'comp'", set = c("std", "diff"))
+    }
+    if(!is.null(test)){
+        s <- paste0("options for 'test' not yet implemented")
         warning(s)
     }
     types <- c("real", "bnry", "catg", "lcat", "date", "surv")
-    d <- if(is.character(desc)){
-             switch(desc,
-                    "default" = 0)
-         } else desc
-    x <- sprintf(paste0("%s.bl", d), types)
-    p <- sprintf("%s.desc.bl", types)
-    for(i in seq_along(x)) dpset(param = p[i], value = x[i])
+    if(!is.null(desc)){
+        d <- if(is.character(desc)){
+                 switch(desc,
+                        "default" = 0)
+             } else desc
+        x <- sprintf(paste0("%s.bl", d), types)
+        p <- sprintf("%s.desc.bl", types)
+        for(i in seq_along(x)) dpset(param = p[i], value = x[i])
+    }
+    if(!is.null(comp)){
+        x <- sprintf(paste0("%s.", comp, ".bl"), types)
+        p <- sprintf("%s.comp.bl", types)
+        for(i in seq_along(x)) dpset(param = p[i], value = x[i])
 
+    }
     invisible(param)
 }
 

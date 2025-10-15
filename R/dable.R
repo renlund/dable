@@ -188,16 +188,14 @@ dlcat <- function(data, ...){
 ##'
 ##' This is a wrapper for bl_theme and dable (with type = 'baseline').
 ##' @param data data.frame of data
-##' @param theme numeric; theme number passed to \code{bl_theme}
+##' @param theme list of 1 or 2, args passed to \code{bl_theme}
 ##' @param ... arguments passed to \code{dable}
 ##' @export
 baseline <- function(data, theme = 0, ...){
-    ## Note to self or whoever cares: currently there is a 'theme' for the
-    ## descriptive functions only. If 'bl_theme' expands, then the theme
-    ## argument should probably be a list instead.
-    properties(theme, class = c("numeric", "integer"), length = 1,
-               na.ok = FALSE)
-    theme.list <- list(desc = theme, comp = NULL, test = NULL)
+    properties(theme, class = c("list", "numeric", "integer", "character"),
+               length = 1:2, na.ok = FALSE)
+    theme <- expand_list(as.list(theme), n = 2, fill = NULL)
+    theme.list <- list(desc = theme[[1]], comp = theme[[2]], test = NULL)
     p <- do.call(what = "bl_theme", args = theme.list)
     on.exit(expr = dpset(p)) ## resets the parameters on exit
     d <- dable(data = data, ...)

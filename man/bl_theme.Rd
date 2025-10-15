@@ -4,12 +4,12 @@
 \alias{bl_theme}
 \title{set baseline functions}
 \usage{
-bl_theme(desc = "default", comp = NULL, test = NULL)
+bl_theme(desc = 0, comp = "std", test = NULL)
 }
 \arguments{
-\item{desc}{the 'theme' for descriptives}
+\item{desc}{the 'theme' for descriptives (0,1,2)}
 
-\item{comp}{the 'theme' for comparisons (not yet implemented)}
+\item{comp}{the 'theme' for comparisons (std, diff)}
 
 \item{test}{the 'theme' for testers (not yet implemented)}
 }
