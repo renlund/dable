@@ -10,7 +10,7 @@
 \alias{risk_ratio.bl}
 \alias{odds_ratio}
 \alias{odds_ratio.bl}
-\title{'bnry' comparers}
+\title{'lcat' comparers}
 \usage{
 bnry.std(x, g, weight = NULL, ...)
 
@@ -38,6 +38,8 @@ odds_ratio.bl(x, g, weight = NULL, ...)
 \item{...}{arguments passed}
 }
 \description{
+functions to compare lcat variables
+
 functions to compare bnry variables
 
 bnry.std: (weighted) standardized difference for 'bnry'

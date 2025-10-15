@@ -2,14 +2,55 @@
 .stddiff <- function() "Standardized difference"
 .stddiff_abbr <- function() "Std. diff."
 
-.compinfo <- function() paste0(dpget("comp.header"), ".info")
 compBaser <- function(fnc, info = NULL, ...){
     if(is.null(info)) info <- attr(fnc, "label")
-    R <- data.frame(a = fnc(...),
-               b = info)
-    names(R) <- c(dpget("comp.header"), .compinfo())
-    R
+    data.frame(comp = fnc(...),
+               comp.info = info)
 }
+
+## --------------------------------------------------------------------- general
+
+##' general comparers
+##'
+##' functions to compare any variables
+##' @param x input vector
+##' @param weight case weight
+##' @param g grouping variable
+##' @param ... arguments passed
+##' @name comp-all
+NULL
+
+
+##' @rdname comp-all
+##' @description empty.std: empty standardized difference calculated
+##' @export
+empty.std <- function(...){
+    NA_real_
+}
+attr(empty.std, "label") <- .stddiff_abbr()
+
+##' @rdname comp-all
+##' @description empty.std.bl: empty standardized difference calculated (for baseline tables)
+##' @export
+empty.std.bl <- function(...){
+    data.frame(comp = NA_real_, comp.info = .stddiff())
+}
+
+##' @rdname comp-all
+##' @description empty.diff: empty standardized difference calculated
+##' @export
+empty.diff <- function(...){
+    NA_real_
+}
+attr(empty.diff, "label") <- .diff()
+
+##' @rdname comp-all
+##' @description empty.diff.bl: empty standardized difference calculated (for baseline tables)
+##' @export
+empty.diff.bl <- function(...){
+    data.frame(comp = NA_real_, comp.info = .diff())
+}
+
 
 ## ------------------------------------------------------------------------ real
 
@@ -65,21 +106,6 @@ real.diff.bl <- function(x, g, weight = NULL, ...){
     compBaser(real.diff, x = x, g = g, weight = weight, bl = TRUE)
 }
 
-##' @rdname comp-real
-##' @description no.std: no standardized difference calculated
-##' @export
-no.std <- function(x, g, weight = NULL, ...){
-    NA_real_
-}
-attr(no.std, "label") <- .stddiff_abbr()
-
-##' @rdname comp-real
-##' @description no.std.bl: no standardized difference calculated (for baseline tables)
-##' @export
-no.std.bl <- function(x, g, weight = NULL, ...){
-    compBaser(no.std, info = .stddiff(), x = x, g = g, weight = weight)
-}
-
 ## ------------------------------------------------------------------------ catg
 
 ##' 'catg' comparers
@@ -92,7 +118,6 @@ no.std.bl <- function(x, g, weight = NULL, ...){
 ##' @importFrom MASS ginv
 ##' @name comp-catg
 NULL
-
 
 ##' @rdname comp-catg
 ##' @description catg.std: (weighted) 'catg' standardized difference
@@ -135,7 +160,8 @@ attr(catg.std, "label") <- .stddiff_abbr()
 ##' @description catg.std.bl: (weighted) 'catg' standardized difference (for baseline)
 ##' @export
 catg.std.bl <- function(x, g, weight = NULL, ...){
-    compBaser(catg.std, info = .stddiff(), x = x, g = g, weight = weight, bl = TRUE)
+    compBaser(catg.std, info = .stddiff(), x = x, g = g,
+              weight = weight, bl = TRUE)
 }
 
 ##' @rdname comp-catg
@@ -160,10 +186,29 @@ attr(catg.diff, "meta") <- "Level"
 catg.diff.bl <- function(x, g, weight = NULL, ...){
     R <- catg.diff(x = x, g = g, weight = weight)
     R$B = .diff()
-    names(R)[2:3] <- c(dpget("comp.header"), .compinfo())
+    names(R)[2:3] <- c("comp", "comp.info")
     R
 }
-attr(no.std.bl, "meta") <- "Level"
+attr(catg.diff.bl, "meta") <- "Level"
+
+## ------------------------------------------------------------------------ bnry
+
+##' 'lcat' comparers
+##'
+##' functions to compare lcat variables
+##' @param x input vector
+##' @param weight case weight
+##' @param g grouping variable
+##' @param ... arguments passed
+##' @name comp-bnry
+NULL
+
+lcat.std <- empty.std
+lcat.std.bl <- empty.std.bl
+lcat.diff <- empty.diff
+lcat.diff.bl <- empty.diff.bl
+
+
 
 ## ------------------------------------------------------------------------ bnry
 
@@ -338,9 +383,9 @@ attr(surv.std, "label") <- .stddiff_abbr()
 ##' @description surv.std.bl: (weighted) standardized difference for
 ##' 'surv' (baseline)
 ##' @export
-surv.std.bl <- function(time, event, weight = NULL, ...){
+surv.std.bl <- function(time, event, g, weight = NULL, ...){
     compBaser(surv.std, info = .stddiff(), time = time, event = event,
-              weight = weight)
+              g = g, weight = weight)
 }
 
 ##' @rdname comp-surv
@@ -361,9 +406,9 @@ attr(surv.diff, "label") <- .diff()
 ##' @rdname comp-surv
 ##' @description surv.diff.bl: (weighted) difference for 'surv' (baseline)
 ##' @export
-surv.diff.bl <- function(time, event, weight = NULL, ...){
+surv.diff.bl <- function(time, event, g, weight = NULL, ...){
     compBaser(surv.diff, time = time, event = event,
-              weight = weight)
+              g = g, weight = weight)
 }
 
 ##' @rdname comp-surv
@@ -382,8 +427,8 @@ attr(rate_ratio, "label") <- "Rate ratio"
 ##' @rdname comp-surv
 ##' @description rate_ratio.bl: ratio of the (weighted) rates (baseline)
 ##' @export
-rate_ratio.bl <- function(time, event, weight = NULL, ...){
-    compBaser(rate_ratio, time = time, event = event, weight = weight)
+rate_ratio.bl <- function(time, event, g, weight = NULL, ...){
+    compBaser(rate_ratio, time = time, event = event, g = g, weight = weight)
 }
 
 ##' @rdname comp-surv
@@ -399,8 +444,8 @@ attr(hazard_ratio, "label") <- "Hazard ratio"
 ##' @rdname comp-surv
 ##' @description hazard_ratio.bl: (weighted) hazard ratio (baseline)
 ##' @export
-hazard_ratio.bl <- function(time, event, weight = NULL, ...){
-    compBaser(hazard_ratio, time = time, event = event, weight = weight)
+hazard_ratio.bl <- function(time, event, g, weight = NULL, ...){
+    compBaser(hazard_ratio, time = time, event = event, g = g, weight = weight)
 }
 
 ##' @rdname comp-surv
@@ -417,6 +462,6 @@ attr(hr_ci, "label") <- "Hazard ratio"
 ##' @rdname comp-surv
 ##' @description hr_ci.bl: (weighted) hazard ratio and confidence interval (baseline)
 ##' @export
-hr_ci.bl <- function(time, event, weight = NULL, ...){
-    compBaser(hr_ci, time = time, event = event, weight = weight)
+hr_ci.bl <- function(time, event, g, weight = NULL, ...){
+    compBaser(hr_ci, time = time, event = event, g = g, weight = weight)
 }
