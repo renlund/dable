@@ -271,6 +271,7 @@ attr(rate_ratio, "label") <- "Rate ratio"
 ##' @export
 hazard_ratio <- function(time, event, g, weight = NULL, ...){
     if(!is.factor(g)) g <- factor(g)
+    g <- factor(g, levels = rev(levels(g)))
     mod <- survival::coxph(survival::Surv(time, event) ~ g, weight = weight)
     as.numeric(exp(mod$coefficients)[1])
 }
@@ -281,8 +282,9 @@ attr(hazard_ratio, "label") <- "Hazard ratio"
 ##' @export
 hr_ci <- function(time, event, g, weight = NULL, ...){
     if(!is.factor(g)) g <- factor(g)
+    g <- factor(g, levels = rev(levels(g)))
     mod <- survival::coxph(survival::Surv(time, event) ~ g, weight = weight)
     v <- exp(as.numeric(c(mod$coefficients[1], stats::confint(mod))))
-    sprintf("%s (%s-%s)", dafonumb(v))
+    do.call(sprintf, args = c(list(fmt = "%s (%s-%s)"), as.list(dafonumb(v))))
 }
-attr(hr_ci, "label") <- "Hazard ratio"
+attr(hr_ci, "label") <- "Hazard Ratio"
