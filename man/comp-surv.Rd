@@ -3,12 +3,15 @@
 \name{comp-surv}
 \alias{comp-surv}
 \alias{surv.std}
+\alias{surv.diff}
 \alias{rate_ratio}
 \alias{hazard_ratio}
 \alias{hr_ci}
 \title{'surv' comparers}
 \usage{
 surv.std(time, event, g, weight = NULL, ...)
+
+surv.diff(time, event, g, weight = NULL, ...)
 
 rate_ratio(time, event, g, weight = NULL, ...)
 
@@ -32,6 +35,8 @@ functions to compare surv variables
 
 surv.std: (weighted) standardized difference for
 'surv'
+
+surv.diff: (weighted) rate difference for 'surv'
 }
 \details{
 rate_ratio: ratio of the (weighted) rates

@@ -3,9 +3,12 @@
 \name{comp-date}
 \alias{comp-date}
 \alias{date.std}
+\alias{date.diff}
 \title{'date' comparers}
 \usage{
 date.std(x, g, weight = NULL, ...)
+
+date.diff(x, g, weight = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -20,5 +23,8 @@ date.std(x, g, weight = NULL, ...)
 functions to compare date variables
 
 date.std: (weighted) standardized difference for 'date' ( = real.std
+applied to x interpreted as an integer)
+
+date.diff: (weighted) difference for 'date' ( = real.diff
 applied to x interpreted as an integer)
 }

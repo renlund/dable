@@ -3,12 +3,12 @@
 \name{comp-catg}
 \alias{comp-catg}
 \alias{catg.std}
-\alias{prop_diff}
+\alias{catg.diff}
 \title{'catg' comparers}
 \usage{
 catg.std(x, g, weight = NULL, catg.full.length = FALSE, ...)
 
-prop_diff(x, g, weight = NULL, catg.full.length = FALSE, ...)
+catg.diff(x, g, weight = NULL, catg.full.length = FALSE, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -27,5 +27,5 @@ functions to compare catg variables
 
 catg.std: (weighted) standardized difference for 'catg'
 
-prop_diff: (weighted) difference in proportion
+catg.diff: (weighted) difference in proportion
 }
