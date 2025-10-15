@@ -108,7 +108,7 @@ gtab_equiv2factor <- function(gtab, na.ok = FALSE, verbose = TRUE){
 # - #' @rdname gtab-fncs
 # - #' @details gtab2factor: create a factor from a grouping table (if possible)
 # - #' @export
-gtab2factor <- function(gtab, na.ok = TRUE, verbose = FALSE){
+gtab2factor <- function(gtab, na.ok = TRUE, verbose = FALSE, ref = NULL){
     equiv <- gtab_equiv2factor(gtab, na.ok = na.ok, verbose = verbose)
     if(equiv){
         L <- names(gtab)
@@ -118,7 +118,21 @@ gtab2factor <- function(gtab, na.ok = TRUE, verbose = FALSE){
         for(i in seq_along(gtab)){
             x[which(gtab[[i]])] <- L[i]
         }
-        factor(x, levels = L)
+        if(!is.null(ref)){
+            properties(ref, class = c("numeric", "integer"), length = 1,
+                       na.ok = FALSE)
+            ## one_of(ref, nm = 'the reference point', set = 1:N)
+            if(ref >= 1 & ref <= N){
+                factor(x, levels = L[c(ref, setdiff(1:N,ref))])
+            } else {
+                s <- paste0("gtab2factor has been given a reference ",
+                            "point outside the range; it is ignored")
+                warning(s)
+                factor(x, levels = L)
+            }
+        } else {
+            factor(x, levels = L)
+        }
     } else {
         warning("gtab not equivalent to a factor")
         factor(character(0)) ## what should be returned (if anything)?
