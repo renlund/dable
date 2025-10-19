@@ -872,13 +872,13 @@ In a similar fashion, the default baseline comparer return columns
 \noindent the default baseline tester return columns
 
 \begin{itemize}
-\item \texttt{p}: An actual p-value
-\item \texttt{p.info}: A text string with information on the test that generated
-  the p-value.
+\item \texttt{test}: An actual p-value
+\item \texttt{test.info}: A text string with information on the test that
+  generated the p-value.
 \end{itemize}
 
-\noindent The information from \texttt{p.info} is attached as footnotes on the
-\texttt{p} column.
+\noindent The information from \texttt{test.info} is attached as footnotes on the
+\texttt{test} column.
 
 A third problem in the context of this package, is that it becomes much more
 involved to pass user defined functions to baseline tables (so much so that it

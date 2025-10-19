@@ -5,9 +5,9 @@
 \alias{bl}
 \title{create a baseline table}
 \usage{
-baseline(data, theme = 0, ...)
+baseline(data, theme = list(desc = 0, comp = "std"), ...)
 
-bl(data, theme = 0, ...)
+bl(data, theme = list(desc = 0, comp = "std"), ...)
 }
 \arguments{
 \item{data}{data.frame of data}
