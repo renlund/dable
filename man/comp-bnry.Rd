@@ -3,9 +3,7 @@
 \name{comp-bnry}
 \alias{comp-bnry}
 \alias{bnry.std}
-\alias{bnry.std.bl}
 \alias{bnry.diff}
-\alias{bnry.diff.bl}
 \alias{risk_ratio}
 \alias{risk_ratio.bl}
 \alias{odds_ratio}
@@ -14,11 +12,7 @@
 \usage{
 bnry.std(x, g, weight = NULL, ...)
 
-bnry.std.bl(x, g, weight = NULL, ...)
-
 bnry.diff(x, g, weight = NULL, ...)
-
-bnry.diff.bl(x, g, weight = NULL, ...)
 
 risk_ratio(x, g, weight = NULL, ...)
 
@@ -44,11 +38,7 @@ functions to compare bnry variables
 
 bnry.std: (weighted) standardized difference for 'bnry'
 
-bnry.std.bl: (weighted) standardized difference for 'bnry' (baseline)
-
 bnry.diff: (weighted) risk difference
-
-bnry.diff.bl: (weighted) risk difference (baseline)
 
 risk_ratio: (weighted) risk ratio
 

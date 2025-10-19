@@ -3,18 +3,12 @@
 \name{comp-date}
 \alias{comp-date}
 \alias{date.std}
-\alias{date.std.bl}
 \alias{date.diff}
-\alias{date.diff.bl}
 \title{'date' comparers}
 \usage{
 date.std(x, g, weight = NULL, ...)
 
-date.std.bl(x, g, weight = NULL, ...)
-
 date.diff(x, g, weight = NULL, ...)
-
-date.diff.bl(x, g, weight = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -31,12 +25,6 @@ functions to compare date variables
 date.std: (weighted) standardized difference for 'date' ( = real.std
 applied to x interpreted as an integer)
 
-date.std.bl: (weighted) standardized difference for 'date' ( = real.std
-applied to x interpreted as an integer)
-
 date.diff: (weighted) difference for 'date' ( = real.diff
-applied to x interpreted as an integer)
-
-date.diff.bl: (weighted) difference for 'date' ( = real.diff
 applied to x interpreted as an integer)
 }

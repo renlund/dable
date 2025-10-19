@@ -3,18 +3,12 @@
 \name{comp-catg}
 \alias{comp-catg}
 \alias{catg.std}
-\alias{catg.std.bl}
 \alias{catg.diff}
-\alias{catg.diff.bl}
 \title{'catg' comparers}
 \usage{
 catg.std(x, g, weight = NULL, ...)
 
-catg.std.bl(x, g, weight = NULL, ...)
-
 catg.diff(x, g, weight = NULL, ...)
-
-catg.diff.bl(x, g, weight = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -30,9 +24,5 @@ functions to compare catg variables
 
 catg.std: (weighted) 'catg' standardized difference
 
-catg.std.bl: (weighted) 'catg' standardized difference (for baseline)
-
 catg.diff: (weighted) difference in proportion
-
-catg.diff: (weighted) difference in proportion for baseline table
 }

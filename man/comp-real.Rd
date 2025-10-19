@@ -3,18 +3,12 @@
 \name{comp-real}
 \alias{comp-real}
 \alias{real.std}
-\alias{real.std.bl}
 \alias{real.diff}
-\alias{real.diff.bl}
 \title{'real' comparers}
 \usage{
 real.std(x, g, weight = NULL, ...)
 
-real.std.bl(x, g, weight = NULL, ...)
-
 real.diff(x, g, weight = NULL, ...)
-
-real.diff.bl(x, g, weight = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -30,10 +24,5 @@ functions to compare real variables
 
 real.std: (weighted) 'real' standardized difference
 
-real.std.bl: (weighted) 'real' standardized difference (for
-baseline tables)
-
 real.diff: (weighted) difference in mean value
-
-real.diff.bl: (weighted) difference in mean value (for baseline tables)
 }

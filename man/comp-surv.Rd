@@ -3,9 +3,7 @@
 \name{comp-surv}
 \alias{comp-surv}
 \alias{surv.std}
-\alias{surv.std.bl}
 \alias{surv.diff}
-\alias{surv.diff.bl}
 \alias{rate_ratio}
 \alias{rate_ratio.bl}
 \alias{hazard_ratio}
@@ -16,23 +14,19 @@
 \usage{
 surv.std(time, event, g, weight = NULL, ...)
 
-surv.std.bl(time, event, weight = NULL, ...)
-
 surv.diff(time, event, g, weight = NULL, ...)
-
-surv.diff.bl(time, event, weight = NULL, ...)
 
 rate_ratio(time, event, g, weight = NULL, ...)
 
-rate_ratio.bl(time, event, weight = NULL, ...)
+rate_ratio.bl(time, event, g, weight = NULL, ...)
 
 hazard_ratio(time, event, g, weight = NULL, ...)
 
-hazard_ratio.bl(time, event, weight = NULL, ...)
+hazard_ratio.bl(time, event, g, weight = NULL, ...)
 
 hr_ci(time, event, g, weight = NULL, ...)
 
-hr_ci.bl(time, event, weight = NULL, ...)
+hr_ci.bl(time, event, g, weight = NULL, ...)
 }
 \arguments{
 \item{time}{time component of time-to-event variable}
@@ -50,12 +44,7 @@ functions to compare surv variables
 
 surv.std: (weighted) standardized difference for 'surv'
 
-surv.std.bl: (weighted) standardized difference for
-'surv' (baseline)
-
 surv.diff: (weighted) rate difference for 'surv'
-
-surv.diff.bl: (weighted) difference for 'surv' (baseline)
 
 rate_ratio.bl: ratio of the (weighted) rates (baseline)
 

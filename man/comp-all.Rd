@@ -6,7 +6,7 @@
 \alias{empty.std.bl}
 \alias{empty.diff}
 \alias{empty.diff.bl}
-\title{genreal comparers}
+\title{general comparers}
 \usage{
 empty.std(...)
 
