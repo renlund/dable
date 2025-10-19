@@ -215,6 +215,17 @@ blextable <- function(dt,
         dt <- dable_prune(dt, rm = "test.info")
     }
 
+    comp.info <- NULL
+    comp.same <- FALSE
+    if("comp.info" %in% names(dt)){
+        comp.info <- dt$comp.info
+        dt <- dable_prune(dt, rm = "comp.info")
+        ci_u <- unique(comp.info[!is.na(comp.info)])
+        if(length(ci_u) == 1) comp.same <- TRUE
+        if(comp.same) ci_u <- if(ci_u == .stddiff()) .stddiff_abbr() else ci_u
+    }
+
+
     ## grey
     if(!is.null(grey)){
         gindex <- get_grey(grey, dt, latex = FALSE)
@@ -248,7 +259,8 @@ blextable <- function(dt,
     Hh <- part2head(part = attr(DT, "part"),
                     cnm = names(DT),
                     bl = TRUE,
-                    ntxt = attr2n(attributes(dt), count))
+                    ntxt = attr2n(attributes(dt), count),
+                    comp.header = if(comp.same) ci_u else dpget("comp.header"))
     Hh$H[Hh$H==""] <- " " ## else flextable col_keys fails
     names(DT) <- Hh$H
 
@@ -270,6 +282,7 @@ blextable <- function(dt,
     ## add footnotes on p-values
     if(!is.null(test.info)){
         tests <- unique(stats::na.omit(test.info))
+        test_nm <- dpget("test.header")
         j <- which(names(DT) == "Test")
         dummy <- FALSE
         for(i in seq_along(tests)){ ## i = 1
@@ -282,6 +295,24 @@ blextable <- function(dt,
             dummy <- TRUE
         }
     }
+
+    ## add footnotes on p-values
+    if(!comp.same){
+        comps <- unique(stats::na.omit(comp.info))
+        comp_nm <- dpget("comp.header")
+        j <- which(names(DT) == comp_nm)
+        dummy <- FALSE
+        for(i in seq_along(comps)){ ## i = 1
+            t <- comps[i]
+            indx <- which(!is.na(DT[[comp_nm]]) & DT[[comp_nm]] != "" &
+                          !is.na(comp.info) & comp.info == t)
+            ft <- flextable::footnote(ft, i = indx, j = j,
+                                      value = flextable::as_paragraph(t),
+                                      ref_symbols = letters[i], inline = dummy)
+            dummy <- TRUE
+        }
+    }
+
 
     ## note on indentation;
     ##  - docx: spaces work
