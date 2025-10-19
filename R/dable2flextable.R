@@ -200,8 +200,8 @@ blextable <- function(dt,
     if(is.null(row.group)) row.group <- length(unique(A$group.rle$values)) > 1
 
     ## display info on summary measures as text inserted below the table
-    if("Summary.info" %in% names(dt)){
-        dt <- dable_prune(dt, rm = "Summary.info", info = TRUE,
+    if("desc.info" %in% names(dt)){
+        dt <- dable_prune(dt, rm = "desc.info", info = TRUE,
                           info.attr = "info", info.unique = TRUE,
                           split.unique = TRUE)
     }

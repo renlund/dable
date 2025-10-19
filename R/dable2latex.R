@@ -208,8 +208,8 @@ blatex_default <- function(bl,
     }
 
     ## display info on summary measures as text inserted below the table
-    if("Summary.info" %in% names(bl)){
-        bl <- dable_prune(bl, rm = "Summary.info", info = TRUE,
+    if("desc.info" %in% names(bl)){
+        bl <- dable_prune(bl, rm = "desc.info", info = TRUE,
                           info.attr = "info", info.unique = TRUE,
                           split.unique = TRUE)
     }

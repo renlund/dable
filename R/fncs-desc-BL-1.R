@@ -87,11 +87,11 @@ real.bl0 <- function(x, weight = NULL, ...){
          }
     si <- "Numeric variable: Median (Q1-Q3)"
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 
 }
-attr(real.bl0, "meta") <- c("Variable", "Summary.info")
+attr(real.bl0, "meta") <- c("Variable", "desc.info")
 
 ##' @rdname baseline-standard
 ##' @details real.bl1: (weighted) mean and standard deviation
@@ -106,10 +106,10 @@ real.bl1 <- function(x, weight = NULL, ...){
          }
     si <- "Numeric variable: Mean (SD)"
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(real.bl1, "meta") <- c("Summary.info", "Variable")
+attr(real.bl1, "meta") <- c("desc.info", "Variable")
 
 ##' @rdname baseline-standard
 ##' @details bnry.bl0/1: (weighted) count and percent of
@@ -127,10 +127,10 @@ bnry.bl0 <- function(x, weight = NULL, ...){
          }
     si <- "Categorical variable: Count (Percent)"
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(bnry.bl0, "meta") <- c("Variable", "Summary.info")
+attr(bnry.bl0, "meta") <- c("Variable", "desc.info")
 bnry.bl1 <- bnry.bl0
 
 ##' @rdname baseline-standard
@@ -149,10 +149,10 @@ catg.bl0 <- function(x, weight = NULL, ...){
          }
     si <- "Categorical variable: Count (Percent)"
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(catg.bl0, "meta") <- c("Variable", "Summary.info")
+attr(catg.bl0, "meta") <- c("Variable", "desc.info")
 catg.bl1 <- catg.bl0
 
 ##' @rdname baseline-standard
@@ -164,10 +164,10 @@ lcat.bl0 <- function(x, ...){
     s <- if(is.na(r) || is.null(r) || length(r) == 0) "" else sprintf("=%s=", r)
     si <- "Categorical variable: =unique values="
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(lcat.bl0, "meta") <- c("Variable", "Summary.info")
+attr(lcat.bl0, "meta") <- c("Variable", "desc.info")
 lcat.bl1 <- lcat.bl0
 
 ##' @rdname baseline-standard
@@ -183,10 +183,10 @@ date.bl0 <- function(x, date.format = dpget("date.format"), ...){
                  changeNA(format(r$Max, format = date.format)))
     si <- "Date variables: min/max"
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(date.bl0, "meta") <- c("Variable", "Summary.info")
+attr(date.bl0, "meta") <- c("Variable", "desc.info")
 date.bl1 <- date.bl0
 
 ##' @rdname baseline-standard
@@ -201,8 +201,8 @@ surv.bl0 <- function(time, event, weight = NULL, time.unit = NULL, ...){
                  changeNA(dafonumb1(r$Rate)))
     si <- "Time-to-event variable: events; rate"
     data.frame(Variable = di.Variable(event, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(surv.bl0, "meta") <- c("Variable", "Summary.info")
+attr(surv.bl0, "meta") <- c("Variable", "desc.info")
 surv.bl1 <- surv.bl0
