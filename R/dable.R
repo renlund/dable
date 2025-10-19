@@ -105,12 +105,20 @@ dable <- function(data,
         nm_new <- names(r)
         if( !is.null(R) ){
             if( !setequal(nm_is, nm_new) ){
-                etxt <- paste0("Trying to rbind table with name set {",
-                               paste0(nm_new, collapse = ", "),
-                               "} onto created table with name set {",
-                               paste0(nm_is, collapse = ", "),
-                               "} will create problems.\n")
-                warning(etxt)
+                nm_is2 <- gsub("\\.[1-9]$", "", nm_is)
+                nm_new2 <- gsub("\\.[1-9]$", "", nm_new)
+                if( !setequal(nm_is2, nm_new2) ){
+                    etxt <- paste0("Trying to rbind table with name set {",
+                                   paste0(nm_new, collapse = ", "),
+                                   "} onto created table with name set {",
+                                   paste0(nm_is, collapse = ", "),
+                                   "} will create problems.\n")
+                    warning(etxt)
+                } else {
+                    names(R) <- nm_is2   ## XK band-aid solution !
+                    names(r) <- nm_new2  ## this problem should be avoided with
+                    ## a check.names = FALSE at the right place, but where is that?
+                }
             }
         }
         R <- rbind(R, r)
