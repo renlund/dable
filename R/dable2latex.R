@@ -202,8 +202,8 @@ blatex_default <- function(bl,
     }
 
     ## display p-value info as footnotes on the values
-    if(all(c("p.info", "p") %in% names(bl))){
-        bl <- dable_fnote(bl, info = "p.info", fn.var = "p",
+    if(all(c("test.info", "test") %in% names(bl))){
+        bl <- dable_fnote(bl, info = "test.info", fn.var = "test",
                           info.attr = "info", format = TRUE, symbol = fn_n)
     }
 

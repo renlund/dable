@@ -209,10 +209,10 @@ blextable <- function(dt,
     ## establish what text to put below table, if any
     ib <- x_true_then_y_else_x(x = insert.bottom, y = attr2text(dt))
 
-    p.info <- NULL
-    if("p.info" %in% names(dt)){
-        p.info <- dt$p.info
-        dt <- dable_prune(dt, rm = "p.info")
+    test.info <- NULL
+    if("test.info" %in% names(dt)){
+        test.info <- dt$test.info
+        dt <- dable_prune(dt, rm = "test.info")
     }
 
     ## grey
@@ -226,8 +226,8 @@ blextable <- function(dt,
         Agr <- A$sorted$group
         ## insert extra rows where grouping names can fit
         dt2 <- insertNA(dt, Agr)
-        ## need to update p.info and gindex
-        p.info <- insertNA(p.info, Agr)
+        ## need to update test.info and gindex
+        test.info <- insertNA(test.info, Agr)
         gindex <- insertNA(gindex, Agr)
         gindex[is.na(gindex)] <- FALSE
         ## find index of added rows and put group names there
@@ -268,14 +268,14 @@ blextable <- function(dt,
     ft <- flextable::add_footer_lines(ft, values = paste0(ib, ". "))
 
     ## add footnotes on p-values
-    if(!is.null(p.info)){
-        tests <- unique(stats::na.omit(p.info))
+    if(!is.null(test.info)){
+        tests <- unique(stats::na.omit(test.info))
         j <- which(names(DT) == "Test")
         dummy <- FALSE
         for(i in seq_along(tests)){ ## i = 1
             t <- tests[i]
             indx <- which(!is.na(DT$Test) & DT$Test != "" &
-                          !is.na(p.info) & p.info == t)
+                          !is.na(test.info) & test.info == t)
             ft <- flextable::footnote(ft, i = indx, j = j,
                                       value = flextable::as_paragraph(t),
                                       ref_symbols = letters[i], inline = dummy)
