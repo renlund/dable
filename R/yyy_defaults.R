@@ -140,7 +140,7 @@ dable_parameters <- list(
     dable.real.comp = "real.std",
     dable.catg.comp = "catg.std",
     dable.bnry.comp = NULL,
-    dable.lcat.comp = "no.std",
+    dable.lcat.comp = "empty.std",
     dable.date.comp = "date.std",
     dable.surv.comp = "surv.std",
     ## default testers

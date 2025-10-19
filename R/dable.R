@@ -199,7 +199,7 @@ dlcat <- function(data, ...){
 ##' @param theme list of 1 or 2, args passed to \code{bl_theme}
 ##' @param ... arguments passed to \code{dable}
 ##' @export
-baseline <- function(data, theme = 0, ...){
+baseline <- function(data, theme = list(desc = 0, comp = "std"), ...){
     properties(theme, class = c("list", "numeric", "integer", "character"),
                length = 1:2, na.ok = FALSE)
     theme <- expand_list(as.list(theme), n = 2, fill = NULL)

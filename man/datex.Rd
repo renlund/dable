@@ -18,6 +18,7 @@ datex(
   rgroup = NULL,
   n.rgroup = NULL,
   insert.bottom = TRUE,
+  headers = c(comp = dpget("comp.header"), test = dpget("test.header")),
   ...
 )
 }
@@ -50,6 +51,8 @@ will be algorithmically decided}
 
 \item{insert.bottom}{character or logical; text to be placed under the
 table. If TRUE, attr2text will be used to create this text}
+
+\item{headers}{header names for comp and test part}
 
 \item{...}{arguments passed to Hmisc::latex}
 }
