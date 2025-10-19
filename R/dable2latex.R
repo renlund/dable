@@ -162,6 +162,7 @@ blatex_default <- function(bl,
     logi1(format)
     char1(list('file' = file, 'where' = where, 'count' = count))
     one_of(count, nm = "count", set = c("rows", "units", "weight"))
+    if(!is.null(kill)) properties(kill, class = "character", na.ok = FALSE)
     logi1(row.group, null.ok = TRUE)
     char1(grey, null.ok = TRUE)
     properties(insert.bottom, class = c("logical", "character"), length = 1,
@@ -177,7 +178,7 @@ blatex_default <- function(bl,
     ## if NULL set row.group to TRUE if more than 1 group
     if(is.null(row.group)) row.group <- length(unique(A$group.rle$values)) > 1
 
-    ##
+    ## fix comp column, header or footnotes
     comp_H <- dpget("comp.header")
     test_H <- dpget("test.header")
     fn_n <- 1
@@ -192,14 +193,10 @@ blatex_default <- function(bl,
             if(length(ic) == 0){
                 ## can this happen?
                 bl <- dable_prune(bl, rm = "comp.info")
-            } else if(length(ic) == 1){
-                bl <- dable_fnote(bl, info = "comp.info", fn.var = "comp",
-                                  info.attr = "info", format = TRUE, i = 1)
-                fn_n <- length(ci_u) + 1
             } else if(length(ic) > 1){
-                ## XK need to update fnote function to work on multiple columns!
-                bl <- dable_prune(bl, rm = "comp.info", info = TRUE) ## not good
-                ## if fnote, set fn_n
+                bl <- dable_fnote(bl, info = "comp.info", fn.var = "comp",
+                                  info.attr = "info", format = TRUE, symbol = 1)
+                fn_n <- length(ci_u) + 1
             }
         }
     }
@@ -207,9 +204,8 @@ blatex_default <- function(bl,
     ## display p-value info as footnotes on the values
     if(all(c("p.info", "p") %in% names(bl))){
         bl <- dable_fnote(bl, info = "p.info", fn.var = "p",
-                          info.attr = "info", format = TRUE, i = fn_n)
+                          info.attr = "info", format = TRUE, symbol = fn_n)
     }
-
 
     ## display info on summary measures as text inserted below the table
     if("Summary.info" %in% names(bl)){
@@ -568,12 +564,51 @@ concatenate_attributes <- function(x, a){
 ##' @param fn.var variable to get footnotes
 ##' @param info.attr name of attribute to store info in
 ##' @param format format the dable?
-##' @param i symbol index starting position
+##' @param symbol symbol index starting position
 ##' @importFrom stats na.omit
 ##' @export
 dable_fnote <- function(dt, info, fn.var,
+                        info.attr = "info",
+                        format = FALSE, symbol = 1){
+    i_fnvar <- which(names(dt) == fn.var)
+    j_info <- which(names(dt) == info)
+    s_counter <- symbol
+    s_add <- 0
+    for(j in j_info){
+        infot   <- unique(as.character(stats::na.omit(unlist(dt[[j]]))))
+        i.infot <- as.numeric(factor(dt[[j]], levels = infot))
+        s_add <- max(i.infot, na.rm = TRUE)
+        symb <- latex_symbols(n = s_add, pre = "$\\phantom{.}^{\\",
+                              suff = "}$", start = s_counter)
+        symb2 <- latex_symbols(n = s_add, pre = "$^{\\",
+                               suff = "}$", start = s_counter)
+        sym.infot <- paste0(symb, infot)
+        attr(dt, info.attr) <- c(attr(dt, info.attr), sym.infot)
+        for(i in i_fnvar){
+            if(format){
+                if(class(dt[[i]]) %in% c("numeric", "integer")){
+                    dt[[i]] <- do.call(dafonumb,
+                                       list(dt[[i]]))
+                } else {
+                    dt[[i]] <- do.call(dafotext,
+                                       list(x = dt[[i]],
+                                            output = "latex")) ## XK test this
+                }
+            }
+            fn_var <- dt[[i]]
+            new_var <- paste0(id_or_empty(fn_var), id_or_empty(symb2[i.infot]))
+            new_var[is.na(fn_var) | fn_var == ""] <- ""
+            dt[[i]] <- new_var
+        }
+        s_counter <- s_counter + s_add
+    }
+    dable_prune(dt, rm = info)
+}
+
+## the old version of dable_fnote:
+dable_fnote_old <- function(dt, info, fn.var,
                          info.attr = "info",
-                         format = FALSE, i = 1){
+                         format = FALSE, symbol = 1){
     if(length(info) != 1 | length(fn.var) != 1){
         stop("want 'info' and 'fn.var' to be length 1")
     }
@@ -599,9 +634,9 @@ dable_fnote <- function(dt, info, fn.var,
     infot   <- unique(as.character(stats::na.omit(unlist(dt[[info]]))))
     i.infot <- as.numeric(factor(dt[[info]], levels = infot))
     symb <- latex_symbols(n = max(i.infot, na.rm = TRUE),
-                          pre = "$\\phantom{.}^{\\", suff = "}$", start = i)
+                          pre = "$\\phantom{.}^{\\", suff = "}$", start = symbol)
     symb2 <- latex_symbols(n = max(i.infot, na.rm = TRUE),
-                           pre = "$^{\\", suff = "}$", start = i)
+                           pre = "$^{\\", suff = "}$", start = symbol)
     sym.infot <- paste0(symb, infot)
     attr(dt, info.attr) <- c(attr(dt, info.attr), sym.infot)
     fn_var <- dt[[fn.var]]
@@ -611,14 +646,17 @@ dable_fnote <- function(dt, info, fn.var,
     dable_prune(dt, rm = info)
 }
 
+
+
+
 #-#' --- itself or empty string if NA
 id_or_empty <- function(s) ifelse(is.na(s), "", s)
 
 #-#'  -- a variable to a 'footnote'
 latex_symbols <- function(n, pre = "\\", suff  = "", start = 1){
-    symb <- c("bot", "forall", "flat", "sharp", "top", "S", "bigstar", "Join",
-               "clubsuit", "diamondsuit", "spadesuit",  "heartsuit",
-               "dagger", "ast", "star", "circ", "ddagger", "bullet")
+    symb <- c( "S", "dagger", "ast", "sharp", "diamondsuit", "flat", "bot",
+              "forall", "top", "clubsuit", "spadesuit",  "heartsuit",
+              "star", "circ", "ddagger", "bullet")
     greekl <- c("alpha", "beta", "gamma", "delta", "epsilon", "varepsilon",
                 "zeta", "eta", "theta", "vartheta", "iota", "kappa", "lambda",
                 "mu", "nu", "xi", "pi", "varpi", "rho", "varrho", "sigma",

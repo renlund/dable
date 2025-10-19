@@ -4,7 +4,7 @@
 \alias{dable_fnote}
 \title{create (latex) footnotes from table variables}
 \usage{
-dable_fnote(dt, info, fn.var, info.attr = "info", format = FALSE)
+dable_fnote(dt, info, fn.var, info.attr = "info", format = FALSE, symbol = 1)
 }
 \arguments{
 \item{dt}{a dable}
@@ -16,6 +16,8 @@ dable_fnote(dt, info, fn.var, info.attr = "info", format = FALSE)
 \item{info.attr}{name of attribute to store info in}
 
 \item{format}{format the dable?}
+
+\item{symbol}{symbol index starting position}
 }
 \description{
 make \code{unique(variable)} a part of attribute 'info' and
