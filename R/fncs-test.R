@@ -58,7 +58,7 @@ NULL
 
 META_noTest <- function(bl = TRUE){
     if(bl){
-        data.frame(p = NA_real_, p.info = NA_character_)
+        data.frame(test = NA_real_, test.info = NA_character_)
     } else {
         data.frame(`no test` = NA_real_)
     }
@@ -80,7 +80,7 @@ noTest.bl <- function(x, g, ...){
     ## unusedWeightWarning(..., caller = "noTest.bl")
     META_noTest(bl = TRUE)
 }
-attr(noTest.bl, "meta") <- c("p.info")
+attr(noTest.bl, "meta") <- c("test.info")
 
 ## ------------------------------------------------------------------------ real
 
@@ -105,9 +105,9 @@ META_param <- function(x, g, bl = TRUE, ...){
                        caller = "META_param")
     }
     if(bl){
-       data.frame(p = p, p.info = p.info)
+       data.frame(test = p, test.info = p.info)
     } else{
-        r <- data.frame(p = p)
+        r <- data.frame(test = p)
         names(r) <- p.info
         r
     }
@@ -129,9 +129,9 @@ META_nonparam <- function(x, g, bl = TRUE, ...){
         p.info <- "Kruskal-Wallis"
     }
     if(bl){
-        data.frame(p = p, p.info = p.info)
+        data.frame(test = p, test.info = p.info)
     } else {
-        r <- data.frame(p = p)
+        r <- data.frame(test = p)
         names(r) <- p.info
         r
     }
@@ -144,7 +144,6 @@ param <- function(x, g, ...){
     unusedWeightWarning(..., caller = "param")
     META_param(x = x, g = g, bl = FALSE, ...)
 }
-## attr(param, "part") <- "test"
 
 ##' @rdname test-real
 ##' @description param.bl: parametric test via linear model (for baseline tables)
@@ -153,7 +152,7 @@ param.bl <- function(x, g, ...){
     unusedWeightWarning(..., caller = "param.bl")
     META_param(x = x, g = g, bl = TRUE, ...)
 }
-attr(param.bl, "meta") <- c("p.info")
+attr(param.bl, "meta") <- c("test.info")
 
 ##' @rdname test-real
 ##' @description nonparam: non-parametric test
@@ -162,7 +161,6 @@ nonparam <- function(x, g, ...){
     unusedWeightWarning(..., caller = "nonparam")
     META_nonparam(x = x, g = g, bl = FALSE, ...)
 }
-## attr(nonparam, "label") <- "p"
 
 ##' @rdname test-real
 ##' @description nonparam.bl: non-parametric test (for baseline tables)
@@ -171,7 +169,7 @@ nonparam.bl <- function(x, g, ...){
     unusedWeightWarning(..., caller = "nonparam.bl")
     META_nonparam(x = x, g = g, bl = TRUE, ...)
 }
-attr(nonparam.bl, "meta") <- c("p.info")
+attr(nonparam.bl, "meta") <- c("test.info")
 
 ## ------------------------------------------------------------------------ catg
 
@@ -185,7 +183,7 @@ attr(nonparam.bl, "meta") <- c("p.info")
 ##' @name test-catg
 NULL
 
-META_chisq <- function(x, g, bl = TRUE, ..., catg.full.length = FALSE){
+META_chisq <- function(x, g, bl = TRUE, ...){
     g <- factor(g)
     n_lev <- length(levels(g))
     p <- NA_real_
@@ -196,15 +194,10 @@ META_chisq <- function(x, g, bl = TRUE, ..., catg.full.length = FALSE){
                        caller = "META_chisq")
         p.info <- "Chi-square"
     }
-    if(catg.full.length){
-        k <- length(levels(as.factor(x)))
-        p <- c(p, rep(NA, max(k-1,0)))
-        if(bl) p.info <- c(p.info, rep(NA, max(k-1,0)))
-    }
     if(bl){
-        data.frame(p = p, p.info = p.info)
+        data.frame(test = p, test.info = p.info)
     } else {
-        r <- data.frame(p = p)
+        r <- data.frame(test = p)
         names(r) <- "p"
         r
     }
@@ -215,7 +208,7 @@ META_chisq <- function(x, g, bl = TRUE, ..., catg.full.length = FALSE){
 ##' @export
 catg.chisq <- function(x, g, ...){
     unusedWeightWarning(..., caller = "catg.chisq")
-    META_chisq(x = x, g = g, bl = FALSE, ..., catg.full.length = FALSE)
+    META_chisq(x = x, g = g, bl = FALSE, ...)
 }
 
 ##' @rdname test-catg
@@ -223,9 +216,9 @@ catg.chisq <- function(x, g, ...){
 ##' @export
 catg.chisq.bl <- function(x, g, ...){
     unusedWeightWarning(..., caller = "catg.chisq.bl")
-    META_chisq(x = x, g = g, bl = TRUE, ..., catg.full.length = FALSE)
+    META_chisq(x = x, g = g, bl = TRUE, ...)
 }
-attr(catg.chisq.bl, "meta") <- c("p.info")
+attr(catg.chisq.bl, "meta") <- c("test.info")
 
 
 ## ------------------------------------------------------------------------ date
@@ -256,7 +249,7 @@ date.nonparam.bl <- function(x, g, ...){
     unusedWeightWarning(..., caller = "date.nonparam.bl")
     META_nonparam(x = as.integer(x), g = g, bl = TRUE, ...)
 }
-attr(nonparam, "meta") <- c("p.info")
+attr(nonparam, "meta") <- c("test.info")
 
 ## ------------------------------------------------------------------------ surv
 
@@ -286,7 +279,7 @@ attr(logrank, "label") <- "Logrank"
 ##' @export
 logrank.bl <- function(time, event, g, ...){
     unusedWeightWarning(..., caller = "logrank.bl")
-    data.frame(p = logrank(time, event, g, ...),
-               p.info = "Log rank")
+    data.frame(test = logrank(time, event, g, ...),
+               test.info = "Log rank")
 }
-attr(logrank.bl, "meta") <- c("p.info")
+attr(logrank.bl, "meta") <- c("test.info")

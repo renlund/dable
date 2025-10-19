@@ -5,8 +5,10 @@
 \alias{bnry.std}
 \alias{bnry.diff}
 \alias{risk_ratio}
+\alias{risk_ratio.bl}
 \alias{odds_ratio}
-\title{'bnry' comparers}
+\alias{odds_ratio.bl}
+\title{'lcat' comparers}
 \usage{
 bnry.std(x, g, weight = NULL, ...)
 
@@ -14,7 +16,11 @@ bnry.diff(x, g, weight = NULL, ...)
 
 risk_ratio(x, g, weight = NULL, ...)
 
+risk_ratio.bl(x, g, weight = NULL, ...)
+
 odds_ratio(x, g, weight = NULL, ...)
+
+odds_ratio.bl(x, g, weight = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -26,6 +32,8 @@ odds_ratio(x, g, weight = NULL, ...)
 \item{...}{arguments passed}
 }
 \description{
+functions to compare lcat variables
+
 functions to compare bnry variables
 
 bnry.std: (weighted) standardized difference for 'bnry'
@@ -34,5 +42,9 @@ bnry.diff: (weighted) risk difference
 
 risk_ratio: (weighted) risk ratio
 
+risk_ratio.bl: (weighted) risk ratio (baseline)
+
 odds_ratio: (weighted) odds ratio
+
+odds_ratio.bl: (weighted) odds ratio (baseline)
 }

@@ -6,9 +6,9 @@
 \alias{catg.diff}
 \title{'catg' comparers}
 \usage{
-catg.std(x, g, weight = NULL, catg.full.length = FALSE, ...)
+catg.std(x, g, weight = NULL, ...)
 
-catg.diff(x, g, weight = NULL, catg.full.length = FALSE, ...)
+catg.diff(x, g, weight = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -17,15 +17,12 @@ catg.diff(x, g, weight = NULL, catg.full.length = FALSE, ...)
 
 \item{weight}{case weight}
 
-\item{catg.full.length}{logical; return dimension equal to the input (is
-this EVER wanted?)}
-
 \item{...}{arguments passed}
 }
 \description{
 functions to compare catg variables
 
-catg.std: (weighted) standardized difference for 'catg'
+catg.std: (weighted) 'catg' standardized difference
 
 catg.diff: (weighted) difference in proportion
 }

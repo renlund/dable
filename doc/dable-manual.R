@@ -349,11 +349,29 @@ b <- baseline(d2, theme = 2, guide = g2, gtab = "gender", part = c(T,T,T))
 blatex(b, caption = "Baseline table theme 2.",
        label = "tab:bsl-2", size = "small")
 
-## ----"adjusted-baseline-0", results = 'asis', message = FALSE-----------------
+## ----"adjusted-baseline-1", results = 'asis', message = FALSE-----------------
 gt <- gtab_maker("gender", data = d2, all = TRUE, all.first = TRUE)
 b <- baseline(d2, theme = 0, guide = g2, gtab = gt,
-                   part = list(T, F, c(2,3)))
-blatex(b, label = "tab:adj-bsl", caption = "Adjusted baseline table")
+              part = list(T, F, c(2,3)))
+blatex(b, label = "tab:adj-bsl-1", caption = "Adjusted baseline table")
+
+## ----"adjusted-baseline-2", results = 'asis', message = FALSE, message = FALSE, warning = FALSE----
+rm(b)
+b <- baseline(d2, theme = list(0, "diff"), guide = g2, gtab = "gender",
+              part = list(T, T, T))
+blatex(b, label = "tab:adj-bsl-2", caption = "Another adjusted baseline table")
+
+## ----"adjusted-baseline-3", results = 'asis', message = FALSE, message = FALSE, warning = FALSE----
+
+dpset("bnry.comp.bl", "odds_ratio.bl")
+g3 <- g2
+g3$type[g3$term == "gender"] <- "bnry"
+b <- baseline(d2, guide = g3, gtab = "region",
+              part = list(desc = 1,
+                          comp = list(c(1,2), c(1,3)),
+                          test = 1:3))
+blatex(b, label = "tab:adj-bsl-3", caption = "Yet another adjusted baseline table")
+dpset_defaults(overwrite = TRUE)
 
 ## ----"prune-1"----------------------------------------------------------------
 foo <- function(x, ...){
@@ -392,7 +410,7 @@ datex(dt2, label = "tab:fnote-added", row.group = FALSE,
 
 ## ----"tidy-baseline", message = FALSE-----------------------------------------
 b <- baseline(d, theme = 0, guide = g, gtab = "gender", part = c(T,T,T))
-str(subset(b))
+str(subset(b)) ## subset used here only to strip all the attributes
 
 ## ----"test-default-describers"------------------------------------------------
 dable(d, type = "real", guide = g)

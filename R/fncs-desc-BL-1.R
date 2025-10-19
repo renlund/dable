@@ -1,26 +1,42 @@
 ##' set baseline functions
 ##'
 ##' Quickly set baseline functions to some predefined set of functions.
-##' @param desc the 'theme' for descriptives
-##' @param comp the 'theme' for comparisons (not yet implemented)
+##' @param desc the 'theme' for descriptives (0,1,2)
+##' @param comp the 'theme' for comparisons (std, diff)
 ##' @param test the 'theme' for testers (not yet implemented)
 ##' @export
-bl_theme <- function(desc = "default", comp = NULL, test = NULL){
+bl_theme <- function(desc = 0, comp = "std", test = NULL){
     param <- dpget_all()
-    properties(desc, class = c("character", "numeric"), length = 1, na.ok = FALSE)
-    if(!is.null(comp) || !is.null(test)){
-        s <- paste0("options for 'comp' and 'test' not yet implemented")
+    if(!is.null(desc)){
+        properties(desc, class = c("character", "numeric"),
+                   length = 1, na.ok = FALSE)
+        one_of(as.character(desc), nm = "'desc'",
+               set = c("0", "default", "1", "2"))
+    }
+    if(!is.null(comp)){
+        properties(comp, class = c("character"), length = 1, na.ok = FALSE)
+        one_of(comp, nm = "'comp'", set = c("std", "diff"))
+    }
+    if(!is.null(test)){
+        s <- paste0("options for 'test' not yet implemented")
         warning(s)
     }
     types <- c("real", "bnry", "catg", "lcat", "date", "surv")
-    d <- if(is.character(desc)){
-             switch(desc,
-                    "default" = 0)
-         } else desc
-    x <- sprintf(paste0("%s.bl", d), types)
-    p <- sprintf("%s.desc.bl", types)
-    for(i in seq_along(x)) dpset(param = p[i], value = x[i])
+    if(!is.null(desc)){
+        d <- if(is.character(desc)){
+                 switch(desc,
+                        "default" = 0)
+             } else desc
+        x <- sprintf(paste0("%s.bl", d), types)
+        p <- sprintf("%s.desc.bl", types)
+        for(i in seq_along(x)) dpset(param = p[i], value = x[i])
+    }
+    if(!is.null(comp)){
+        x <- sprintf(paste0("%s.", comp, ".bl"), types)
+        p <- sprintf("%s.comp.bl", types)
+        for(i in seq_along(x)) dpset(param = p[i], value = x[i])
 
+    }
     invisible(param)
 }
 
@@ -71,11 +87,11 @@ real.bl0 <- function(x, weight = NULL, ...){
          }
     si <- "Numeric variable: Median (Q1-Q3)"
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 
 }
-attr(real.bl0, "meta") <- c("Variable", "Summary.info")
+attr(real.bl0, "meta") <- c("Variable", "desc.info")
 
 ##' @rdname baseline-standard
 ##' @details real.bl1: (weighted) mean and standard deviation
@@ -90,10 +106,10 @@ real.bl1 <- function(x, weight = NULL, ...){
          }
     si <- "Numeric variable: Mean (SD)"
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(real.bl1, "meta") <- c("Summary.info", "Variable")
+attr(real.bl1, "meta") <- c("desc.info", "Variable")
 
 ##' @rdname baseline-standard
 ##' @details bnry.bl0/1: (weighted) count and percent of
@@ -111,10 +127,10 @@ bnry.bl0 <- function(x, weight = NULL, ...){
          }
     si <- "Categorical variable: Count (Percent)"
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(bnry.bl0, "meta") <- c("Variable", "Summary.info")
+attr(bnry.bl0, "meta") <- c("Variable", "desc.info")
 bnry.bl1 <- bnry.bl0
 
 ##' @rdname baseline-standard
@@ -133,10 +149,10 @@ catg.bl0 <- function(x, weight = NULL, ...){
          }
     si <- "Categorical variable: Count (Percent)"
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(catg.bl0, "meta") <- c("Variable", "Summary.info")
+attr(catg.bl0, "meta") <- c("Variable", "desc.info")
 catg.bl1 <- catg.bl0
 
 ##' @rdname baseline-standard
@@ -148,10 +164,10 @@ lcat.bl0 <- function(x, ...){
     s <- if(is.na(r) || is.null(r) || length(r) == 0) "" else sprintf("=%s=", r)
     si <- "Categorical variable: =unique values="
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(lcat.bl0, "meta") <- c("Variable", "Summary.info")
+attr(lcat.bl0, "meta") <- c("Variable", "desc.info")
 lcat.bl1 <- lcat.bl0
 
 ##' @rdname baseline-standard
@@ -167,10 +183,10 @@ date.bl0 <- function(x, date.format = dpget("date.format"), ...){
                  changeNA(format(r$Max, format = date.format)))
     si <- "Date variables: min/max"
     data.frame(Variable = di.Variable(x, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(date.bl0, "meta") <- c("Variable", "Summary.info")
+attr(date.bl0, "meta") <- c("Variable", "desc.info")
 date.bl1 <- date.bl0
 
 ##' @rdname baseline-standard
@@ -185,8 +201,8 @@ surv.bl0 <- function(time, event, weight = NULL, time.unit = NULL, ...){
                  changeNA(dafonumb1(r$Rate)))
     si <- "Time-to-event variable: events; rate"
     data.frame(Variable = di.Variable(event, ...),
-               Summary = NA_desc_append(s, n.na),
-               Summary.info = NA_info_append(si, n.na))
+               desc = NA_desc_append(s, n.na),
+               desc.info = NA_info_append(si, n.na))
 }
-attr(surv.bl0, "meta") <- c("Variable", "Summary.info")
+attr(surv.bl0, "meta") <- c("Variable", "desc.info")
 surv.bl1 <- surv.bl0

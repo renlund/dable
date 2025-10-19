@@ -5,8 +5,11 @@
 \alias{surv.std}
 \alias{surv.diff}
 \alias{rate_ratio}
+\alias{rate_ratio.bl}
 \alias{hazard_ratio}
+\alias{hazard_ratio.bl}
 \alias{hr_ci}
+\alias{hr_ci.bl}
 \title{'surv' comparers}
 \usage{
 surv.std(time, event, g, weight = NULL, ...)
@@ -15,9 +18,15 @@ surv.diff(time, event, g, weight = NULL, ...)
 
 rate_ratio(time, event, g, weight = NULL, ...)
 
+rate_ratio.bl(time, event, g, weight = NULL, ...)
+
 hazard_ratio(time, event, g, weight = NULL, ...)
 
+hazard_ratio.bl(time, event, g, weight = NULL, ...)
+
 hr_ci(time, event, g, weight = NULL, ...)
+
+hr_ci.bl(time, event, g, weight = NULL, ...)
 }
 \arguments{
 \item{time}{time component of time-to-event variable}
@@ -33,10 +42,16 @@ hr_ci(time, event, g, weight = NULL, ...)
 \description{
 functions to compare surv variables
 
-surv.std: (weighted) standardized difference for
-'surv'
+surv.std: (weighted) standardized difference for 'surv'
 
 surv.diff: (weighted) rate difference for 'surv'
+
+rate_ratio.bl: ratio of the (weighted) rates (baseline)
+
+hazard_ratio.bl: (weighted) hazard ratio (baseline)
+
+hr_ci.bl: (weighted) hazard ratio and confidence interval (baseline)
+
 }
 \details{
 rate_ratio: ratio of the (weighted) rates

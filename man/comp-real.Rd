@@ -4,14 +4,11 @@
 \alias{comp-real}
 \alias{real.std}
 \alias{real.diff}
-\alias{no.std}
 \title{'real' comparers}
 \usage{
 real.std(x, g, weight = NULL, ...)
 
 real.diff(x, g, weight = NULL, ...)
-
-no.std(x, g, weight = NULL, ...)
 }
 \arguments{
 \item{x}{input vector}
@@ -29,5 +26,5 @@ real.std: (weighted) standardized difference for 'real'
 
 real.diff: (weighted) difference in mean value
 
-no.std: no standardized difference calculated
+real.diff: (weighted) difference in mean value
 }

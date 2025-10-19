@@ -1,5 +1,56 @@
-.stddiff <- function() "Std. diff."
 .diff <- function() "Difference"
+.stddiff <- function() "Standardized difference"
+.stddiff_abbr <- function() "Std. diff."
+
+compBaser <- function(fnc, info = NULL, ...){
+    if(is.null(info)) info <- attr(fnc, "label")
+    data.frame(comp = fnc(...),
+               comp.info = info)
+}
+
+## --------------------------------------------------------------------- general
+
+##' general comparers
+##'
+##' functions to compare any variables
+##' @param x input vector
+##' @param weight case weight
+##' @param g grouping variable
+##' @param ... arguments passed
+##' @name comp-all
+NULL
+
+##' @rdname comp-all
+##' @description empty.std: empty standardized difference calculated
+##' @export
+empty.std <- function(...){
+    NA_real_
+}
+attr(empty.std, "label") <- .stddiff_abbr()
+
+##' @rdname comp-all
+##' @description empty.std.bl: empty standardized difference calculated (for baseline tables)
+##' @export
+empty.std.bl <- function(...){
+    data.frame(comp = NA_real_, comp.info = .stddiff())
+}
+attr(empty.std.bl, "meta") <- "comp.info"
+
+##' @rdname comp-all
+##' @description empty.diff: empty standardized difference calculated
+##' @export
+empty.diff <- function(...){
+    NA_real_
+}
+attr(empty.diff, "label") <- .diff()
+
+##' @rdname comp-all
+##' @description empty.diff.bl: empty standardized difference calculated (for baseline tables)
+##' @export
+empty.diff.bl <- function(...){
+    data.frame(comp = NA_real_, comp.info = .diff())
+}
+attr(empty.diff.bl, "meta") <- "comp.info"
 
 ## ------------------------------------------------------------------------ real
 
@@ -14,7 +65,7 @@
 NULL
 
 ##' @rdname comp-real
-##' @description real.std: (weighted) standardized difference for 'real'
+##' @description real.std: (weighted) 'real' standardized difference
 ##' @export
 real.std <- function(x, g, weight = NULL, ...){
     if(!is.factor(g)) g <- factor(g)
@@ -25,7 +76,8 @@ real.std <- function(x, g, weight = NULL, ...){
         sqrt( (d.sd(x = x[x_i], weight = weight[x_i])^2 +
                d.sd(x = x[y_i], weight = weight[y_i])^2  ) / 2 )
 }
-attr(real.std, "label") <- .stddiff()
+attr(real.std, "label") <- .stddiff_abbr()
+
 
 ##' @rdname comp-real
 ##' @description real.diff: (weighted) difference in mean value
@@ -39,13 +91,13 @@ real.diff <- function(x, g, weight = NULL, ...){
 }
 attr(real.diff, "label") <- .diff()
 
-##' @rdname comp-real
-##' @description no.std: no standardized difference calculated
-##' @export
-no.std <- function(x, g, weight = NULL, ...){
-    NA_real_
-}
-attr(no.std, "label") <- .stddiff()
+## ##' @rdname comp-real
+## ##' @description real.diff.bl: (weighted) difference in mean value (for baseline tables)
+## ##' @export
+## real.diff.bl <- function(x, g, weight = NULL, ...){
+##     compBaser(real.diff, x = x, g = g, weight = weight, bl = TRUE)
+## }
+## attr(real.diff.bl, "meta") <- "comp.info"
 
 ## ------------------------------------------------------------------------ catg
 
@@ -55,17 +107,15 @@ attr(no.std, "label") <- .stddiff()
 ##' @param x input vector
 ##' @param g grouping variable
 ##' @param weight case weight
-##' @param catg.full.length logical; return dimension equal to the input (is
-##'     this EVER wanted?)
 ##' @param ... arguments passed
 ##' @importFrom MASS ginv
 ##' @name comp-catg
 NULL
 
 ##' @rdname comp-catg
-##' @description catg.std: (weighted) standardized difference for 'catg'
+##' @description catg.std: (weighted) 'catg' standardized difference
 ##' @export
-catg.std <- function(x, g, weight = NULL, catg.full.length = FALSE, ...){
+catg.std <- function(x, g, weight = NULL, ...){
     if(!is.factor(g)) g <- factor(g)
     x_i <- g == levels(g)[1]
     y_i <- g == levels(g)[2]
@@ -95,22 +145,55 @@ catg.std <- function(x, g, weight = NULL, catg.full.length = FALSE, ...){
          } else{
              sqrt(t(p1-p2) %*% INV %*% (p1-p2))
          }
-    if(catg.full.length) c(STDD, rep(NA, max(k-1,0))) else as.numeric(STDD)
+    as.numeric(STDD)
 }
-attr(catg.std, "label") <- .stddiff()
+attr(catg.std, "label") <- .stddiff_abbr()
+
 
 ##' @rdname comp-catg
 ##' @description catg.diff: (weighted) difference in proportion
 ##' @export
-catg.diff <- function(x, g, weight = NULL, catg.full.length = FALSE, ...){
+catg.diff <- function(x, g, weight = NULL, ...){
     if(!is.factor(g)) g <- factor(g)
     x_i <- g == levels(g)[1]
     y_i <- g == levels(g)[2]
-    p1 <- catg.count_prop(x = x[x_i], weight = weight[x_i])[["Proportion"]]
-    p2 <- catg.count_prop(x = x[y_i], weight = weight[y_i])[["Proportion"]]
-    p1 - p2
+    p1 <- catg.count_prop(x = x[x_i], weight = weight[x_i])#[["Proportion"]]
+    p2 <- catg.count_prop(x = x[y_i], weight = weight[y_i])#[["Proportion"]]
+    R <- data.frame(Variable = di.Variable(x, ...),
+                    B = p1$Proportion - p2$Proportion)
+    names(R)[2] <- .diff()
+    R
 }
-attr(catg.diff, "label") <- .diff()
+attr(catg.diff, "meta") <- "Variable"
+
+## ##' @rdname comp-catg
+## ##' @description catg.diff: (weighted) difference in proportion for baseline table
+## ##' @export
+## catg.diff.bl <- function(x, g, weight = NULL, ...){
+##     R <- catg.diff(x = x, g = g, weight = weight, ...)
+##     R$B = .diff()
+##     names(R)[2:3] <- c("comp", "comp.info")
+##     R
+## }
+## attr(catg.diff.bl, "meta") <- "Variable"
+
+## ------------------------------------------------------------------------ bnry
+
+##' 'lcat' comparers
+##'
+##' functions to compare lcat variables
+##' @param x input vector
+##' @param weight case weight
+##' @param g grouping variable
+##' @param ... arguments passed
+##' @name comp-bnry
+NULL
+
+lcat.std <- empty.std
+## lcat.std.bl <- empty.std.bl
+lcat.diff <- empty.diff
+##lcat.diff.bl <- empty.diff.bl
+
 
 
 ## ------------------------------------------------------------------------ bnry
@@ -125,6 +208,7 @@ attr(catg.diff, "label") <- .diff()
 ##' @name comp-bnry
 NULL
 
+
 ##' @rdname comp-bnry
 ##' @description bnry.std: (weighted) standardized difference for 'bnry'
 ##' @export
@@ -136,7 +220,8 @@ bnry.std <- function(x, g, weight = NULL, ...){
     p2 <- bnry.count_prop(x = x[y_i], weight = weight[y_i])[["Proportion"]]
     (p1 - p2) / sqrt((p1*(1-p1) + p2*(1-p2)) / 2)
 }
-attr(bnry.std, "label") <- .stddiff()
+attr(bnry.std, "label") <- .stddiff_abbr()
+
 
 ##' @rdname comp-bnry
 ##' @description bnry.diff: (weighted) risk difference
@@ -151,6 +236,13 @@ bnry.diff <- function(x, g, weight = NULL, ...){
 }
 attr(bnry.diff, "label") <- .diff()
 
+## ##' @rdname comp-bnry
+## ##' @description bnry.diff.bl: (weighted) risk difference (baseline)
+## ##' @export
+## bnry.diff.bl <- function(x, g, weight = NULL, ...){
+##     compBaser(bnry.diff, x = x, g = g, weight = weight)
+## }
+## attr(bnry.diff.bl, "meta") <- "comp.info"
 
 ##' @rdname comp-bnry
 ##' @description risk_ratio: (weighted) risk ratio
@@ -166,6 +258,14 @@ risk_ratio <- function(x, g, weight = NULL, ...){
 attr(risk_ratio, "label") <- "Risk ratio"
 
 ##' @rdname comp-bnry
+##' @description risk_ratio.bl: (weighted) risk ratio (baseline)
+##' @export
+risk_ratio.bl <- function(x, g, weight = NULL, ...){
+    compBaser(risk_ratio, x = x, g = g, weight = weight)
+}
+attr(risk_ratio.bl, "meta") <- "comp.info"
+
+##' @rdname comp-bnry
 ##' @description odds_ratio: (weighted) odds ratio
 ##' @export
 odds_ratio <- function(x, g, weight = NULL, ...){
@@ -178,6 +278,13 @@ odds_ratio <- function(x, g, weight = NULL, ...){
 }
 attr(odds_ratio, "label") <- "Odds ratio"
 
+##' @rdname comp-bnry
+##' @description odds_ratio.bl: (weighted) odds ratio (baseline)
+##' @export
+odds_ratio.bl <- function(x, g, weight = NULL, ...){
+    compBaser(odds_ratio, x = x, g = g, weight = weight)
+}
+attr(odds_ratio.bl, "meta") <- "comp.info"
 
 ## ------------------------------------------------------------------------ date
 
@@ -198,7 +305,8 @@ NULL
 date.std <- function(x, g, weight = NULL, ...){
     real.std(x = as.integer(x), g = g, weight = weight)
 }
-attr(date.std, "label") <- .stddiff()
+attr(date.std, "label") <- .stddiff_abbr()
+
 
 ##' @rdname comp-date
 ##' @description date.diff: (weighted) difference for 'date' ( = real.diff
@@ -208,6 +316,15 @@ date.diff <- function(x, g, weight = NULL, ...){
     real.diff(x = as.integer(x), g = g, weight = weight)
 }
 attr(date.diff, "label") <- .diff()
+
+## ##' @rdname comp-date
+## ##' @description date.diff.bl: (weighted) difference for 'date' ( = real.diff
+## ##'     applied to x interpreted as an integer)
+## ##' @export
+## date.diff.bl <- function(x, g, weight = NULL, ...){
+##     compBaser(date.diff, x = x, g = g, weight = weight)
+## }
+## attr(date.diff.bl, "meta") <- "comp.info"
 
 ## ------------------------------------------------------------------------ surv
 
@@ -223,8 +340,7 @@ attr(date.diff, "label") <- .diff()
 NULL
 
 ##' @rdname comp-surv
-##' @description surv.std: (weighted) standardized difference for
-##' 'surv'
+##' @description surv.std: (weighted) standardized difference for 'surv'
 ##' @export
 surv.std <- function(time, event, g, weight = NULL, ...){
     if(!is.factor(g)) g <- factor(g)
@@ -236,7 +352,8 @@ surv.std <- function(time, event, g, weight = NULL, ...){
     t2 <- d.sum(x = time[y_i], weight = weight[y_i])
     (n1 / t1 - n2 / t2) / sqrt((n1 / t1 + n2 / t2) / 2)
 }
-attr(surv.std, "label") <- .stddiff()
+attr(surv.std, "label") <- .stddiff_abbr()
+
 
 ##' @rdname comp-surv
 ##' @description surv.diff: (weighted) rate difference for 'surv'
@@ -253,6 +370,15 @@ surv.diff <- function(time, event, g, weight = NULL, ...){
 }
 attr(surv.diff, "label") <- .diff()
 
+## ##' @rdname comp-surv
+## ##' @description surv.diff.bl: (weighted) difference for 'surv' (baseline)
+## ##' @export
+## surv.diff.bl <- function(time, event, g, weight = NULL, ...){
+##     compBaser(surv.diff, time = time, event = event,
+##               g = g, weight = weight)
+## }
+## attr(surv.diff.bl, "meta") <- "comp.info"
+
 ##' @rdname comp-surv
 ##' @details rate_ratio: ratio of the (weighted) rates
 ##' @export
@@ -267,6 +393,14 @@ rate_ratio <- function(time, event, g, weight = NULL, ...){
 attr(rate_ratio, "label") <- "Rate ratio"
 
 ##' @rdname comp-surv
+##' @description rate_ratio.bl: ratio of the (weighted) rates (baseline)
+##' @export
+rate_ratio.bl <- function(time, event, g, weight = NULL, ...){
+    compBaser(rate_ratio, time = time, event = event, g = g, weight = weight)
+}
+attr(rate_ratio.bl, "meta") <- "comp.info"
+
+##' @rdname comp-surv
 ##' @details hazard_ratio: (weighted) hazard ratio
 ##' @export
 hazard_ratio <- function(time, event, g, weight = NULL, ...){
@@ -276,6 +410,14 @@ hazard_ratio <- function(time, event, g, weight = NULL, ...){
     as.numeric(exp(mod$coefficients)[1])
 }
 attr(hazard_ratio, "label") <- "Hazard ratio"
+
+##' @rdname comp-surv
+##' @description hazard_ratio.bl: (weighted) hazard ratio (baseline)
+##' @export
+hazard_ratio.bl <- function(time, event, g, weight = NULL, ...){
+    compBaser(hazard_ratio, time = time, event = event, g = g, weight = weight)
+}
+attr(hazard_ratio.bl, "meta") <- "comp.info"
 
 ##' @rdname comp-surv
 ##' @details hr_ci:  (weighted) hazard ratio and confidence interval
@@ -288,3 +430,11 @@ hr_ci <- function(time, event, g, weight = NULL, ...){
     do.call(sprintf, args = c(list(fmt = "%s (%s-%s)"), as.list(dafonumb(v))))
 }
 attr(hr_ci, "label") <- "Hazard Ratio"
+
+##' @rdname comp-surv
+##' @description hr_ci.bl: (weighted) hazard ratio and confidence interval (baseline)
+##' @export
+hr_ci.bl <- function(time, event, g, weight = NULL, ...){
+    compBaser(hr_ci, time = time, event = event, g = g, weight = weight)
+}
+attr(hr_ci.bl, "meta") <- "comp.info"

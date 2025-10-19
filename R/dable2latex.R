@@ -18,6 +18,7 @@
 ##' @param n.rgroup integer; argument for Hmisc::latex
 ##' @param insert.bottom character or logical; text to be placed under the
 ##'     table. If TRUE, attr2text will be used to create this text
+##' @param headers header names for comp and test part
 ##' @param ... arguments passed to Hmisc::latex
 ##' @importFrom Hmisc latex latexTranslate
 ##' @export
@@ -34,6 +35,8 @@ datex <- function(dt,
                   rgroup = NULL,
                   n.rgroup = NULL,
                   insert.bottom = TRUE,
+                  headers = c(comp = dpget("comp.header"),
+                              test = dpget("test.header")),
                   ...){
     Dots <- list(...) ## Dots <- list()
     properties(format, nm = "format", class = "logical", length = 1, na.ok = FALSE)
@@ -44,6 +47,7 @@ datex <- function(dt,
     one_of(count, nm = "count", set = c("rows", "units", "weight"))
     properties(rowname, nm = "rowname", class = c("NULL", "character"),
                length = 0:1, na.ok = FALSE)
+    properties(headers, class = "character", length = 2, na.ok = FALSE)
     Guide <- attr(dt, "guide")
     Term <- with(Guide, ifelse(type == "surv", label, term))
     a <- align(dt$term, template = Term, group = Guide$group,
@@ -54,22 +58,6 @@ datex <- function(dt,
     Ntxt <- attr2n(attributes(dt), count)
     BL <- attr(dt, "type") == "baseline"
     if(BL){
-        ## if("Variable" %in% names(dt)){
-        ##     rowname <- "Variable"
-        ##     kill <- c(kill, "term")
-        ## } else rowname <- "term"
-        ## if(is.null(row.group)) row.group <- length(unique(a$group.rle$values)) > 1
-        ## if(bl.method == "standard"){
-        ##     if(all(c("p.info", "p") %in% names(dt))){
-        ##         dt <- dable_fnote(dt, info = "p.info", fn.var = "p",
-        ##                           info.attr = "info", format = TRUE)
-        ##     }
-        ##     if("Summary.info" %in% names(dt)){
-        ##         dt <- dable_prune(dt, rm = "Summary.info", info = TRUE,
-        ##                           info.attr = "info", info.unique = TRUE,
-        ##                           split.unique = TRUE)
-        ##     }
-        ## }
         w <- paste0("[datex] you've called datex with a baseline table - ",
                     "it is better to use blatex or blatex_default")
         message(w)
@@ -106,7 +94,8 @@ datex <- function(dt,
     DT <- dt
     for(k in unique(c(kill, rowname))) DT <- dable_prune(DT, rm = k)
     Part <- attr(DT, "part")
-    Hh <- part2head(Part, names(DT), BL, Ntxt)
+    Hh <- part2head(Part, names(DT), BL, Ntxt,
+                    comp.header = headers[1], test.header = headers[2])
     names(DT) <- Hh$h
     cg <- rle(Hh$H)
     if("term" %in% names(DT) & t2l){
@@ -173,6 +162,7 @@ blatex_default <- function(bl,
     logi1(format)
     char1(list('file' = file, 'where' = where, 'count' = count))
     one_of(count, nm = "count", set = c("rows", "units", "weight"))
+    if(!is.null(kill)) properties(kill, class = "character", na.ok = FALSE)
     logi1(row.group, null.ok = TRUE)
     char1(grey, null.ok = TRUE)
     properties(insert.bottom, class = c("logical", "character"), length = 1,
@@ -188,15 +178,38 @@ blatex_default <- function(bl,
     ## if NULL set row.group to TRUE if more than 1 group
     if(is.null(row.group)) row.group <- length(unique(A$group.rle$values)) > 1
 
+    ## fix comp column, header or footnotes
+    comp_H <- dpget("comp.header")
+    test_H <- dpget("test.header")
+    fn_n <- 1
+    if("comp.info" %in% names(bl)){
+        tmp <- bl$comp.info
+        ci_u <- unique(tmp[!is.na(tmp)])
+        if(length(ci_u) == 1){
+            comp_H <- if(ci_u == .stddiff()) .stddiff_abbr() else ci_u
+            bl <- dable_prune(bl, rm = "comp.info")
+        } else {
+            ic <- which(names(bl) == "comp")
+            if(length(ic) == 0){
+                ## can this happen?
+                bl <- dable_prune(bl, rm = "comp.info")
+            } else if(length(ic) > 1){
+                bl <- dable_fnote(bl, info = "comp.info", fn.var = "comp",
+                                  info.attr = "info", format = TRUE, symbol = 1)
+                fn_n <- length(ci_u) + 1
+            }
+        }
+    }
+
     ## display p-value info as footnotes on the values
-    if(all(c("p.info", "p") %in% names(bl))){
-        bl <- dable_fnote(bl, info = "p.info", fn.var = "p",
-                          info.attr = "info", format = TRUE)
+    if(all(c("test.info", "test") %in% names(bl))){
+        bl <- dable_fnote(bl, info = "test.info", fn.var = "test",
+                          info.attr = "info", format = TRUE, symbol = fn_n)
     }
 
     ## display info on summary measures as text inserted below the table
-    if("Summary.info" %in% names(bl)){
-        bl <- dable_prune(bl, rm = "Summary.info", info = TRUE,
+    if("desc.info" %in% names(bl)){
+        bl <- dable_prune(bl, rm = "desc.info", info = TRUE,
                           info.attr = "info", info.unique = TRUE,
                           split.unique = TRUE)
     }
@@ -218,7 +231,9 @@ blatex_default <- function(bl,
     Hh <- part2head(part = attr(BL, "part"),
                     cnm = names(BL),
                     bl = TRUE,
-                    ntxt = attr2n(attributes(bl), count))
+                    ntxt = attr2n(attributes(bl), count),
+                    comp.header = comp_H,
+                    test.header = test_H)
     names(BL) <- Hh$h
     cg <- rle(Hh$H)
 
@@ -549,11 +564,51 @@ concatenate_attributes <- function(x, a){
 ##' @param fn.var variable to get footnotes
 ##' @param info.attr name of attribute to store info in
 ##' @param format format the dable?
+##' @param symbol symbol index starting position
 ##' @importFrom stats na.omit
 ##' @export
 dable_fnote <- function(dt, info, fn.var,
+                        info.attr = "info",
+                        format = FALSE, symbol = 1){
+    i_fnvar <- which(names(dt) == fn.var)
+    j_info <- which(names(dt) == info)
+    s_counter <- symbol
+    s_add <- 0
+    for(j in j_info){
+        infot   <- unique(as.character(stats::na.omit(unlist(dt[[j]]))))
+        i.infot <- as.numeric(factor(dt[[j]], levels = infot))
+        s_add <- max(i.infot, na.rm = TRUE)
+        symb <- latex_symbols(n = s_add, pre = "$\\phantom{.}^{\\",
+                              suff = "}$", start = s_counter)
+        symb2 <- latex_symbols(n = s_add, pre = "$^{\\",
+                               suff = "}$", start = s_counter)
+        sym.infot <- paste0(symb, infot)
+        attr(dt, info.attr) <- c(attr(dt, info.attr), sym.infot)
+        for(i in i_fnvar){
+            if(format){
+                if(class(dt[[i]]) %in% c("numeric", "integer")){
+                    dt[[i]] <- do.call(dafonumb,
+                                       list(dt[[i]]))
+                } else {
+                    dt[[i]] <- do.call(dafotext,
+                                       list(x = dt[[i]],
+                                            output = "latex")) ## XK test this
+                }
+            }
+            fn_var <- dt[[i]]
+            new_var <- paste0(id_or_empty(fn_var), id_or_empty(symb2[i.infot]))
+            new_var[is.na(fn_var) | fn_var == ""] <- ""
+            dt[[i]] <- new_var
+        }
+        s_counter <- s_counter + s_add
+    }
+    dable_prune(dt, rm = info)
+}
+
+## the old version of dable_fnote:
+dable_fnote_old <- function(dt, info, fn.var,
                          info.attr = "info",
-                         format = FALSE){
+                         format = FALSE, symbol = 1){
     if(length(info) != 1 | length(fn.var) != 1){
         stop("want 'info' and 'fn.var' to be length 1")
     }
@@ -579,9 +634,9 @@ dable_fnote <- function(dt, info, fn.var,
     infot   <- unique(as.character(stats::na.omit(unlist(dt[[info]]))))
     i.infot <- as.numeric(factor(dt[[info]], levels = infot))
     symb <- latex_symbols(n = max(i.infot, na.rm = TRUE),
-                          pre = "$\\phantom{.}^{\\", suff = "}$")
+                          pre = "$\\phantom{.}^{\\", suff = "}$", start = symbol)
     symb2 <- latex_symbols(n = max(i.infot, na.rm = TRUE),
-                           pre = "$^{\\", suff = "}$")
+                           pre = "$^{\\", suff = "}$", start = symbol)
     sym.infot <- paste0(symb, infot)
     attr(dt, info.attr) <- c(attr(dt, info.attr), sym.infot)
     fn_var <- dt[[fn.var]]
@@ -591,14 +646,17 @@ dable_fnote <- function(dt, info, fn.var,
     dable_prune(dt, rm = info)
 }
 
+
+
+
 #-#' --- itself or empty string if NA
 id_or_empty <- function(s) ifelse(is.na(s), "", s)
 
 #-#'  -- a variable to a 'footnote'
 latex_symbols <- function(n, pre = "\\", suff  = "", start = 1){
-    symb <- c("bot", "forall", "flat", "sharp", "top", "S", "bigstar", "Join",
-               "clubsuit", "diamondsuit", "spadesuit",  "heartsuit",
-               "dagger", "ast", "star", "circ", "ddagger", "bullet")
+    symb <- c( "S", "dagger", "ast", "sharp", "diamondsuit", "flat", "bot",
+              "forall", "top", "clubsuit", "spadesuit",  "heartsuit",
+              "star", "circ", "ddagger", "bullet")
     greekl <- c("alpha", "beta", "gamma", "delta", "epsilon", "varepsilon",
                 "zeta", "eta", "theta", "vartheta", "iota", "kappa", "lambda",
                 "mu", "nu", "xi", "pi", "varpi", "rho", "varrho", "sigma",
@@ -645,7 +703,9 @@ attr2n <- function(attr, n){
 }
 
 
-part2head <- function(part, cnm, bl, ntxt){
+part2head <- function(part, cnm, bl, ntxt,
+                      comp.header = dpget("comp.header"),
+                      test.header = dpget("test.header")){
     i_m <- which(grepl("^meta", part))
     i_d <- which(grepl("^desc", part))
     ## g_d <- sub("(desc:)(.*)", "\\2", part[i_d])
@@ -657,8 +717,8 @@ part2head <- function(part, cnm, bl, ntxt){
     H[i_d] <- tmp[i_d]
     h[c(i_c, i_t)] <- tmp[c(i_c, i_t)]
     if(bl){
-        H[i_c] <- dpget("comp.header")
-        H[i_t] <- dpget("test.header")
+        H[i_c] <- comp.header
+        H[i_t] <- test.header
         if(all(H[i_d] %in% names(ntxt))) h[i_d] <- ntxt[H[i_d]]
     } else {
         H[i_c] <- cnm[i_c]

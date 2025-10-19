@@ -854,24 +854,31 @@ on what the summary string contains, so e.g. the baseline default for the
 \texttt{real} type returns columns
 
 \begin{itemize}
-\item \texttt{Summary}: The actually summary string of the form "Median (Q1-Q3)"
-\item \texttt{Summary.info}: The text string "Numeric variable: Median (Q1-Q3)"
+\item \texttt{desc}: The actually summary string of the form "Median (Q1-Q3)"
+\item \texttt{desc.info}: The text string "Numeric variable: Median (Q1-Q3)"
 \end{itemize}
 
-\noindent The information from \texttt{Summary.info} is presented in the foot of
+\noindent The information from \texttt{desc.info} is presented in the foot of
 the table, which works since each types summary measure has a unique
 presentation.
 
-In a similar fashion, the default baseline tester return columns
+In a similar fashion, the default baseline comparer return columns
 
 \begin{itemize}
-\item \texttt{p}: An actual p-value
-\item \texttt{p.info}: A text string with information on the test that generated
-  the p-value.
+\item \texttt{comp}: A comparison
+\item \texttt{comp.info}: A text string with information on the comparison made.
 \end{itemize}
 
-\noindent The information from \texttt{p.info} is attached as footnotes on the
-\texttt{p} column.
+\noindent the default baseline tester return columns
+
+\begin{itemize}
+\item \texttt{test}: An actual p-value
+\item \texttt{test.info}: A text string with information on the test that
+  generated the p-value.
+\end{itemize}
+
+\noindent The information from \texttt{test.info} is attached as footnotes on the
+\texttt{test} column.
 
 A third problem in the context of this package, is that it becomes much more
 involved to pass user defined functions to baseline tables (so much so that it
@@ -964,12 +971,43 @@ test - but, of course, the test should only contrast the gender levels. Then you
 can use \texttt{gtab\_maker} and supply the correct input for the \texttt{part}
 argument.
 
-<<"adjusted-baseline-0", results = 'asis', message = FALSE>>=
+<<"adjusted-baseline-1", results = 'asis', message = FALSE>>=
 gt <- gtab_maker("gender", data = d2, all = TRUE, all.first = TRUE)
 b <- baseline(d2, theme = 0, guide = g2, gtab = gt,
-                   part = list(T, F, c(2,3)))
-blatex(b, label = "tab:adj-bsl", caption = "Adjusted baseline table")
+              part = list(T, F, c(2,3)))
+blatex(b, label = "tab:adj-bsl-1", caption = "Adjusted baseline table")
 @
+
+\newpage
+You might also want to display the \emph{absolute} rather than standardized
+differences
+
+<<"adjusted-baseline-2", results = 'asis', message = FALSE, message = FALSE, warning = FALSE>>=
+rm(b)
+b <- baseline(d2, theme = list(0, "diff"), guide = g2, gtab = "gender",
+              part = list(T, T, T))
+blatex(b, label = "tab:adj-bsl-2", caption = "Another adjusted baseline table")
+@
+
+\newpage
+Or, you might want something more complex, e.g.\ only describe the first (of the
+five) regions and compare it to the second and third, with a test of difference
+among the three. \emph{But} you are adamant that \texttt{bnry} should be
+compared with odds ratios.
+
+<<"adjusted-baseline-3", results = 'asis', message = FALSE, message = FALSE, warning = FALSE>>=
+
+dpset("bnry.comp.bl", "odds_ratio.bl")
+g3 <- g2
+g3$type[g3$term == "gender"] <- "bnry"
+b <- baseline(d2, guide = g3, gtab = "region",
+              part = list(desc = 1,
+                          comp = list(c(1,2), c(1,3)),
+                          test = 1:3))
+blatex(b, label = "tab:adj-bsl-3", caption = "Yet another adjusted baseline table")
+dpset_defaults(overwrite = TRUE)
+@
+
 
 \newpage
 %% =============================================================================
@@ -1053,9 +1091,9 @@ information on the contents thereof. These are added as info in the foot, and as
 \section{Loose ends}
 
 \begin{itemize}
-\item Baseline theme 0: the 'Comparison' is never identified as having
-  standardized differences. Should the name of 'Comparison' and 'Test' perhaps
-  be carried in the object until presentation?
+\item No loose ends?
+%% \item In baseline tables (at least theme 0/1), if e.g.\  \texttt{part = c(F,T)}
+%%   then no variable names are shown. BUT this is due to \texttt{kill = "term"}.
 \end{itemize}
 
 \clearpage
