@@ -118,14 +118,18 @@ dable_parameters <- list(
     dable.substitute = data.frame(
         out = c("latex",
                 "latex",
+                "latex",
                 "console"),
         pat = c("(.*)([^\\\\])(%)(.*)",
                 "\t",
+                "_",
                 "\t"),
         rep = c("\\1\\2\\\\%\\4",
                 "\\quad ",
+                "\\_",
                 "   "),
         fix = c(FALSE,
+                TRUE,
                 TRUE,
                 TRUE)
     ),
