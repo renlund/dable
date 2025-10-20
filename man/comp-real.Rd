@@ -22,9 +22,7 @@ real.diff(x, g, weight = NULL, ...)
 \description{
 functions to compare real variables
 
-real.std: (weighted) standardized difference for 'real'
-
-real.diff: (weighted) difference in mean value
+real.std: (weighted) 'real' standardized difference
 
 real.diff: (weighted) difference in mean value
 }

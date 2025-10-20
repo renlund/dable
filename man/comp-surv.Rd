@@ -51,7 +51,6 @@ rate_ratio.bl: ratio of the (weighted) rates (baseline)
 hazard_ratio.bl: (weighted) hazard ratio (baseline)
 
 hr_ci.bl: (weighted) hazard ratio and confidence interval (baseline)
-
 }
 \details{
 rate_ratio: ratio of the (weighted) rates
