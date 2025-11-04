@@ -178,9 +178,13 @@ date.bl0 <- function(x, date.format = dpget("date.format"), ...){
                na.ok = FALSE)
     r <- min_max(x)
     n.na <- sum(is.na(x))
-    s <- sprintf("%s/%s",
-                 changeNA(format(r$Min, format = date.format)),
-                 changeNA(format(r$Max, format = date.format)))
+    s <- if(is.na(r$Min)){
+        NAsign
+    } else {
+        sprintf("%s/%s",
+                changeNA(format(r$Min, format = date.format)),
+                changeNA(format(r$Max, format = date.format)))
+    }
     si <- "Date variables: min/max"
     data.frame(Variable = di.Variable(x, ...),
                desc = NA_desc_append(s, n.na),
