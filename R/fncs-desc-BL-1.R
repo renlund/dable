@@ -83,7 +83,7 @@ real.bl0 <- function(x, weight = NULL, ...){
              NAsign
          } else {
              sprintf("%s (%s - %s)", dafonumb1(q$Q2),
-                     dafonumb1(q$Q1), dafonumb1(q$Q2))
+                     dafonumb1(q$Q1), dafonumb1(q$Q3))
          }
     si <- "Numeric variable: Median (Q1-Q3)"
     data.frame(Variable = di.Variable(x, ...),
