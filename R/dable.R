@@ -190,8 +190,6 @@ dlcat <- function(data, ...){
     dable(data, type = "lcat", ...)
 }
 
-
-
 ##' create a baseline table
 ##'
 ##' This is a wrapper for bl_theme and dable (with type = 'baseline').
