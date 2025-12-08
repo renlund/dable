@@ -229,7 +229,12 @@ value_type <- function(x, bnry.list = list(), real.tol = 0, catg.tol = Inf){
              }
     n_val <- length(x_val)
     type <- if(n_val == 0){
-                "missing" ## ?
+                ## in this scenario we have to trick the functions to believe
+                ## that the variable is catg with an empty level - else all
+                ## functions have to be checked that they are sane when given
+                ## completely missing data
+                x_val <- ""
+                "catg"
             } else if( n_val == 2 && is.bnry(x_val, bnry.list) ){
                 "bnry"
             } else if( any( c("character", "factor", "logical") %in% klass ) ){

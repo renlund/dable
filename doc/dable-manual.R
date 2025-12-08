@@ -108,7 +108,7 @@ dpget("bnry.list")
 test_stab()
 
 ## ----"default-affix"----------------------------------------------------------
-dpget("surv.prefix") ## is prefix used? (else suffix)
+dpget("surv.prefix") ## is a prefix used? (else suffix)
 dpget("surv.affix") ## what is the affix used?
 
 ## ----"test-data"--------------------------------------------------------------
@@ -139,7 +139,7 @@ st$group <- "Outcomes"
 
 ## ----"baseline-table-a-first-look", results = 'asis', message = FALSE, warning = FALSE----
 b <- baseline(d, guide = g, gtab = "gender", part = c(T,T,T))
-blatex(b, where = "!ht", caption = "Default baseline table",
+blatex(b, where = "!ht", caption = "Default baseline table.",
        label = "tab:default-bsl", size = "small")
 
 ## ----"real-with-dable"--------------------------------------------------------
@@ -168,11 +168,11 @@ attr(dt, "part")
 
 ## ----"datex", results = 'asis'------------------------------------------------
 datex(dt, label = "tab:datex",
-      caption = "Default \\LaTeX\\, output for descriptive table.")
+      caption = "Default \\LaTeX\\, output for a descriptive table.")
 
 ## ----"datex-with-less", results = 'asis'--------------------------------------
-datex(dt, row.group = FALSE, lab = FALSE, label = "tab:datex-less",
-      caption = "Descriptive table using less meta data.")
+datex(dt, row.group = FALSE, t2l = FALSE, label = "tab:datex-less",
+      caption = "A descriptive table using less meta data.")
 
 ## ----"gtab_maker"-------------------------------------------------------------
 gt <- gtab_maker("area", data = d, all = TRUE)
@@ -366,11 +366,13 @@ blatex(b, label = "tab:adj-bsl-2", caption = "Another adjusted baseline table")
 dpset("bnry.comp.bl", "odds_ratio.bl")
 g3 <- g2
 g3$type[g3$term == "gender"] <- "bnry"
-b <- baseline(d2, guide = g3, gtab = "region",
+b <- baseline(d2, theme = list(desc=0, comp=NULL),
+              guide = g3, gtab = "region",
               part = list(desc = 1,
                           comp = list(c(1,2), c(1,3)),
                           test = 1:3))
-blatex(b, label = "tab:adj-bsl-3", caption = "Yet another adjusted baseline table")
+blatex(b, label = "tab:adj-bsl-3",
+       caption = "Yet another adjusted baseline table")
 dpset_defaults(overwrite = TRUE)
 
 ## ----"prune-1"----------------------------------------------------------------
