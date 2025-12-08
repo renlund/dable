@@ -60,6 +60,13 @@ delist <- function(x){
     R
 }
 
+## - # shuffle two vectors together
+## - #
+## - # Create a vector where every other element is from input x and the others
+## - # from y.
+## - # @param x vector
+## - # @param y vector of same length as x
+## - # @return vector where the elements are alternating those from x and y
 shuffle <- function (x, y){
     n <- length(x)
     if (length(y) != n) stop("no shuffle for you!")
