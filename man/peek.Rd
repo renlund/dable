@@ -4,14 +4,12 @@
 \alias{peek}
 \title{peek at an object}
 \usage{
-peek(x, right = FALSE, ...)
+peek(x, bl.term = FALSE)
 }
 \arguments{
 \item{x}{object to take a peek at}
 
-\item{right}{logical, passed to print}
-
-\item{...}{passed to print}
+\item{bl.term}{logical; include term in baseline tables}
 }
 \description{
 a printing method for interactive use only - do not use in scripts as it is
