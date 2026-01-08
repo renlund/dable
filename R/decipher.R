@@ -10,9 +10,14 @@
 ##'     key is created from this information.
 ##' @param flexible Logical; if TRUE the key can be inverted
 ##' @param within Logical; if TRUE occurences of the keyed values within a
-##'     string can be replaced. Such occurences must be encapsulated by
-##'     beginning of line, space characters, punctuation characters or end of
-##'     line, so that replacement does not take place within words.
+##'     string can be replaced.
+##' @param within_word Logical; if 'within' is TRUE, one can use this parameter
+##'     to choose if replacement can occur within words or not. E.g. if TRUE
+##'     then replacing 'break' with 'pause' will turn 'breakfast' into
+##'     'pausfast'. I imagine this is not typically what is wanted. If FALSE,
+##'     replacement occurences must be encapsulated by beginning of line, space
+##'     characters, punctuation characters or end of line, so that replacement
+##'     does not take place within words.
 ##' @examples
 ##' x <- c("foo", "foo!", "A foo", "A foo and two bar",
 ##'        "football", "barely", "bar")
@@ -29,7 +34,8 @@
 ##' str(data.frame(x = x, d = decipher(x, key)))
 ##' @return vector of same length and class as s (character or factor)
 ##' @export
-decipher <- function (x, key, flexible = TRUE, within = FALSE) {
+decipher <- function (x, key, flexible = TRUE, within = FALSE,
+                      within_word = FALSE) {
     properties(x, class = c("character", "factor"))
     if(inherits(key, "data.frame")){
         inclusion(names(key), nm = "names of 'key' argument",
@@ -41,10 +47,20 @@ decipher <- function (x, key, flexible = TRUE, within = FALSE) {
                length = length(key), na.ok = FALSE)
     properties(flexible, class = "logical", length = 1, na.ok = FALSE)
     properties(within, class = "logical", length = 1, na.ok = FALSE)
+    properties(within_word, class = "logical", length = 1, na.ok = FALSE)
+    if(within_word & !within){
+        s <- paste0("argument 'within_word' is hierarchically below 'within' ",
+                    "so if the latter is FALSE, then so are both")
+        warning(s)
+    }
     w_patt <- function(x){
-        paste0("(^|[[:punct:]]|[[:space:]])",
-               "(", x, ")",
-               "($|[[:punct:]]|[[:space:]])")
+        if(within_word){
+            x
+        } else {
+            paste0("(^|[[:punct:]]|[[:space:]])",
+                   "(", x, ")",
+                   "($|[[:punct:]]|[[:space:]])")
+        }
     }
     if("factor" %in% class(x)){
         r <- factor(x = as.numeric(x),

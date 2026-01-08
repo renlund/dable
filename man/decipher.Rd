@@ -4,7 +4,7 @@
 \alias{decipher}
 \title{replace selected values}
 \usage{
-decipher(x, key, flexible = TRUE, within = FALSE)
+decipher(x, key, flexible = TRUE, within = FALSE, within_word = FALSE)
 }
 \arguments{
 \item{x}{Character (or factor) vector}
@@ -19,9 +19,15 @@ key is created from this information.}
 \item{flexible}{Logical; if TRUE the key can be inverted}
 
 \item{within}{Logical; if TRUE occurences of the keyed values within a
-string can be replaced. Such occurences must be encapsulated by
-beginning of line, space characters, punctuation characters or end of
-line, so that replacement does not take place within words.}
+string can be replaced.}
+
+\item{within_word}{Logical; if 'within' is TRUE, one can use this parameter
+to choose if replacement can occur within words or not. E.g. if TRUE
+then replacing 'break' with 'pause' will turn 'breakfast' into
+'pausfast'. I imagine this is not typically what is wanted. If FALSE,
+replacement occurences must be encapsulated by beginning of line, space
+characters, punctuation characters or end of line, so that replacement
+does not take place within words.}
 }
 \value{
 vector of same length and class as s (character or factor)
