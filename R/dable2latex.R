@@ -333,6 +333,30 @@ unique_latex_rownames <- function(x){
     x
 }
 
+mumbojumbo <- function(n, prefix = "", suffix = "",
+                       m = NULL, try.unique = TRUE){
+    if(n==0) return(character(0))
+    set1 <- c(letters, LETTERS)
+    if(is.null(m)){
+        z <- c(52,52^2,52^3,52^4,52^5)
+        m <- which(n / z < 0.2)[1] ## this is not a good uniform boundary
+        if(is.na(m)) stop("[mumbojumbo] woha!")
+    }
+    R <- rep(NA_character_, n)
+    dummy <- 1
+    threshold <- if (try.unique) 100 else 0
+    while ((all(is.na(R)) | any(duplicated(R))) & dummy < threshold) {
+        for (k in 1:n) {
+            R[k] <- paste(sample(set1, size = m, replace = TRUE),
+                collapse = "")
+        }
+        dummy <- dummy + 1
+    }
+    if (dummy == threshold & try.unique)
+        warning("[mumbojumbo] uniqueness failed!")
+    paste0(prefix, R, suffix)
+}
+
 x_true_then_y_else_x <- function(x, y, latex = FALSE){
     txt <- if(is.logical(x)){
                if(isTRUE(x)) y else NULL
@@ -725,28 +749,4 @@ part2head <- function(part, cnm, bl, ntxt,
         H[i_t] <- cnm[i_t]
     }
     list(H = H, h = h)
-}
-
-mumbojumbo <- function(n, prefix = "", suffix = "",
-                       m = NULL, try.unique = TRUE){
-    if(n==0) return(character(0))
-    set1 <- c(letters, LETTERS)
-    if(is.null(m)){
-        z <- c(52,52^2,52^3,52^4,52^5)
-        m <- which(n / z < 0.2)[1] ## this is not a good uniform boundary
-        if(is.na(m)) stop("[mumbojumbo] woha!")
-    }
-    R <- rep(NA_character_, n)
-    dummy <- 1
-    threshold <- if (try.unique) 100 else 0
-    while ((all(is.na(R)) | any(duplicated(R))) & dummy < threshold) {
-        for (k in 1:n) {
-            R[k] <- paste(sample(set1, size = m, replace = TRUE),
-                collapse = "")
-        }
-        dummy <- dummy + 1
-    }
-    if (dummy == threshold & try.unique)
-        warning("[mumbojumbo] uniqueness failed!")
-    paste0(prefix, R, suffix)
 }
