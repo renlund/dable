@@ -338,9 +338,10 @@ blextable <- function(dt,
     ft <- flextable::fontsize(ft, size = fontsize[3], part = "footer")
 
     ## ft <- bold(ft, i = 1, part = "head")
-    ft <- flextable::bold(ft, i = rg_index, j = 1)
-    ft <- flextable::italic(ft, i = setdiff(1:nrow(DT), rg_index), j = 1)
-
+    if(row.group){
+        ft <- flextable::bold(ft, i = rg_index, j = 1)
+        ft <- flextable::italic(ft, i = setdiff(1:nrow(DT), rg_index), j = 1)
+    }
     ## print(ft, preview = "docx")
     ## print(ft, preview = "html")
     ## print(ft, preview = "pdf")
