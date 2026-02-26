@@ -2,9 +2,17 @@
 % Please edit documentation in R/align.R
 \name{align}
 \alias{align}
-\title{ordering of vector}
+\title{ordering a vector}
 \usage{
-align(x, template = NULL, group = NULL, all = TRUE, outgroup = ".Other")
+align(
+  x,
+  template = NULL,
+  group = NULL,
+  all = TRUE,
+  outgroup = ".Other",
+  exact = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{the vector that needs ordering}
@@ -16,8 +24,26 @@ align(x, template = NULL, group = NULL, all = TRUE, outgroup = ".Other")
 \item{all}{logical; should given elements not in template be kept?}
 
 \item{outgroup}{group name of elements not in template (if kept)}
+
+\item{exact}{logical; if TRUE matches for \code{x} in \code{template} is
+determined by \code{match}, if FALSE matches are determined by
+\code{gmatch}. The latter is based on \code{grep}.}
+
+\item{...}{arguments passed to \code{gmatch} (only relevant when \code{exact
+= FALSE})}
 }
 \description{
 Order a given vector, which may contain duplicates, according to the wanted
 order given by some other vector.
+}
+\examples{
+D <- data.frame(x = LETTERS[c(2,2,2,4,4,1,3,3)])
+D$y <- paste0(D$x, ":", letters[c(1,2,3,1,2,1,1,2)])
+print(D)
+ordnung <- rev(LETTERS)
+a <- align(D$x, template = ordnung)
+print(D[a$order,])
+}
+\seealso{
+\code{\link{gmatch}}
 }
