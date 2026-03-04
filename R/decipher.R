@@ -18,6 +18,11 @@
 ##'     replacement occurences must be encapsulated by beginning of line, space
 ##'     characters, punctuation characters or end of line, so that replacement
 ##'     does not take place within words.
+##' @param as.factor logical; return as factor (this is automatic if input x is
+##'     factor to begin with) with the key indicating the order of the levels
+##'     (this is achieved using \code{align})
+##' @param ... arguments passed to \code{align} (only relevant if
+##'     \code{as.factor} is \code{TRUE})
 ##' @examples
 ##' x <- c("foo", "foo!", "A foo", "A foo and two bar",
 ##'        "football", "barely", "bar")
@@ -32,10 +37,14 @@
 ##'             labels = c("foo", "bar", "baz"))
 ##' key <- c(A = "foo", C = "baz")
 ##' str(data.frame(x = x, d = decipher(x, key)))
-##' @return vector of same length and class as s (character or factor)
+##' x <- LETTERS[2:4]
+##' key <- setNames(c("Baz", "Bar", "Foo"), nm = LETTERS[3:1])
+##' decipher(x, key)
+##' decipher(x, key, as.factor = TRUE)
+##' @return vector of same length as x
 ##' @export
 decipher <- function (x, key, flexible = TRUE, within = FALSE,
-                      within_word = FALSE) {
+                      within_word = FALSE, as.factor = FALSE, ...) {
     properties(x, class = c("character", "factor"))
     if(inherits(key, "data.frame")){
         inclusion(names(key), nm = "names of 'key' argument",
@@ -48,6 +57,7 @@ decipher <- function (x, key, flexible = TRUE, within = FALSE,
     properties(flexible, class = "logical", length = 1, na.ok = FALSE)
     properties(within, class = "logical", length = 1, na.ok = FALSE)
     properties(within_word, class = "logical", length = 1, na.ok = FALSE)
+    properties(as.factor, class = "logical", length = 1, na.ok = FALSE)
     if(within_word & !within){
         s <- paste0("argument 'within_word' is hierarchically below 'within' ",
                     "so if the latter is FALSE, then so are both")
@@ -67,7 +77,9 @@ decipher <- function (x, key, flexible = TRUE, within = FALSE,
                     labels = decipher(x = levels(x),
                                       key = key,
                                       flexible = flexible,
-                                      within = within))
+                                      within = within,
+                                      within_word = within_word,
+                                      as.factor = FALSE))
         return(r)
     }
     if(flexible){
@@ -89,9 +101,16 @@ decipher <- function (x, key, flexible = TRUE, within = FALSE,
                       replacement = paste0("\\1", key[i], "\\3"),
                       x = r)
         }
-        r
+        R <- r
     } else {
         r <- key[as.character(x)]
-        as.character(ifelse(is.na(r), x, r))
+        R <- as.character(ifelse(is.na(r), x, r))
     }
+    if(as.factor){
+        dots <- list(...) ## dots <- as.list(NULL)
+        u <- unique(R)
+        ## a <- align(x = u, template = key)
+        a <- do.call(what = align, args = c(list(x = u, template = key), dots))
+        factor(R, levels = u[a$order])
+    } else R
 }

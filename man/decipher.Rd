@@ -4,7 +4,15 @@
 \alias{decipher}
 \title{replace selected values}
 \usage{
-decipher(x, key, flexible = TRUE, within = FALSE, within_word = FALSE)
+decipher(
+  x,
+  key,
+  flexible = TRUE,
+  within = FALSE,
+  within_word = FALSE,
+  as.factor = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{Character (or factor) vector}
@@ -28,9 +36,16 @@ then replacing 'break' with 'pause' will turn 'breakfast' into
 replacement occurences must be encapsulated by beginning of line, space
 characters, punctuation characters or end of line, so that replacement
 does not take place within words.}
+
+\item{as.factor}{logical; return as factor (this is automatic if input x is
+factor to begin with) with the key indicating the order of the levels
+(this is achieved using \code{align})}
+
+\item{...}{arguments passed to \code{align} (only relevant if
+\code{as.factor} is \code{TRUE})}
 }
 \value{
-vector of same length and class as s (character or factor)
+vector of same length as x
 }
 \description{
 Change values that corresponds to those of a key.
@@ -49,4 +64,8 @@ x <- factor(c(1,3,2), levels = 1:3,
             labels = c("foo", "bar", "baz"))
 key <- c(A = "foo", C = "baz")
 str(data.frame(x = x, d = decipher(x, key)))
+x <- LETTERS[2:4]
+key <- setNames(c("Baz", "Bar", "Foo"), nm = LETTERS[3:1])
+decipher(x, key)
+decipher(x, key, as.factor = TRUE)
 }
